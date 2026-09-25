@@ -7,7 +7,7 @@ import { test, expect } from "@playwright/test";
 */
 
 const pages: { path: string; heading: RegExp }[] = [
-  { path: "/", heading: /landing headline/i },
+  { path: "/", heading: /community/i },
   { path: "/community", heading: /Explore forums/ },
   { path: "/community?view=latest", heading: /Latest topics/ },
   { path: "/community/c/ebay", heading: /eBay/ },

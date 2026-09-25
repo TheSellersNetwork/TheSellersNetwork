@@ -66,6 +66,7 @@ const launch: Cat[] = [
     children: [
       { slug: "depop-and-clothing-resale", name: "Depop and clothing resale", colour: "website" },
       { slug: "etsy-and-handmade", name: "Etsy and handmade", colour: "etsy" },
+      { slug: "tiktok-shop", name: "TikTok Shop", colour: "website" },
       { slug: "own-website-and-shopify", name: "Own website and Shopify", colour: "website" },
     ],
   },
