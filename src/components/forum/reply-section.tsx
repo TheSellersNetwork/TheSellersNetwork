@@ -50,11 +50,11 @@ export function ReplySection({ topicId, topicSlug, shortId, canReply, isLocked, 
   if (!signedIn) {
     return (
       <div id="reply" className="rounded-lg border border-dashed p-6 text-center text-sm">
-        <Link href={urls.login(urls.topic({ slug: topicSlug, short_id: shortId }))} className="font-medium text-brand hover:underline">
+        <Link href={urls.login(urls.topic({ slug: topicSlug, short_id: shortId }))} className="font-medium text-brand underline underline-offset-2 hover:text-brand-deep">
           Sign in
         </Link>{" "}
         or{" "}
-        <Link href={urls.signup()} className="font-medium text-brand hover:underline">
+        <Link href={urls.signup()} className="font-medium text-brand underline underline-offset-2 hover:text-brand-deep">
           join
         </Link>{" "}
         to reply.

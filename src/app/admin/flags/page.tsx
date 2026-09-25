@@ -21,7 +21,7 @@ export default async function FlagsPage() {
             Agree hides the post and warns the author. Disagree restores it. Ignore closes the flag and leaves the post as it is.
           </p>
         </div>
-        <Link href={urls.community()} className="text-sm text-brand hover:underline">
+        <Link href={urls.community()} className="text-sm text-brand underline underline-offset-2 hover:text-brand-deep">
           Back to the community
         </Link>
       </div>

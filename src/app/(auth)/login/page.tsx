@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         New here?{" "}
-        <Link href={urls.signup()} className="text-brand hover:underline">
+        <Link href={urls.signup()} className="text-brand underline underline-offset-2 hover:text-brand-deep">
           Create an account
         </Link>
       </p>

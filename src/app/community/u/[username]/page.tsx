@@ -67,7 +67,7 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
           </dl>
         </div>
         {isOwn ? (
-          <Link href={urls.account()} className="text-sm text-brand hover:underline">
+          <Link href={urls.account()} className="text-sm text-brand underline underline-offset-2 hover:text-brand-deep">
             Edit profile
           </Link>
         ) : null}
@@ -76,7 +76,7 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
       {profile.trust_level >= 2 && !profile.is_staff ? (
         <aside className="mt-4 rounded-lg bg-brand-soft p-4 text-sm">
           [TOM: soft mentoring banner for established members]{" "}
-          <Link href="/mentoring" className="font-medium text-brand hover:underline">
+          <Link href="/mentoring" className="font-medium text-brand underline underline-offset-2 hover:text-brand-deep">
             About mentoring
           </Link>
         </aside>

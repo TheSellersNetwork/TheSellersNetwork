@@ -12,7 +12,7 @@ export function RightRail({ children, source }: { children?: React.ReactNode; so
           <h2 className="font-semibold">House rules</h2>
           <p className="mt-1 text-muted-foreground">
             Be useful, no selling, real numbers welcome.{" "}
-            <Link href={urls.rules()} className="text-brand hover:underline">
+            <Link href={urls.rules()} className="text-brand underline underline-offset-2 hover:text-brand-deep">
               Read all six
             </Link>
           </p>

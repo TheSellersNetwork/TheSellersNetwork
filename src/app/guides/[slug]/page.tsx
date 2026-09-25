@@ -49,7 +49,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             {guide.module ? (
               <p className="mt-4 text-sm text-muted-foreground">
                 This is covered in more depth in the course.{" "}
-                <Link href={`/course#${guide.module}`} className="text-brand hover:underline">
+                <Link href={`/course#${guide.module}`} className="text-brand underline underline-offset-2 hover:text-brand-deep">
                   See the module
                 </Link>
               </p>

@@ -79,7 +79,7 @@ function FlagCard({ flag }: { flag: QueueFlag }) {
           <p className="text-xs text-muted-foreground">
             {flag.post.author ? displayName(flag.post.author) : "Deleted member"} in{" "}
             {flag.post.topic ? (
-              <Link href={urls.topic(flag.post.topic, flag.post.post_number)} className="text-brand hover:underline">
+              <Link href={urls.topic(flag.post.topic, flag.post.post_number)} className="text-brand underline underline-offset-2 hover:text-brand-deep">
                 {flag.post.topic.title}
               </Link>
             ) : (

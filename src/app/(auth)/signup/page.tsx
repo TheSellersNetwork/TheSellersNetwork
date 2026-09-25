@@ -16,7 +16,7 @@ export default async function SignupPage() {
       <h1 className="text-2xl font-semibold tracking-tight">Join The Sellers Network</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Free, for anyone who buys and sells for profit in the UK. Already a member?{" "}
-        <Link href={urls.login()} className="text-brand hover:underline">
+        <Link href={urls.login()} className="text-brand underline underline-offset-2 hover:text-brand-deep">
           Sign in
         </Link>
       </p>

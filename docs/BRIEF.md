@@ -195,21 +195,21 @@ Forum first, because it must be live and gathering members before the paid tiers
 
 - [x] Scaffold Next.js, TypeScript, Tailwind, shadcn, MDX, Supabase client, PostHog. Deploy to Vercel. CI with lint, tests and Lighthouse.
 - [x] Migrations for every forum table, RLS policies, is_staff() and can_post(), tsvector columns and triggers.
-- [ ] Profile trigger on signup, username picker, multi-select platform choice, onboarding with house rules acceptance.
-- [ ] Design tokens, shared header, right rail, footer, dark mode.
-- [ ] /community category list.
-- [ ] Topic list views (latest, top by day/week/month, unanswered), per-category, cursor pagination.
-- [ ] Topic page with posts, quotes, solved pinned, like, flag, share, right-rail guide and signup.
-- [ ] Composer: Tiptap, Markdown storage, preview, image paste to Supabase Storage with resize, mention autocomplete, draft autosave.
-- [ ] Server-side Markdown render and sanitise, cached in posts.body_html.
-- [ ] /admin/flags queue and moderation_log.
-- [ ] Trust level cron, TL0 caps, user_stats_daily.
-- [ ] Resend templates for reply and mention; notification preferences.
-- [ ] /blog and /blog/[slug] on MDX; publish hook creates the discussion thread.
-- [ ] Sitemaps, canonicals, OG images, QAPage and Article schema.
-- [ ] Turnstile, rate limiting, duplicate rejection.
-- [ ] PostHog events.
-- [ ] Seed script: all launch categories, pinned intro placeholders, CSV loader for Tom's seed topics.
+- [x] Profile trigger on signup, username picker, multi-select platform choice, onboarding with house rules acceptance.
+- [x] Design tokens, shared header, right rail, footer, dark mode.
+- [x] /community category list.
+- [x] Topic list views (latest, top by day/week/month, unanswered), per-category, cursor pagination.
+- [x] Topic page with posts, quotes, solved pinned, like, flag, share, right-rail guide and signup.
+- [x] Composer: Tiptap, Markdown storage, preview, image paste to Supabase Storage with resize, mention autocomplete, draft autosave.
+- [x] Server-side Markdown render and sanitise, cached in posts.body_html.
+- [x] /admin/flags queue and moderation_log.
+- [x] Trust level cron, TL0 caps, user_stats_daily.
+- [x] Resend templates for reply and mention; notification preferences.
+- [x] /blog and /blog/[slug] on MDX; publish hook creates the discussion thread.
+- [x] Sitemaps, canonicals, OG images, QAPage and Article schema.
+- [x] Turnstile, rate limiting, duplicate rejection.
+- [x] PostHog events.
+- [x] Seed script: all launch categories, pinned intro placeholders, CSV loader for Tom's seed topics.
 
 Definition of done: Tom can register, post a topic with an image, receive a reply notification, mark it solved, and see it in the latest list on a preview deploy with Lighthouse over 90.
 

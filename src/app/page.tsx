@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 */
 export default function HomePage() {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-16 sm:px-6">
+    <main id="main" className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-16 sm:px-6">
       <Logo size={32} />
       <h1 className="mt-8 text-3xl font-semibold tracking-tight sm:text-4xl">
         [TOM: landing headline]
