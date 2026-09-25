@@ -13,7 +13,10 @@
     "test:e2e": "playwright test",
     "lighthouse": "lhci autorun",
     "test": "npm run test:unit && npm run test:db && npm run test:e2e",
-    "test:db": "node scripts/test-migrations.mjs"
+    "test:db": "node scripts/test-migrations.mjs",
+    "seed": "tsx scripts/seed.ts",
+    "blog:sync": "tsx scripts/sync-blog.ts",
+    "roundup": "tsx scripts/roundup.ts"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.6.1",
@@ -31,6 +34,7 @@
     "@tiptap/react": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
     "@tiptap/suggestion": "^3.31.3",
+    "@types/hast": "^3.0.5",
     "@types/mdx": "^2.0.14",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
@@ -68,6 +72,7 @@
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
+    "@tailwindcss/typography": "^0.5.20",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

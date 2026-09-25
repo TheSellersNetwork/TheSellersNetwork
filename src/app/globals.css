@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "../styles/tokens.css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -64,4 +65,34 @@
 
 @utility measure {
   max-width: var(--measure);
+}
+
+/* Post bodies: mentions and blockquote attribution */
+.post-body a.mention {
+  color: var(--brand);
+  font-weight: 500;
+  text-decoration: none;
+}
+.post-body a.mention:hover {
+  text-decoration: underline;
+}
+.post-body img {
+  max-height: 600px;
+  width: auto;
+}
+.post-body blockquote {
+  font-style: normal;
+}
+
+/* Tiptap editor */
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--muted-foreground);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.tiptap .mention {
+  color: var(--brand);
+  font-weight: 500;
 }
