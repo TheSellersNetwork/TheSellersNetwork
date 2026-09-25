@@ -31,15 +31,15 @@ export function EmailSignupCard({ source, variant = "card", className }: Props) 
   );
 
   return (
-    <div className={cn(variant === "card" ? "forum-card rail-card rounded-lg border bg-card p-4" : "rounded-lg bg-brand-soft p-5", className)}>
-      <h2 className="font-semibold">Free newsletter</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Seller news, fee changes and the best of the forum. Free, and not too often.</p>
+    <div className={cn(variant === "card" ? "forum-card rail-card rounded-lg border bg-card p-4" : "rounded-xl bg-brand-soft p-8 text-center sm:p-10", className)}>
+      <h2 className={variant === "inline" ? "text-2xl font-semibold tracking-tight" : "font-semibold"}>Free newsletter</h2>
+      <p className={cn("mt-1 text-muted-foreground", variant === "inline" ? "mx-auto max-w-md" : "text-sm")}>Seller news, fee changes and the best of the forum. Free, and not too often.</p>
       {state.ok ? (
         <p className="mt-3 text-sm" role="status">
           {state.message}
         </p>
       ) : (
-        <form action={action} className="mt-3 flex flex-col gap-2">
+        <form action={action} className={cn("mt-3 flex flex-col gap-2", variant === "inline" && "mx-auto max-w-md items-stretch")}>
           <input type="hidden" name="source" value={source} />
           <Label htmlFor={`email-${source}`} className="sr-only">
             Email address
