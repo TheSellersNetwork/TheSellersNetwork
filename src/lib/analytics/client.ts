@@ -2,7 +2,7 @@
 
 import posthog from "posthog-js";
 
-export type ClientEvent = "signup" | "first_post" | "solution_marked" | "signup_form_submitted";
+export type ClientEvent = "signup" | "first_post" | "solution_marked" | "signup_form_submitted" | "sponsor_impression" | "sponsor_click" | "search_landing";
 
 /* Client-side event. Safe to call before PostHog is initialised. */
 export function track(event: ClientEvent, properties: Record<string, unknown> = {}) {

@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { friendlyError } from "@/lib/errors";
 import { siteConfig } from "@/lib/site";
+import { followFromMarketplaces } from "@/app/community/follow-actions";
 
 export type OnboardingState = { ok: boolean; message: string };
 
@@ -47,6 +48,8 @@ export async function completeOnboarding(_prev: OnboardingState, formData: FormD
     })
     .eq("id", user.id);
   if (error) return { ok: false, message: friendlyError(error) };
+
+  await followFromMarketplaces(user.id, parsed.data.marketplaces);
 
   redirect(parsed.data.next ?? "/community");
 }

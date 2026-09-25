@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ForumShell } from "@/components/layout/forum-shell";
 import { TopicList } from "@/components/forum/topic-list";
 import { ViewTabs } from "@/components/forum/view-tabs";
-import { getCategories, getTopics, groupCategories } from "@/lib/forum/queries";
+import { getCategories, getCategoryFollows, getTopics, groupCategories } from "@/lib/forum/queries";
+import { getCurrentUser } from "@/lib/auth";
 import { urls } from "@/lib/forum/urls";
 import type { TopicListView, TopPeriod } from "@/lib/db/types";
 
@@ -13,8 +14,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/community" },
 };
 
-function parseView(v: unknown): TopicListView {
-  return v === "top" || v === "unanswered" ? v : "latest";
+function parseView(v: unknown): TopicListView | null {
+  return v === "top" || v === "unanswered" || v === "following" || v === "latest" ? v : null;
 }
 function parsePeriod(p: unknown): TopPeriod {
   return p === "day" || p === "month" || p === "all" ? p : "week";
@@ -22,12 +23,27 @@ function parsePeriod(p: unknown): TopPeriod {
 
 export default async function CommunityPage({ searchParams }: PageProps<"/community">) {
   const params = await searchParams;
-  const view = parseView(params.view);
+  const requested = parseView(params.view);
   const period = parsePeriod(params.period);
   const cursor = typeof params.cursor === "string" ? params.cursor : null;
 
-  const [categories, page] = await Promise.all([getCategories(), getTopics({ view, period, cursor })]);
+  const [categories, user] = await Promise.all([getCategories(), getCurrentUser()]);
   const groups = groupCategories(categories);
+  const follows = user ? await getCategoryFollows(user.id) : new Map<string, "following" | "muted">();
+
+  // Followed categories include their subcategories; muted ones drop out of every feed.
+  const withChildren = (ids: string[]) =>
+    categories.filter((c) => ids.includes(c.id) || (c.parent_id !== null && ids.includes(c.parent_id))).map((c) => c.id);
+  const followedIds = withChildren(Array.from(follows.entries()).filter(([, l]) => l === "following").map(([id]) => id));
+  const mutedIds = new Set(withChildren(Array.from(follows.entries()).filter(([, l]) => l === "muted").map(([id]) => id)));
+  const hasFollows = followedIds.length > 0;
+
+  // Signed-in members with follows land on their feed unless they picked a view.
+  const view: TopicListView = requested ?? (hasFollows ? "following" : "latest");
+  const categoryIds =
+    view === "following" ? followedIds : mutedIds.size > 0 ? categories.map((c) => c.id).filter((id) => !mutedIds.has(id)) : undefined;
+
+  const page = await getTopics({ view: view === "following" ? "latest" : view, period, cursor, categoryIds });
 
   return (
     <ForumShell source="/community">
@@ -64,15 +80,22 @@ export default async function CommunityPage({ searchParams }: PageProps<"/commun
       <section aria-labelledby="topics-heading">
         <div className="mb-4 flex items-end justify-between gap-4">
           <h1 id="topics-heading" className="text-xl font-semibold tracking-tight">
-            {view === "top" ? "Top topics" : view === "unanswered" ? "Unanswered topics" : "Latest topics"}
+            {view === "top" ? "Top topics" : view === "unanswered" ? "Unanswered topics" : view === "following" ? "Your feed" : "Latest topics"}
           </h1>
         </div>
-        <ViewTabs basePath={urls.community()} view={view} period={period} />
+        <ViewTabs basePath={urls.community()} view={view} period={period} showFollowing={!!user} />
         <TopicList
           topics={page.topics}
           nextCursor={page.nextCursor}
           moreHref={(c) => `${urls.community()}?view=${view}&period=${period}&cursor=${encodeURIComponent(c)}`}
-          emptyMessage={view === "unanswered" ? "Every topic has a reply. [TOM: unanswered empty state]" : "[TOM: empty community message]"}
+          sponsorPage={urls.community()}
+          emptyMessage={
+            view === "unanswered"
+              ? "Every topic has a reply. [TOM: unanswered empty state]"
+              : view === "following"
+                ? "Nothing yet from the categories you follow. Follow a category from its page to build your feed."
+                : "[TOM: empty community message]"
+          }
         />
       </section>
     </ForumShell>

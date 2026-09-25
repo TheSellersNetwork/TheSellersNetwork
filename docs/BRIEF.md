@@ -230,3 +230,15 @@ Forum Phase B, then mentoring Phase 2 (Stripe, gated course, video), then forum 
 - Accent colour and logo, or placeholder wordmark (four palettes and four marks are at /brand, see docs/palette-options.png)
 - Community platform for live calls (Zoom or Google Meet link is fine to start)
 - Any change to the pricing table before Stripe products are created
+
+## Additions agreed on 25 September 2026 (outside the original brief)
+
+- Partners directory at /partners with sponsored and affiliate labels; sponsor placements in the right rail and after the fifth topic row, managed at /admin/partners, with impressions and clicks in the database and PostHog.
+- Weekly numbers thread posted every Monday from content/templates/weekly-numbers.md.
+- Similar solved topics shown while typing a title; search results list solved threads first.
+- Solution counts next to member names; top answerers card in the right rail.
+- Category follow and mute, with a Following feed seeded from the marketplaces picked at onboarding.
+- Ask Tom category with a monthly window opened and closed at /admin; staff answers are auto-tagged and `npm run ask-tom:digest` drafts the blog post.
+- Screenshot hint and redaction reminder in the composer.
+- Search-landing funnel events for signed-out visitors, carried through to signup events.
+- Blog templates for evergreen guide, case study, news reaction and member spotlight.

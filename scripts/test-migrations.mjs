@@ -487,6 +487,66 @@ await step("trust cron promotes a qualifying TL0 to TL1", async () => {
   if (p.rows[0].trust_level !== 1 || p.rows[0].days_visited !== 1) throw new Error(`profile ${JSON.stringify(p.rows[0])}`);
 });
 
+await step("solution_count follows the accepted answer", async () => {
+  const t = await asUser(ids.member, `insert into public.topics (title, category_id, author_id) values ('Reputation check', $1, $2) returning id`, [ids.cat_ebay, ids.member]);
+  await asUser(ids.member, `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'Question.')`, [t.rows[0].id, ids.member]);
+  const a = await asUser(ids.regular, `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'Answer.') returning id`, [t.rows[0].id, ids.regular]);
+  await asUser(ids.member, `update public.topics set is_solved = true, solution_post_id = $2 where id = $1`, [t.rows[0].id, a.rows[0].id]);
+  let p = await db.query(`select solution_count from public.profiles where id = $1`, [ids.regular]);
+  const after = p.rows[0].solution_count;
+  await asUser(ids.member, `update public.topics set is_solved = false, solution_post_id = null where id = $1`, [t.rows[0].id]);
+  p = await db.query(`select solution_count from public.profiles where id = $1`, [ids.regular]);
+  if (after < 1 || p.rows[0].solution_count !== after - 1) throw new Error(`counts ${after} then ${p.rows[0].solution_count}`);
+  const top = await db.query(`select username, solutions::int as n from public.top_answerers(30, 5)`);
+  if (!top.rows.some((r) => r.username === "regular")) throw new Error("top_answerers missing regular");
+});
+
+await step("closed Ask Tom window blocks new topics and staff answers get tagged", async () => {
+  const c = await db.query(`insert into public.categories (slug, name, accepting_topics) values ('ask-tom', 'Ask Tom', false) returning id`);
+  ids.cat_ask = c.rows[0].id;
+  await expectError(
+    asUser(ids.member, `insert into public.topics (title, category_id, author_id) values ('Question for Tom', $1, $2)`, [ids.cat_ask, ids.member]),
+    DENIED,
+  );
+  await db.query(`update public.categories set accepting_topics = true where id = $1`, [ids.cat_ask]);
+  const t = await asUser(ids.member, `insert into public.topics (title, category_id, author_id) values ('Question for Tom', $1, $2) returning id`, [ids.cat_ask, ids.member]);
+  await asUser(ids.member, `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'The question.')`, [t.rows[0].id, ids.member]);
+  const a = await asUser(ids.staff, `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'The answer.') returning id`, [t.rows[0].id, ids.staff]);
+  await asUser(ids.member, `update public.topics set is_solved = true, solution_post_id = $2 where id = $1`, [t.rows[0].id, a.rows[0].id]);
+  const tags = await db.query(`select tg.slug from public.topic_tags tt join public.tags tg on tg.id = tt.tag_id where tt.topic_id = $1`, [t.rows[0].id]);
+  if (!tags.rows.some((r) => r.slug === "ask-tom-answered")) throw new Error("answered tag missing");
+});
+
+await step("partners and placements: public read of live only, events deduplicated", async () => {
+  const pa = await db.query(`insert into public.partners (slug, name, url, category, relationship) values ('example-post', 'Example Postage', 'https://example.test', 'postage', 'sponsored') returning id`);
+  await db.query(`insert into public.partners (slug, name, url, is_active) values ('hidden-co', 'Hidden', 'https://example.test', false)`);
+  const live = await db.query(
+    `insert into public.placements (partner_id, slot, headline) values ($1, 'rail', 'Cheaper labels') returning id`,
+    [pa.rows[0].id],
+  );
+  await db.query(
+    `insert into public.placements (partner_id, slot, headline, starts_at, ends_at) values ($1, 'rail', 'Expired', now() - interval '2 days', now() - interval '1 day')`,
+    [pa.rows[0].id],
+  );
+  const seen = await asAnon(`select slug from public.partners order by slug`);
+  if (seen.rows.map((r) => r.slug).join() !== "example-post") throw new Error(`anon saw ${seen.rows.map((r) => r.slug).join()}`);
+  const direct = await asAnon(`select count(*)::int as n from public.placements`);
+  if (direct.rows[0].n !== 0) throw new Error("anon read placements directly");
+  const fn = await asAnon(`select headline from public.live_placements('rail', 5)`);
+  if (fn.rows.length !== 1 || fn.rows[0].headline !== "Cheaper labels") throw new Error(`live_placements returned ${JSON.stringify(fn.rows)}`);
+  await asAnon(`select public.record_placement_event($1, 'impression', '/community', 'hash1')`, [live.rows[0].id]);
+  await asAnon(`select public.record_placement_event($1, 'impression', '/community', 'hash1')`, [live.rows[0].id]);
+  await asAnon(`select public.record_placement_event($1, 'click', '/community', 'hash1')`, [live.rows[0].id]);
+  const ev = await db.query(`select kind, count(*)::int as n from public.placement_events where placement_id = $1 group by kind order by kind`, [live.rows[0].id]);
+  if (ev.rows.map((r) => `${r.kind}:${r.n}`).join() !== "click:1,impression:1") throw new Error(`events ${JSON.stringify(ev.rows)}`);
+});
+
+await step("category follows are private to the member", async () => {
+  await asUser(ids.member, `insert into public.category_follows (user_id, category_id) values ($1, $2)`, [ids.member, ids.cat_ebay]);
+  const other = await asUser(ids.regular, `select count(*)::int as n from public.category_follows where user_id = $1`, [ids.member]);
+  if (other.rows[0].n !== 0) throw new Error("follows visible to others");
+});
+
 await step("every public table has RLS enabled", async () => {
   const r = await db.query(`
     select c.relname from pg_class c

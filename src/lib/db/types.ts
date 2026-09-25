@@ -35,6 +35,7 @@ export type Profile = {
   email_on_reply: boolean;
   email_on_mention: boolean;
   email_digest: boolean;
+  solution_count: number;
   created_at: string;
   updated_at: string;
 };
@@ -42,7 +43,7 @@ export type Profile = {
 /* The subset of a profile shown next to posts and in topic rows. */
 export type ProfileSummary = Pick<
   Profile,
-  "id" | "username" | "display_name" | "avatar_url" | "trust_level" | "is_staff"
+  "id" | "username" | "display_name" | "avatar_url" | "trust_level" | "is_staff" | "solution_count"
 >;
 
 export type Category = {
@@ -60,6 +61,8 @@ export type Category = {
   allowed_group_id: string | null;
   topic_count: number;
   post_count: number;
+  accepting_topics: boolean;
+  accepting_note: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -170,5 +173,45 @@ export type Notification = {
   created_at: string;
 };
 
-export type TopicListView = "latest" | "top" | "unanswered";
+export type TopicListView = "latest" | "top" | "unanswered" | "following";
 export type TopPeriod = "day" | "week" | "month" | "all";
+
+export type PartnerCategory = "postage" | "bookkeeping" | "sourcing" | "software" | "other";
+export type PartnerRelationship = "partner" | "sponsored" | "affiliate";
+
+export type Partner = {
+  id: string;
+  slug: string;
+  name: string;
+  url: string;
+  logo_url: string | null;
+  blurb: string | null;
+  category: PartnerCategory;
+  relationship: PartnerRelationship;
+  is_active: boolean;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PlacementSlot = "rail" | "topic_list";
+
+export type Placement = {
+  id: string;
+  partner_id: string;
+  slot: PlacementSlot;
+  headline: string;
+  body: string | null;
+  cta_label: string;
+  url: string | null;
+  starts_at: string;
+  ends_at: string | null;
+  weight: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LivePlacement = Placement & { partner: Pick<Partner, "id" | "name" | "slug" | "url" | "logo_url" | "relationship"> };
+
+export type CategoryFollow = { user_id: string; category_id: string; level: "following" | "muted" };

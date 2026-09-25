@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
+import { SponsorSlot } from "@/components/partners/sponsor-slot";
+import { TopAnswerers } from "@/components/forum/top-answerers";
 import { urls } from "@/lib/forum/urls";
 
 export function RightRail({ children, source }: { children?: React.ReactNode; source?: string }) {
@@ -8,6 +10,8 @@ export function RightRail({ children, source }: { children?: React.ReactNode; so
       <div className="sticky top-[calc(var(--header-height)+1.5rem)] space-y-6">
         {children}
         <EmailSignupCard source={source ?? "rail"} />
+        <TopAnswerers />
+        <SponsorSlot slot="rail" page={source ?? "rail"} />
         <div className="rounded-lg border bg-card p-4 text-sm">
           <h2 className="font-semibold">House rules</h2>
           <p className="mt-1 text-muted-foreground">

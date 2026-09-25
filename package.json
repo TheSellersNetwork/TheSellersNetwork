@@ -16,7 +16,8 @@
     "test:db": "node scripts/test-migrations.mjs",
     "seed": "tsx scripts/seed.ts",
     "blog:sync": "tsx scripts/sync-blog.ts",
-    "roundup": "tsx scripts/roundup.ts"
+    "roundup": "tsx scripts/roundup.ts",
+    "ask-tom:digest": "tsx scripts/ask-tom-digest.ts"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.6.1",

@@ -8,6 +8,7 @@ import { PostItem } from "@/components/forum/post-item";
 import { ReplySection } from "@/components/forum/reply-section";
 import { TopicStaffTools } from "@/components/forum/topic-staff-tools";
 import { ReadTracker } from "@/components/forum/read-tracker";
+import { LandingTracker } from "@/components/analytics/landing-tracker";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { BreadcrumbJsonLd, TopicJsonLd } from "@/components/seo/json-ld";
 import { getCurrentUser } from "@/lib/auth";
@@ -95,6 +96,7 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
         />
       ) : null}
       <ReadTracker postCount={posts.length} />
+      <LandingTracker topicId={topic.id} solved={topic.is_solved} signedIn={!!viewer} />
 
       <nav aria-label="Breadcrumb" className="mb-2 text-sm text-muted-foreground">
         <Link href={urls.community()} className="hover:underline">

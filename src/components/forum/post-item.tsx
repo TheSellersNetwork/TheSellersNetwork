@@ -53,6 +53,11 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
             {post.author ? (
               <span className="rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground">{trustLabel(post.author.trust_level, post.author.is_staff)}</span>
             ) : null}
+            {post.author && post.author.solution_count > 0 ? (
+              <span className="text-xs text-success" title="Accepted answers">
+                {post.author.solution_count} {post.author.solution_count === 1 ? "solution" : "solutions"}
+              </span>
+            ) : null}
             {isOpening && post.author?.id === topic.author_id ? <span className="text-xs text-muted-foreground">Original poster</span> : null}
           </div>
           <div className="text-xs text-muted-foreground">

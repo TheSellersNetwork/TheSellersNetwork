@@ -127,12 +127,20 @@ function UserMenu({ user }: { user: HeaderUser }) {
           </Link>
         </DropdownMenuItem>
         {user.is_staff ? (
-          <DropdownMenuItem asChild>
-            <Link href={urls.adminFlags()}>
-              <Shield />
-              Moderation queue
-            </Link>
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/admin">
+                <Shield />
+                Staff home
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={urls.adminFlags()}>
+                <Shield />
+                Moderation queue
+              </Link>
+            </DropdownMenuItem>
+          </>
         ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={signOut}>

@@ -6,6 +6,7 @@ type Props = {
   basePath: string;
   view: TopicListView;
   period: TopPeriod;
+  showFollowing?: boolean;
 };
 
 const views: { id: TopicListView; label: string }[] = [
@@ -22,14 +23,15 @@ const periods: { id: TopPeriod; label: string }[] = [
 ];
 
 /* Latest, top and unanswered, with a period picker under Top. Plain links so it is crawlable. */
-export function ViewTabs({ basePath, view, period }: Props) {
+export function ViewTabs({ basePath, view, period, showFollowing }: Props) {
+  const tabs = showFollowing ? [{ id: "following" as const, label: "Following" }, ...views] : views;
   return (
     <div className="mb-4 flex flex-wrap items-center gap-2">
       <nav aria-label="Topic views" className="flex gap-1 rounded-md bg-secondary p-1">
-        {views.map((v) => (
+        {tabs.map((v) => (
           <Link
             key={v.id}
-            href={v.id === "latest" ? basePath : `${basePath}?view=${v.id}`}
+            href={`${basePath}?view=${v.id}`}
             aria-current={view === v.id ? "page" : undefined}
             className={cn(
               "rounded px-3 py-1 text-sm font-medium",

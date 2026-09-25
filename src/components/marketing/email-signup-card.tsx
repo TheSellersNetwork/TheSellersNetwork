@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { subscribeToCourse } from "@/app/actions/email-signup";
+import { track } from "@/lib/analytics/client";
+import { landingContext } from "@/components/analytics/landing-tracker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +21,14 @@ type Props = {
   stored with the subscriber and sent to PostHog.
 */
 export function EmailSignupCard({ source, variant = "card", className }: Props) {
-  const [state, action, pending] = useActionState(subscribeToCourse, { ok: false, message: "" });
+  const [state, action, pending] = useActionState(
+    async (prev: { ok: boolean; message: string }, formData: FormData) => {
+      const result = await subscribeToCourse(prev, formData);
+      if (result.ok) track("signup_form_submitted", { source, ...landingContext() });
+      return result;
+    },
+    { ok: false, message: "" },
+  );
 
   return (
     <div className={cn(variant === "card" ? "rounded-lg border bg-card p-4" : "rounded-lg bg-brand-soft p-5", className)}>

@@ -114,6 +114,7 @@ export function Composer({
       }
       const { url } = (await res.json()) as { url: string };
       editor.chain().focus().setImage({ src: url, alt: "" }).run();
+      toast("Image added. Check it for buyer names, addresses and order numbers before you post.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Image upload failed.");
     } finally {
@@ -239,7 +240,7 @@ export function Composer({
         <TabsContent value="write" className="mt-0">
           <EditorContent editor={editor} />
           <div className="flex items-center justify-between border-t px-3 py-1.5 text-xs text-muted-foreground">
-            <span>{uploading > 0 ? `Uploading ${uploading} image${uploading === 1 ? "" : "s"}` : "Paste or drop images to attach them. Type @ to mention someone."}</span>
+            <span>{uploading > 0 ? `Uploading ${uploading} image${uploading === 1 ? "" : "s"}` : "Screenshots welcome: paste with Ctrl+V or drop them here. Blur buyer names and order numbers. Type @ to mention someone."}</span>
             <span>{markdown.trim().split(/\s+/).filter(Boolean).length} words</span>
           </div>
         </TabsContent>

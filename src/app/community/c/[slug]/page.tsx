@@ -7,7 +7,9 @@ import { TopicList } from "@/components/forum/topic-list";
 import { ViewTabs } from "@/components/forum/view-tabs";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
-import { getCategories, getCategoryBySlug, getTopics } from "@/lib/forum/queries";
+import { FollowButton } from "@/components/forum/follow-button";
+import { getCurrentUser } from "@/lib/auth";
+import { getCategories, getCategoryBySlug, getCategoryFollows, getTopics } from "@/lib/forum/queries";
 import { urls } from "@/lib/forum/urls";
 import type { TopicListView, TopPeriod } from "@/lib/db/types";
 
@@ -32,7 +34,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
   const period: TopPeriod = sp.period === "day" || sp.period === "month" || sp.period === "all" ? sp.period : "week";
   const cursor = typeof sp.cursor === "string" ? sp.cursor : null;
 
-  const all = await getCategories();
+  const [all, viewer] = await Promise.all([getCategories(), getCurrentUser()]);
+  const follows = viewer ? await getCategoryFollows(viewer.id) : new Map<string, "following" | "muted">();
+  const canStartTopic = category.accepting_topics || !!viewer?.profile.is_staff;
   const parent = category.parent_id ? all.find((c) => c.id === category.parent_id) : null;
   const children = all.filter((c) => c.parent_id === category.id);
   const categoryIds = [category.id, ...children.map((c) => c.id)];
@@ -70,13 +74,23 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
           </h1>
           <p className="mt-1 max-w-prose text-sm text-muted-foreground">{category.description ?? "[TOM: category intro]"}</p>
         </div>
-        <Button asChild>
-          <Link href={urls.newTopic(category.slug)}>
-            <Plus data-icon="inline-start" />
-            New topic
-          </Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <FollowButton categoryId={category.id} level={follows.get(category.id) ?? null} signedIn={!!viewer} />
+          {canStartTopic ? (
+            <Button asChild>
+              <Link href={urls.newTopic(category.slug)}>
+                <Plus data-icon="inline-start" />
+                New topic
+              </Link>
+            </Button>
+          ) : null}
+        </div>
       </div>
+      {!category.accepting_topics ? (
+        <p className="mb-4 rounded-lg border bg-brand-soft/60 p-3 text-sm">
+          New questions are closed for now. {category.accepting_note ?? "[TOM: when the window reopens]"}
+        </p>
+      ) : null}
       {children.length > 0 ? (
         <ul className="mb-4 flex flex-wrap gap-2 text-sm">
           {children.map((c) => (
@@ -94,6 +108,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
         nextCursor={page.nextCursor}
         moreHref={(c) => `${basePath}?view=${view}&period=${period}&cursor=${encodeURIComponent(c)}`}
         showCategory={children.length > 0}
+        sponsorPage={basePath}
         emptyMessage="[TOM: empty category message]"
       />
     </ForumShell>

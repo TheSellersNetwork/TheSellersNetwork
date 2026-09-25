@@ -28,7 +28,7 @@ if (!authorEmail) throw new Error("SEED_AUTHOR_EMAIL (Tom's account email) is re
 
 const supabase = createClient(url, key, { auth: { persistSession: false } });
 
-type Cat = { slug: string; name: string; colour: string; children?: Cat[]; min_account_age_hours?: number; description?: string };
+type Cat = { slug: string; name: string; colour: string; children?: Cat[]; min_account_age_hours?: number; description?: string; accepting_topics?: boolean; accepting_note?: string };
 
 /* Launch categories: four platforms at top level, then Other platforms, then general. */
 const launch: Cat[] = [
@@ -83,6 +83,14 @@ const launch: Cat[] = [
       { slug: "site-feedback", name: "Site feedback", colour: "general" },
     ],
   },
+  {
+    slug: "ask-tom",
+    name: "Ask Tom",
+    colour: "general",
+    accepting_topics: false,
+    accepting_note: "[TOM: when the monthly window opens, e.g. the first week of every month]",
+    description: "[TOM: what Ask Tom is: a monthly window where Tom answers questions in public]",
+  },
 ];
 
 async function authorId(): Promise<string> {
@@ -104,6 +112,8 @@ async function upsertCategory(cat: Cat, parentId: string | null, position: numbe
         position,
         parent_id: parentId,
         min_account_age_hours: cat.min_account_age_hours ?? 0,
+        accepting_topics: cat.accepting_topics ?? true,
+        accepting_note: cat.accepting_note ?? null,
         description: cat.description ?? `[TOM: one line describing ${cat.name}]`,
       },
       { onConflict: "slug" },

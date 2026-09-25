@@ -24,6 +24,7 @@ const columns = [
     links: [
       { href: "/mentoring", label: "Mentoring" },
       { href: "/autopilot", label: "Autopilot" },
+      { href: "/partners", label: "Partners" },
       { href: "/about", label: "About" },
     ],
   },

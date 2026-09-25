@@ -3,6 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import { createTopic, type ActionState } from "@/app/community/actions";
 import { Composer } from "@/components/composer/composer";
+import { SimilarTopics } from "@/components/forum/similar-topics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ export function NewTopicForm({ categories, preselectedSlug, trustLevel }: { cate
   const [state, action, pending] = useActionState<ActionState, FormData>(createTopic, { ok: false, message: "" });
   const initial = categories.find((c) => c.slug === preselectedSlug)?.id ?? "";
   const [categoryId, setCategoryId] = useState(initial);
+  const [title, setTitle] = useState("");
 
   const groups = useMemo(() => {
     const parents = categories.filter((c) => !c.parent_id);
@@ -24,7 +26,8 @@ export function NewTopicForm({ categories, preselectedSlug, trustLevel }: { cate
     <form action={action} className="space-y-5">
       <div className="space-y-1.5">
         <Label htmlFor="title">Title</Label>
-        <Input id="title" name="title" required minLength={3} maxLength={200} placeholder="Say what it is about in one line" autoFocus />
+        <Input id="title" name="title" required minLength={3} maxLength={200} placeholder="Say what it is about in one line" autoFocus value={title} onChange={(e) => setTitle(e.target.value)} />
+        <SimilarTopics title={title} />
       </div>
 
       <div className="space-y-1.5">

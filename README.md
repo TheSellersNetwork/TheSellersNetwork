@@ -41,6 +41,21 @@ Open http://localhost:3000. The brand chooser is at http://localhost:3000/brand.
 | `npm run seed`       | Launch categories, intro placeholders, optional CSV topics    |
 | `npm run blog:sync`  | Creates discussion threads for published blog posts           |
 | `npm run roundup`    | Drafts the Friday roundup from the week's solved threads      |
+| `npm run ask-tom:digest` | Drafts the monthly Ask Tom blog post from answered questions |
+
+## Partners and sponsor slots
+
+`/partners` lists partners by category with sponsored and affiliate labels. Staff manage them at
+`/admin/partners`, including placements: a card in the right rail or a row after the fifth topic,
+running between two dates. Impressions (deduplicated per viewer per day, no IPs stored) and clicks
+are counted in the database and sent to PostHog. Outbound links go through `/go/...`.
+
+## Recurring things
+
+- Monday 07:00 UTC: `/api/cron/weekly-thread` posts the weekly numbers thread from
+  `content/templates/weekly-numbers.md` (Vercel cron, protected by `CRON_SECRET`).
+- Ask Tom: staff open and close the monthly window at `/admin`. Answers Tom accepts are tagged and
+  `npm run ask-tom:digest` drafts the blog post.
 
 ## Content
 
@@ -48,6 +63,8 @@ Open http://localhost:3000. The brand chooser is at http://localhost:3000/brand.
   related_topic_ids, cover, published. Leave `published` empty for a draft.
 - `content/guides/*.mdx` guides. Frontmatter: title, excerpt, categories (forum slugs the guide
   appears beside), module, order, published.
+- `content/blog/templates/` holds a starter for each content type: evergreen guide, case study,
+  news reaction, member spotlight, plus the roundup template in `content/blog/_roundup-template.mdx`.
 - `<Placeholder>` and `<Signup source="..." />` are the two components available in MDX.
 
 ## Stack

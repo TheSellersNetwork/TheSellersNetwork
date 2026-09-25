@@ -13,7 +13,7 @@ import type {
   TopPeriod,
 } from "@/lib/db/types";
 
-const PROFILE_SUMMARY = "id, username, display_name, avatar_url, trust_level, is_staff";
+const PROFILE_SUMMARY = "id, username, display_name, avatar_url, trust_level, is_staff, solution_count";
 
 const TOPIC_SELECT = `
   *,
@@ -280,8 +280,24 @@ export async function searchTopics(q: string, limit = 30): Promise<TopicRow[]> {
     for (const raw of (more ?? []) as unknown as RawTopic[]) results.push(shapeTopic(raw));
   }
 
+  // Solved threads first: the accepted answer is what a searcher wants.
+  results.sort((a, b) => Number(b.is_solved) - Number(a.is_solved));
   return results.slice(0, limit);
 }
+
+export type Answerer = { id: string; username: string; display_name: string | null; avatar_url: string | null; trust_level: number; is_staff: boolean; solutions: number };
+
+export const getTopAnswerers = cache(async (days = 30, limit = 5): Promise<Answerer[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("top_answerers", { p_days: days, p_limit: limit });
+  return ((data ?? []) as Answerer[]).map((a) => ({ ...a, solutions: Number(a.solutions) }));
+});
+
+export const getCategoryFollows = cache(async (userId: string): Promise<Map<string, "following" | "muted">> => {
+  const supabase = await createClient();
+  const { data } = await supabase.from("category_follows").select("category_id, level").eq("user_id", userId);
+  return new Map((data ?? []).map((f) => [f.category_id as string, f.level as "following" | "muted"]));
+});
 
 export const getUnreadNotificationCount = cache(async (userId: string): Promise<number> => {
   const supabase = await createClient();

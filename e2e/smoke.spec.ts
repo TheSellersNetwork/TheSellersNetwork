@@ -16,6 +16,7 @@ const pages: { path: string; heading: RegExp }[] = [
   { path: "/login", heading: /Sign in/ },
   { path: "/signup", heading: /Join/ },
   { path: "/mentoring", heading: /Mentoring/ },
+  { path: "/partners", heading: /Partners/ },
   { path: "/brand", heading: /Brand options/ },
 ];
 
@@ -39,6 +40,13 @@ test("protected pages redirect to sign in", async ({ page }) => {
   await expect(page).toHaveURL(/\/login\?next=/);
   await page.goto("/admin/flags");
   await expect(page).toHaveURL(/\/login/);
+  await page.goto("/admin/partners");
+  await expect(page).toHaveURL(/\/login/);
+});
+
+test("outbound redirect falls back to the partners page", async ({ page }) => {
+  await page.goto("/go/00000000-0000-0000-0000-000000000000");
+  await expect(page).toHaveURL(/\/partners$/);
 });
 
 test("robots and sitemap respond", async ({ request }) => {

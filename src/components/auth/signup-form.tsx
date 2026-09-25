@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { track } from "@/lib/analytics/client";
+import { landingContext } from "@/components/analytics/landing-tracker";
 
 export function SignupForm({ turnstileSiteKey }: { turnstileSiteKey: string | null }) {
   const [token, setToken] = useState("");
   const [state, action, pending] = useActionState<SignupState, FormData>(
     async (prev, formData) => {
       const result = await signUp(prev, formData);
-      if (result.ok) track("signup", {});
+      if (result.ok) track("signup", landingContext());
       return result;
     },
     { ok: false, message: "" },

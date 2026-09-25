@@ -16,7 +16,7 @@ function getClient(): PostHog | null {
   return client;
 }
 
-export type ServerEvent = "signup" | "first_post" | "solution_marked" | "signup_form_submitted";
+export type ServerEvent = "signup" | "first_post" | "solution_marked" | "signup_form_submitted" | "partner_click";
 
 /* Fire-and-forget server-side event. Silent when PostHog is not configured. */
 export async function trackServer(event: ServerEvent, properties: Record<string, unknown>, distinctId: string) {
