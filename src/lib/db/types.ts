@@ -12,6 +12,7 @@ export type MarketplaceId =
   | "depop"
   | "facebook"
   | "own_website"
+  | "live"
   | "other";
 
 export type Profile = {

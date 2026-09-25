@@ -60,6 +60,17 @@ const launch: Cat[] = [
   { slug: "vinted", name: "Vinted", colour: "vinted" },
   { slug: "facebook-marketplace", name: "Facebook Marketplace", colour: "facebook" },
   {
+    slug: "live-selling",
+    name: "Live selling",
+    colour: "live",
+    children: [
+      { slug: "whatnot", name: "Whatnot", colour: "live" },
+      { slug: "ebay-live", name: "eBay Live", colour: "live" },
+      { slug: "tiktok-live-and-other", name: "TikTok Live and other live platforms", colour: "live" },
+      { slug: "running-a-show", name: "Running a show", colour: "live", description: "Sourcing for lives, pacing, packing after a stream, chargebacks and refunds." },
+    ],
+  },
+  {
     slug: "other-platforms",
     name: "Other platforms",
     colour: "website",

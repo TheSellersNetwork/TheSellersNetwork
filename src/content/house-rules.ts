@@ -6,7 +6,7 @@ export const houseRules = [
   },
   {
     title: "No selling.",
-    body: "No links to your listings, no account trading, no feedback swaps.",
+    body: "No links to your listings or live streams, no account trading, no feedback swaps.",
   },
   {
     title: "No evasion advice.",

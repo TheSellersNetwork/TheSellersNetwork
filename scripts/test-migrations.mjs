@@ -135,7 +135,7 @@ await step("fixtures", async () => {
   await db.query(`update public.profiles set trust_level = 4, is_staff = true, marketplaces = '{ebay,amazon}' where id = $1`, [ids.staff]);
   await db.query(`update public.profiles set trust_level = 0, marketplaces = '{vinted}' where id = $1`, [ids.newbie]);
   await db.query(`update public.profiles set trust_level = 3, marketplaces = '{ebay}' where id = $1`, [ids.regular]);
-  await db.query(`update public.profiles set trust_level = 2, marketplaces = '{facebook,other}' where id = $1`, [ids.member]);
+  await db.query(`update public.profiles set trust_level = 2, marketplaces = '{facebook,live,other}' where id = $1`, [ids.member]);
   const check = await db.query(`select username, display_name from public.profiles where id = $1`, [ids.staff]);
   if (check.rows[0].username !== "tom" || check.rows[0].display_name !== "Tom") throw new Error("signup trigger did not use metadata");
   const cats = await db.query(`

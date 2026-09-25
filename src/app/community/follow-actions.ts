@@ -26,6 +26,7 @@ export const marketplaceToCategory: Record<string, string> = {
   depop: "depop-and-clothing-resale",
   etsy: "etsy-and-handmade",
   own_website: "own-website-and-shopify",
+  live: "live-selling",
   other: "other-platforms",
 };
 

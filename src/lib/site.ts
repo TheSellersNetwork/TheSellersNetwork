@@ -22,6 +22,7 @@ export const siteConfig = {
     { id: "depop", label: "Depop" },
     { id: "facebook", label: "Facebook Marketplace" },
     { id: "own_website", label: "Own website or Shopify" },
+    { id: "live", label: "Live selling (Whatnot, eBay Live, TikTok Live)" },
     { id: "other", label: "Other" },
   ],
 } as const;

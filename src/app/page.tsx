@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BookOpen, ChevronRight, MessageSquare, ShoppingBag, Sparkles, Store, Tag, Users } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronRight, MessageSquare, Radio, ShoppingBag, Sparkles, Store, Tag, Users } from "lucide-react";
 import { ActivityTabs } from "@/components/forum/activity-tabs";
 import { CommunityStats } from "@/components/forum/community-stats";
 import { HeroCards } from "@/components/forum/hero-cards";
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 /* Platforms shown as wordmarks under the hero. Text, not logos, so nothing is borrowed. */
-const platforms = ["eBay", "Amazon", "Vinted", "TikTok Shop", "Etsy", "Depop", "Facebook Marketplace"];
+const platforms = ["eBay", "Amazon", "Vinted", "Whatnot", "TikTok Shop", "Etsy", "Depop", "Facebook Marketplace"];
 
 /* The Categories card. Slugs match the seed script. */
 const quickCategories = [
@@ -31,6 +31,7 @@ const quickCategories = [
   { slug: "amazon", label: "Amazon", icon: Store },
   { slug: "vinted", label: "Vinted", icon: Tag },
   { slug: "tiktok-shop", label: "TikTok Shop", icon: Sparkles },
+  { slug: "whatnot", label: "Whatnot", icon: Radio },
 ];
 
 export default async function HomePage() {
@@ -170,7 +171,7 @@ export default async function HomePage() {
                 <ChevronRight className="size-5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </span>
               <span className="flex -space-x-2">
-                {["eBay", "Vinted", "TikTok"].map((p) => (
+                {["eBay", "Vinted", "Whatnot"].map((p) => (
                   <span key={p} className="grid size-9 place-items-center rounded-full border bg-background text-[10px] font-semibold ring-2 ring-card">
                     {p.slice(0, 2)}
                   </span>
