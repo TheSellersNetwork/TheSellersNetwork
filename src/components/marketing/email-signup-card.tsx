@@ -32,8 +32,8 @@ export function EmailSignupCard({ source, variant = "card", className }: Props) 
 
   return (
     <div className={cn(variant === "card" ? "forum-card rail-card rounded-lg border bg-card p-4" : "rounded-lg bg-brand-soft p-5", className)}>
-      <h2 className="font-semibold">[TOM: email course headline]</h2>
-      <p className="mt-1 text-sm text-muted-foreground">[TOM: one line on what the 7 daily emails fix]</p>
+      <h2 className="font-semibold">Free 7-day email course</h2>
+      <p className="mt-1 text-sm text-muted-foreground">One practical fix a day, for seven days. Written by resellers, not marketers.</p>
       {state.ok ? (
         <p className="mt-3 text-sm" role="status">
           {state.message}

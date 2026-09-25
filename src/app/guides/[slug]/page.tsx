@@ -30,7 +30,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
     <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
       <BreadcrumbJsonLd items={[{ name: "Guides", url: urls.guides() }, { name: guide.title, url: urls.guide(guide.slug) }]} />
       {guide.published ? (
-        <ArticleJsonLd title={guide.title} description={guide.excerpt} url={urls.guide(guide.slug)} datePublished={guide.published} author={{ name: "Tom", url: `${siteConfig.url}/about` }} />
+        <ArticleJsonLd title={guide.title} description={guide.excerpt} url={urls.guide(guide.slug)} datePublished={guide.published} author={{ name: siteConfig.name, url: `${siteConfig.url}/about` }} />
       ) : null}
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
         <article>
@@ -46,7 +46,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
           </div>
           <div className="mt-10 border-t pt-6">
             <EmailSignupCard source={urls.guide(guide.slug)} variant="inline" />
-            {guide.module ? (
+            {guide.module && process.env.NEXT_PUBLIC_SHOW_COURSE === "true" ? (
               <p className="mt-4 text-sm text-muted-foreground">
                 This is covered in more depth in the course.{" "}
                 <Link href={`/course#${guide.module}`} className="text-brand underline underline-offset-2 hover:text-brand-deep">

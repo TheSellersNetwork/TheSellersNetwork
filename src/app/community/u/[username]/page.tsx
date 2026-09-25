@@ -73,7 +73,7 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
         ) : null}
       </header>
 
-      {profile.trust_level >= 2 && !profile.is_staff ? (
+      {profile.trust_level >= 2 && !profile.is_staff && process.env.NEXT_PUBLIC_SHOW_MENTORING === "true" ? (
         <aside className="mt-4 rounded-lg bg-brand-soft p-4 text-sm">
           [TOM: soft mentoring banner for established members]{" "}
           <Link href="/mentoring" className="font-medium text-brand underline underline-offset-2 hover:text-brand-deep">

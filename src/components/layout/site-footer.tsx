@@ -12,18 +12,15 @@ const columns = [
     ],
   },
   {
-    heading: "Learn",
+    heading: "Read",
     links: [
       { href: urls.guides(), label: "Guides" },
       { href: urls.blog(), label: "Blog" },
-      { href: "/course", label: "Course" },
     ],
   },
   {
-    heading: "Work with Tom",
+    heading: "More",
     links: [
-      { href: "/mentoring", label: "Mentoring" },
-      { href: "/autopilot", label: "Autopilot" },
       { href: "/partners", label: "Partners" },
       { href: "/about", label: "About" },
     ],
@@ -43,7 +40,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.5fr_repeat(4,1fr)]">
         <div>
           <Logo size={20} />
-          <p className="mt-3 max-w-xs text-sm text-muted-foreground">[TOM: one-line footer description]</p>
+          <p className="mt-3 max-w-xs text-sm text-muted-foreground">A free forum for people who buy and sell for profit in the UK.</p>
         </div>
         {columns.map((col) => (
           <nav key={col.heading} aria-label={col.heading}>
@@ -62,7 +59,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t">
         <div className="mx-auto max-w-7xl px-4 py-4 text-xs text-muted-foreground sm:px-6">
-          The Sellers Network, {new Date().getFullYear()}. [TOM: company details if required]
+          The Sellers Network, {new Date().getFullYear()}.
         </div>
       </div>
     </footer>

@@ -51,7 +51,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
           url={urls.blogPost(post.slug)}
           datePublished={post.published}
           dateModified={post.updated ?? undefined}
-          author={{ name: "Tom", url: `${siteConfig.url}/about` }}
+          author={{ name: siteConfig.name, url: `${siteConfig.url}/about` }}
           image={post.cover ?? undefined}
         />
       ) : null}
@@ -68,10 +68,10 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
             <h1 className="mt-3 font-serif text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{post.title}</h1>
             <p className="mt-3 max-w-prose text-lg text-muted-foreground">{post.excerpt}</p>
             <div className="mt-5 flex items-center gap-3 border-y py-3 text-sm">
-              <span className="grid size-9 place-items-center rounded-full bg-secondary font-medium">T</span>
+              <span className="grid size-9 place-items-center rounded-full bg-secondary font-medium">SN</span>
               <div>
                 <Link href="/about" className="font-medium hover:underline">
-                  Tom
+                  {siteConfig.name}
                 </Link>
                 <div className="text-xs text-muted-foreground">
                   {post.published ? format(new Date(post.published), "d MMMM yyyy", { locale: enGB }) : "Draft"} · {readingTime(post.content)} min read

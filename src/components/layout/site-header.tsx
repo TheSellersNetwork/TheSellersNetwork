@@ -13,7 +13,7 @@ const nav = [
   { href: urls.community(), label: "Community" },
   { href: urls.blog(), label: "Blog" },
   { href: urls.guides(), label: "Guides" },
-  { href: "/mentoring", label: "Mentoring" },
+  { href: "/partners", label: "Partners" },
 ];
 
 /* Sticky header: wordmark, primary nav, search, New topic, bell, avatar. */

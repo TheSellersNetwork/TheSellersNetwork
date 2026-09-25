@@ -17,7 +17,7 @@ import { siteConfig } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: { absolute: `${siteConfig.name}: the community for UK resellers` },
+  title: { absolute: `${siteConfig.name}: the free forum for UK resellers` },
   description: siteConfig.description,
   alternates: { canonical: "/" },
 };
@@ -57,22 +57,21 @@ export default async function HomePage() {
           <div className="relative">
             <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium">
               <span className="live-dot size-2 rounded-full bg-success" aria-hidden="true" />
-              {stats.members >= 25 ? `${stats.members.toLocaleString("en-GB")} members and growing` : "Now open. Founding members welcome"}
+              {stats.members >= 25 ? `${stats.members.toLocaleString("en-GB")} members. Free to join` : "Free to join. Always will be"}
             </p>
             <div className="relative mt-6">
               <HeroCursors names={members.map((m) => displayName(m))} />
-              {/* [TOM: replace these three lines with the real headline] */}
               <h1 className="text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-                The community
+                The free forum
                 <br />
-                for UK resellers
+                for UK resellers.
                 <br />
-                on every platform
+                Every platform.
               </h1>
             </div>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
-              [TOM: standfirst. Real numbers, straight answers, no selling in threads. Whether you sell on <span className="text-brand">eBay</span>, <span className="text-brand">Vinted</span> or{" "}
-              <span className="text-brand">TikTok Shop</span>.]
+              Ask a question and get an answer from someone who has actually done it. <span className="text-brand">eBay</span>, <span className="text-brand">Vinted</span>,{" "}
+              <span className="text-brand">Whatnot</span>, car boots and everything in between. No fees, no selling in the threads, no nonsense.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -99,13 +98,13 @@ export default async function HomePage() {
               <ol className="mt-4 space-y-5 border-l pl-5 text-sm">
                 <li className="relative">
                   <span className="absolute -left-[26px] top-1 size-2.5 rounded-full border-2 border-brand bg-card" aria-hidden="true" />
-                  <p className="font-medium">Pick your platforms</p>
-                  <p className="text-muted-foreground">Tell us where you sell and your feed starts relevant.</p>
+                  <p className="font-medium">Tell us where you sell</p>
+                  <p className="text-muted-foreground">Your feed starts with the forums that matter to you.</p>
                 </li>
                 <li className="relative">
                   <span className="absolute -left-[26px] top-1 size-2.5 rounded-full border-2 border-brand bg-brand" aria-hidden="true" />
-                  <p className="font-medium">Join the community</p>
-                  <p className="text-muted-foreground">Ask, answer, and post your real numbers.</p>
+                  <p className="font-medium">Ask, answer, share your numbers</p>
+                  <p className="text-muted-foreground">Good answers get marked solved and stay at the top.</p>
                   {members.length > 0 ? (
                     <div className="mt-3 flex items-center gap-2">
                       <div className="flex -space-x-2">
@@ -121,8 +120,8 @@ export default async function HomePage() {
                 </li>
                 <li className="relative">
                   <span className="absolute -left-[26px] top-1 size-2.5 rounded-full border-2 border-border bg-card" aria-hidden="true" />
-                  <p className="font-medium">Grow with us</p>
-                  <p className="text-muted-foreground">Weekly numbers thread, guides, and mentoring when you want it.</p>
+                  <p className="font-medium">Come back on a Monday</p>
+                  <p className="text-muted-foreground">Every week there is a thread for what you listed, what sold and what you made.</p>
                 </li>
               </ol>
             </div>
@@ -157,10 +156,17 @@ export default async function HomePage() {
               </ul>
             </div>
 
-            {/* Quote */}
+            {/* The short version of the rules */}
             <div className="forum-card row-enter rounded-2xl border bg-card p-5 text-sm sm:col-start-2">
-              <p className="text-muted-foreground">&ldquo;[TOM: a real member quote, with permission]&rdquo;</p>
-              <p className="mt-2 text-xs text-muted-foreground">[TOM: name and platform]</p>
+              <p className="font-medium">Three rules, no small print</p>
+              <ul className="mt-2 space-y-1 text-muted-foreground">
+                <li>No selling in the threads.</li>
+                <li>No links to your listings.</li>
+                <li>Real numbers welcome.</li>
+              </ul>
+              <Link href={urls.rules()} className="mt-2 inline-block text-xs text-brand underline underline-offset-2 hover:text-brand-deep">
+                All six house rules
+              </Link>
             </div>
 
             {/* Wide banner */}
@@ -204,13 +210,13 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <h2 className="text-2xl font-semibold tracking-tight">Three ways in</h2>
-        <p className="mt-1 text-muted-foreground">[TOM: one line framing the three paths]</p>
+        <h2 className="text-2xl font-semibold tracking-tight">What you get here</h2>
+        <p className="mt-1 text-muted-foreground">It is a forum. A good one, run properly, and free.</p>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {[
-            { href: "/course", icon: BookOpen, title: "Learn", body: "[TOM: one line on the free email course and the paid course]" },
-            { href: "/mentoring", icon: Users, title: "Get mentored", body: "[TOM: one line on group and one-to-one mentoring]" },
-            { href: "/autopilot", icon: Sparkles, title: "Go Autopilot", body: "[TOM: one line on hands-off reselling]" },
+            { href: `${urls.community()}?view=unanswered`, icon: MessageSquare, title: "Straight answers", body: "Questions get marked solved by the person who asked. The answer sits at the top of the thread, not on page four." },
+            { href: urls.community(), icon: Users, title: "Real numbers", body: "A weekly thread for what you listed, what sold and what you made. Nobody is here to impress anyone." },
+            { href: urls.community(), icon: BookOpen, title: "Every platform", body: "eBay, Amazon, Vinted, Whatnot, TikTok Shop, Etsy, Depop, Facebook Marketplace. If you sell on it, there is a forum for it." },
           ].map((p) => (
             <Link key={p.href} href={p.href} className="forum-card row-enter group rounded-xl border bg-card p-5 transition-colors hover:border-brand/60">
               <p.icon className="size-6 text-brand" aria-hidden="true" />

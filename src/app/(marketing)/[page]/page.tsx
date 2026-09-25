@@ -10,7 +10,7 @@ const pages: Record<string, { title: string; description: string; note: string }
   mentoring: { title: "Mentoring", description: "Group and one-to-one mentoring for UK resellers.", note: "group and one-to-one mentoring, pricing table, Cal.com booking (mentoring Phase 3)" },
   course: { title: "The course", description: "The self-paced course for UK resellers.", note: "course sales page, 8 modules, Stripe checkout (mentoring Phase 2)" },
   autopilot: { title: "Autopilot", description: "Hands-off reselling, explained.", note: "Autopilot explainer and waitlist (week 2)" },
-  about: { title: "About Tom", description: "Who Tom is and why this exists.", note: "about page: who Tom is, results, photo (week 2)" },
+  about: { title: "About", description: "Why The Sellers Network exists and how it is run.", note: "about page: why the forum exists, who runs it, how it is funded (week 2)" },
   privacy: { title: "Privacy policy", description: "How The Sellers Network handles your data.", note: "privacy policy covering Supabase, PostHog with consent, Resend, Stripe, data export and deletion" },
   terms: { title: "Terms", description: "Terms of use for The Sellers Network.", note: "terms of use" },
 };
