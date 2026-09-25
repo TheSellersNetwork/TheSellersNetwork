@@ -9,7 +9,12 @@ import { Button } from "@/components/ui/button";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/forum/follow-button";
 import { getCurrentUser } from "@/lib/auth";
+import { after } from "next/server";
 import { getCategories, getCategoryBySlug, getCategoryFollows, getTopics } from "@/lib/forum/queries";
+import { getOnlineMembers } from "@/lib/forum/live-queries";
+import { LiveBar } from "@/components/forum/live-bar";
+import { recordCategoryVisit } from "@/app/community/presence-actions";
+import { createClient } from "@/lib/supabase/server";
 import { urls } from "@/lib/forum/urls";
 import type { TopicListView, TopPeriod } from "@/lib/db/types";
 
@@ -41,8 +46,18 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
   const children = all.filter((c) => c.parent_id === category.id);
   const categoryIds = [category.id, ...children.map((c) => c.id)];
 
-  const page = await getTopics({ view, period, cursor, categoryIds, includePinnedFirst: view === "latest" });
+  const [page, online] = await Promise.all([getTopics({ view, period, cursor, categoryIds, includePinnedFirst: view === "latest" }), getOnlineMembers(50)]);
+  const onlineIds = new Set(online.map((m) => m.id));
   const basePath = urls.category(category.slug);
+
+  // Remember the previous visit for New pills, then record this one after the response.
+  let newSince: string | null = null;
+  if (viewer) {
+    const supabase = await createClient();
+    const { data: visit } = await supabase.from("category_visits").select("visited_at").eq("user_id", viewer.id).eq("category_id", category.id).maybeSingle();
+    newSince = (visit?.visited_at as string | undefined) ?? null;
+    after(() => recordCategoryVisit(viewer.id, category.id));
+  }
 
   return (
     <ForumShell activeCategory={category.slug} source={basePath}>
@@ -103,7 +118,10 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
         </ul>
       ) : null}
       <ViewTabs basePath={basePath} view={view} period={period} />
+      <LiveBar kind="topics" categoryIds={categoryIds} />
       <TopicList
+        newSince={newSince}
+        onlineIds={onlineIds}
         topics={page.topics}
         nextCursor={page.nextCursor}
         moreHref={(c) => `${basePath}?view=${view}&period=${period}&cursor=${encodeURIComponent(c)}`}

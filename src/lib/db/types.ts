@@ -36,6 +36,7 @@ export type Profile = {
   email_on_mention: boolean;
   email_digest: boolean;
   solution_count: number;
+  home_visited_at: string | null;
   created_at: string;
   updated_at: string;
 };

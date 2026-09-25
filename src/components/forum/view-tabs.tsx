@@ -12,7 +12,7 @@ type Props = {
 const views: { id: TopicListView; label: string }[] = [
   { id: "latest", label: "Latest" },
   { id: "top", label: "Top" },
-  { id: "unanswered", label: "Unanswered" },
+  { id: "unanswered", label: "Needs an answer" },
 ];
 
 const periods: { id: TopPeriod; label: string }[] = [

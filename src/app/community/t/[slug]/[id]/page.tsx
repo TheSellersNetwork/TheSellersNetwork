@@ -9,6 +9,7 @@ import { ReplySection } from "@/components/forum/reply-section";
 import { TopicStaffTools } from "@/components/forum/topic-staff-tools";
 import { ReadTracker } from "@/components/forum/read-tracker";
 import { LandingTracker } from "@/components/analytics/landing-tracker";
+import { LiveBar } from "@/components/forum/live-bar";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { BreadcrumbJsonLd, TopicJsonLd } from "@/components/seo/json-ld";
 import { getCurrentUser } from "@/lib/auth";
@@ -176,6 +177,7 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
         ))}
       </div>
 
+      <LiveBar kind="replies" topicId={topic.id} />
       <div className="mt-8">
         <ReplySection topicId={topic.id} topicSlug={topic.slug} shortId={topic.short_id} canReply={canReply} isLocked={topic.is_locked} signedIn={!!viewer} emailConfirmed={viewer?.emailConfirmed ?? false} />
       </div>

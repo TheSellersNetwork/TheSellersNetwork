@@ -547,6 +547,23 @@ await step("category follows are private to the member", async () => {
   if (other.rows[0].n !== 0) throw new Error("follows visible to others");
 });
 
+await step("presence, stats and unread counts", async () => {
+  await asUser(ids.regular, `select public.touch_presence()`);
+  const online = await asAnon(`select username from public.online_members(5, 10)`);
+  if (!online.rows.some((r) => r.username === "regular")) throw new Error("regular not online");
+  const stats = await asAnon(`select * from public.community_stats()`);
+  if (Number(stats.rows[0].topics_week) < 1 || Number(stats.rows[0].online_now) < 1) throw new Error(`stats ${JSON.stringify(stats.rows[0])}`);
+  // member has never opened the eBay category, so its topics count as unread
+  let unread = await asUser(ids.member, `select category_id, unread::int as unread from public.category_unread_counts()`);
+  const ebay = unread.rows.find((r) => r.category_id === ids.cat_ebay);
+  if (!ebay || ebay.unread < 1) throw new Error("expected unread topics in ebay");
+  await asUser(ids.member, `insert into public.category_visits (user_id, category_id) values ($1, $2)`, [ids.member, ids.cat_ebay]);
+  unread = await asUser(ids.member, `select category_id from public.category_unread_counts()`);
+  if (unread.rows.some((r) => r.category_id === ids.cat_ebay)) throw new Error("visit did not clear unread");
+  const other = await asUser(ids.regular, `select count(*)::int as n from public.category_visits where user_id = $1`, [ids.member]);
+  if (other.rows[0].n !== 0) throw new Error("visits visible to others");
+});
+
 await step("every public table has RLS enabled", async () => {
   const r = await db.query(`
     select c.relname from pg_class c

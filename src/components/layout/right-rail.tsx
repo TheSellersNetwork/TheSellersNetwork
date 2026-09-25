@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { SponsorSlot } from "@/components/partners/sponsor-slot";
 import { TopAnswerers } from "@/components/forum/top-answerers";
+import { OnlineMembers } from "@/components/forum/online-members";
 import { urls } from "@/lib/forum/urls";
 
 export function RightRail({ children, source }: { children?: React.ReactNode; source?: string }) {
@@ -9,6 +10,7 @@ export function RightRail({ children, source }: { children?: React.ReactNode; so
     <aside className="hidden xl:block" aria-label="Related">
       <div className="sticky top-[calc(var(--header-height)+1.5rem)] space-y-6">
         {children}
+        <OnlineMembers />
         <EmailSignupCard source={source ?? "rail"} />
         <TopAnswerers />
         <SponsorSlot slot="rail" page={source ?? "rail"} />

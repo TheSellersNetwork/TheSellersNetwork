@@ -9,6 +9,7 @@ import { test, expect } from "@playwright/test";
 const pages: { path: string; heading: RegExp }[] = [
   { path: "/", heading: /landing headline/i },
   { path: "/community", heading: /Latest topics/ },
+  { path: "/community/c/ebay", heading: /eBay/ },
   { path: "/community/rules", heading: /House rules/ },
   { path: "/community/search?q=royal", heading: /Search/ },
   { path: "/blog", heading: /blog/i },

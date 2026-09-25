@@ -3,8 +3,15 @@ import Link from "next/link";
 import { ForumShell } from "@/components/layout/forum-shell";
 import { TopicList } from "@/components/forum/topic-list";
 import { ViewTabs } from "@/components/forum/view-tabs";
+import { after } from "next/server";
 import { getCategories, getCategoryFollows, getTopics, groupCategories } from "@/lib/forum/queries";
+import { getOnlineMembers } from "@/lib/forum/live-queries";
 import { getCurrentUser } from "@/lib/auth";
+import { CommunityStats } from "@/components/forum/community-stats";
+import { HeroCards } from "@/components/forum/hero-cards";
+import { QuickAsk } from "@/components/forum/quick-ask";
+import { LiveBar } from "@/components/forum/live-bar";
+import { recordHomeVisit } from "@/app/community/presence-actions";
 import { urls } from "@/lib/forum/urls";
 import type { TopicListView, TopPeriod } from "@/lib/db/types";
 
@@ -43,10 +50,23 @@ export default async function CommunityPage({ searchParams }: PageProps<"/commun
   const categoryIds =
     view === "following" ? followedIds : mutedIds.size > 0 ? categories.map((c) => c.id).filter((id) => !mutedIds.has(id)) : undefined;
 
-  const page = await getTopics({ view: view === "following" ? "latest" : view, period, cursor, categoryIds });
+  const [page, online] = await Promise.all([getTopics({ view: view === "following" ? "latest" : view, period, cursor, categoryIds }), getOnlineMembers(50)]);
+  const onlineIds = new Set(online.map((m) => m.id));
+  const newSince = user?.profile.home_visited_at ?? null;
+  if (user) after(() => recordHomeVisit(user.id));
 
   return (
     <ForumShell source="/community">
+      {!cursor ? (
+        <div className="mb-6 space-y-4">
+          <QuickAsk
+            viewer={user ? { username: user.profile.username, display_name: user.profile.display_name, avatar_url: user.profile.avatar_url, trust_level: user.profile.trust_level } : null}
+            categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id, min_trust_to_post: c.min_trust_to_post }))}
+          />
+          <CommunityStats />
+          <HeroCards />
+        </div>
+      ) : null}
       {!cursor ? (
         <section aria-labelledby="categories-heading" className="mb-8 lg:hidden">
           <h1 id="categories-heading" className="mb-3 text-xl font-semibold tracking-tight">
@@ -80,11 +100,14 @@ export default async function CommunityPage({ searchParams }: PageProps<"/commun
       <section aria-labelledby="topics-heading">
         <div className="mb-4 flex items-end justify-between gap-4">
           <h1 id="topics-heading" className="text-xl font-semibold tracking-tight">
-            {view === "top" ? "Top topics" : view === "unanswered" ? "Unanswered topics" : view === "following" ? "Your feed" : "Latest topics"}
+            {view === "top" ? "Top this week" : view === "unanswered" ? "Needs an answer" : view === "following" ? "Your feed" : "Latest topics"}
           </h1>
         </div>
         <ViewTabs basePath={urls.community()} view={view} period={period} showFollowing={!!user} />
+        <LiveBar kind="topics" categoryIds={categoryIds} />
         <TopicList
+          newSince={newSince}
+          onlineIds={onlineIds}
           topics={page.topics}
           nextCursor={page.nextCursor}
           moreHref={(c) => `${urls.community()}?view=${view}&period=${period}&cursor=${encodeURIComponent(c)}`}

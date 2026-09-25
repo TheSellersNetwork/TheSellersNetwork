@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { HeaderActions } from "@/components/layout/header-actions";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { Heartbeat } from "@/components/forum/heartbeat";
 import { getCurrentUser } from "@/lib/auth";
 import { getUnreadNotificationCount } from "@/lib/forum/queries";
 import { urls } from "@/lib/forum/urls";
@@ -22,6 +23,7 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      {user ? <Heartbeat /> : null}
       <div className="mx-auto flex h-(--header-height) max-w-7xl items-center gap-4 px-4 sm:px-6">
         <MobileNav items={nav} />
         <Link href="/" className="shrink-0 rounded-sm" aria-label="The Sellers Network home">

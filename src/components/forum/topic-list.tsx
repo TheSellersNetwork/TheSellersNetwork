@@ -16,13 +16,17 @@ type Props = {
   showCategory?: boolean;
   /* When set, one sponsor row is placed after the fifth topic. */
   sponsorPage?: string;
+  /* Topics with activity after this time get a New pill. */
+  newSince?: string | null;
+  /* Ids of members active in the last few minutes, for presence dots. */
+  onlineIds?: Set<string>;
 };
 
 /*
   Topic rows: title, category bar, tags, reply count, last activity, up to
   three avatars. No excerpts, as the brief asks.
 */
-export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCategory = true, sponsorPage }: Props) {
+export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCategory = true, sponsorPage, newSince, onlineIds }: Props) {
   if (topics.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -36,7 +40,7 @@ export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCate
       <ol className="forum-card divide-y rounded-lg border bg-card">
         {topics.map((topic, i) => (
           <li key={topic.id} className="contents">
-            <TopicRowItem topic={topic} showCategory={showCategory} />
+            <TopicRowItem topic={topic} showCategory={showCategory} isNew={!!newSince && topic.last_post_at > newSince} onlineIds={onlineIds} />
             {sponsorPage && i === 4 ? (
               <div className="px-3 py-2 sm:px-4">
                 <SponsorSlot slot="topic_list" page={sponsorPage} />
@@ -58,7 +62,7 @@ export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCate
   );
 }
 
-function TopicRowItem({ topic, showCategory }: { topic: TopicRow; showCategory: boolean }) {
+function TopicRowItem({ topic, showCategory, isNew, onlineIds }: { topic: TopicRow; showCategory: boolean; isNew: boolean; onlineIds?: Set<string> }) {
   const avatars = [topic.author, topic.last_poster].filter(
     (p, i, arr): p is NonNullable<typeof p> => !!p && arr.findIndex((x) => x?.id === p.id) === i,
   );
@@ -73,7 +77,8 @@ function TopicRowItem({ topic, showCategory }: { topic: TopicRow; showCategory: 
             {topic.title}
           </Link>
           <span className="flex shrink-0 items-center gap-1 pt-0.5 text-muted-foreground">
-            {topic.is_solved ? <CheckCircle2 className="size-4 text-success" aria-label="Solved" /> : null}
+            {isNew ? <span className="unread-pill">New</span> : null}
+            {topic.is_solved ? <CheckCircle2 className="tick-draw size-4 text-success" aria-label="Solved" /> : null}
             {topic.is_pinned ? <Pin className="size-4" aria-label="Pinned" /> : null}
             {topic.is_locked ? <Lock className="size-4" aria-label="Locked" /> : null}
           </span>
@@ -93,7 +98,7 @@ function TopicRowItem({ topic, showCategory }: { topic: TopicRow; showCategory: 
       </div>
       <div className="hidden -space-x-2 sm:flex">
         {avatars.slice(0, 3).map((p) => (
-          <UserAvatar key={p.id} profile={p} size="sm" className="ring-2 ring-card" />
+          <UserAvatar key={p.id} profile={p} size="sm" className="ring-2 ring-card" online={onlineIds?.has(p.id)} />
         ))}
       </div>
       <div className="w-12 shrink-0 text-right text-sm tabular-nums text-muted-foreground" aria-label={`${topic.reply_count} replies`}>

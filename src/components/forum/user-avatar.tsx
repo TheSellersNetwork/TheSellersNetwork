@@ -10,6 +10,8 @@ type Props = {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   link?: boolean;
   className?: string;
+  /* Shows a green presence dot. */
+  online?: boolean;
 };
 
 const sizes = {
@@ -21,13 +23,14 @@ const sizes = {
 };
 
 /* Initials on a neutral background until an avatar is uploaded. */
-export function UserAvatar({ profile, size = "md", link = true, className }: Props) {
+export function UserAvatar({ profile, size = "md", link = true, className, online }: Props) {
   const avatar = (
-    <Avatar className={cn(sizes[size], className)}>
+    <Avatar className={cn(sizes[size], online && "overflow-visible", className)}>
       {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
       <AvatarFallback className="bg-secondary font-medium text-secondary-foreground">
         {initials(profile)}
       </AvatarFallback>
+      {online ? <span className="presence-dot" aria-label="Online now" role="img" /> : null}
     </Avatar>
   );
   if (!link || !profile) return avatar;
