@@ -227,7 +227,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="course" className="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
+      <section id="newsletter" className="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
         <EmailSignupCard source="/" variant="inline" />
       </section>
     </main>

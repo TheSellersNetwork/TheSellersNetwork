@@ -16,7 +16,7 @@ type Props = {
 };
 
 /*
-  The free 7-day email course capture. Appears in the right rail, under
+  The free newsletter signup. Appears in the right rail, under
   solved answers and at the end of every blog post. The source page is
   stored with the subscriber and sent to PostHog.
 */
@@ -32,8 +32,8 @@ export function EmailSignupCard({ source, variant = "card", className }: Props) 
 
   return (
     <div className={cn(variant === "card" ? "forum-card rail-card rounded-lg border bg-card p-4" : "rounded-lg bg-brand-soft p-5", className)}>
-      <h2 className="font-semibold">Free 7-day email course</h2>
-      <p className="mt-1 text-sm text-muted-foreground">One practical fix a day, for seven days.</p>
+      <h2 className="font-semibold">Free newsletter</h2>
+      <p className="mt-1 text-sm text-muted-foreground">Seller news, fee changes and the best of the forum. Free, and not too often.</p>
       {state.ok ? (
         <p className="mt-3 text-sm" role="status">
           {state.message}
@@ -46,14 +46,14 @@ export function EmailSignupCard({ source, variant = "card", className }: Props) 
           </Label>
           <Input id={`email-${source}`} name="email" type="email" required autoComplete="email" placeholder="you@example.co.uk" />
           <Button type="submit" disabled={pending}>
-            {pending ? "Sending" : "Start the free course"}
+            {pending ? "Signing you up" : "Subscribe"}
           </Button>
           {state.message ? (
             <p className="text-sm text-destructive" role="alert">
               {state.message}
             </p>
           ) : null}
-          <p className="text-xs text-muted-foreground">One email a day for seven days. Unsubscribe any time.</p>
+          <p className="text-xs text-muted-foreground">No spam. Unsubscribe any time.</p>
         </form>
       )}
     </div>

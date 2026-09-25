@@ -14,9 +14,8 @@ const schema = z.object({
 });
 
 /*
-  Adds an address to the 7-day course. Confirmation email and the sequence
-  itself are wired in the email course task; for now the row is stored as
-  pending. Rate limited per IP through the database.
+  Adds an address to the newsletter. The confirmation email is wired in the
+  newsletter task; for now the row is stored as pending. Rate limited per IP through the database.
 */
 export async function subscribeToCourse(_prev: SignupState, formData: FormData): Promise<SignupState> {
   const parsed = schema.safeParse({ email: formData.get("email"), source: formData.get("source") });
@@ -46,5 +45,5 @@ export async function subscribeToCourse(_prev: SignupState, formData: FormData):
   }
 
   await trackServer("signup_form_submitted", { source: parsed.data.source }, parsed.data.email.toLowerCase());
-  return { ok: true, message: "Check your inbox for the first email." };
+  return { ok: true, message: "You are on the list. Check your inbox to confirm." };
 }
