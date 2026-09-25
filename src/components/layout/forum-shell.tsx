@@ -11,17 +11,19 @@ type Props = {
   hideSidebar?: boolean;
   /* Source page recorded with email signups from the rail. */
   source?: string;
+  /* Which sidebar link is current: all, latest, following, unanswered, top. */
+  activeNav?: string;
 };
 
 /*
   Three columns on desktop: categories, content, right rail. Single column on
   mobile, where the category list lives inside /community itself.
 */
-export function ForumShell({ children, rail, activeCategory, hideSidebar, source }: Props) {
+export function ForumShell({ children, rail, activeCategory, hideSidebar, source, activeNav }: Props) {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
       <div className="grid gap-8 lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] xl:grid-cols-[var(--sidebar-width)_minmax(0,1fr)_var(--rail-width)]">
-        {hideSidebar ? <div className="hidden lg:block" /> : <CategorySidebar active={activeCategory ?? null} />}
+        {hideSidebar ? <div className="hidden lg:block" /> : <CategorySidebar active={activeCategory ?? null} activeNav={activeNav} />}
         <main id="main" className="min-w-0">
           {children}
         </main>

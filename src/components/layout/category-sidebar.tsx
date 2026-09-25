@@ -3,10 +3,11 @@ import { Hash } from "lucide-react";
 import { getCategories, groupCategories } from "@/lib/forum/queries";
 import { getCategoryUnread } from "@/lib/forum/live-queries";
 import { getCurrentUser } from "@/lib/auth";
+import { CommunityNav } from "@/components/layout/community-nav";
 import { urls } from "@/lib/forum/urls";
 import { cn } from "@/lib/utils";
 
-export async function CategorySidebar({ active }: { active: string | null }) {
+export async function CategorySidebar({ active, activeNav = "all" }: { active: string | null; activeNav?: string }) {
   const [all, viewer] = await Promise.all([getCategories(), getCurrentUser()]);
   const categories = groupCategories(all);
   const unread = viewer ? await getCategoryUnread() : new Map<string, number>();
@@ -14,13 +15,9 @@ export async function CategorySidebar({ active }: { active: string | null }) {
 
   return (
     <aside className="hidden lg:block" aria-label="Categories">
-      <nav className="category-sidebar sticky top-[calc(var(--header-height)+1.5rem)] space-y-5 text-sm">
-        <Link
-          href={urls.community()}
-          className={cn("block rounded-md px-2 py-1 font-medium", active === null && "sidebar-active")}
-        >
-          All categories
-        </Link>
+      <nav className="category-sidebar sticky top-[calc(var(--header-height)+1.5rem)] max-h-[calc(100vh-var(--header-height)-2rem)] space-y-5 overflow-y-auto pr-1 text-sm">
+        <CommunityNav active={active ? "category" : activeNav} />
+        <h2 className="px-2 text-xs font-semibold uppercase tracking-wide sidebar-muted">Forums</h2>
         {categories.map((parent) => (
           <div key={parent.id}>
             <Link

@@ -240,3 +240,14 @@
     animation: none;
   }
 }
+
+/* Explore forums */
+.explore-group summary:hover {
+  color: var(--foreground);
+}
+.explore-card {
+  border-color: var(--card-border);
+}
+:root.dark .explore-card {
+  background: color-mix(in oklab, var(--card) 70%, var(--background));
+}
