@@ -15,7 +15,7 @@ export default async function OnboardingPage({ searchParams }: PageProps<"/onboa
   return (
     <main id="main" className="mx-auto w-full max-w-2xl flex-1 px-4 py-12 sm:px-6">
       <h1 className="text-2xl font-semibold tracking-tight">Welcome</h1>
-      <p className="mt-1 text-muted-foreground">[TOM: two lines of welcome, then the three steps below]</p>
+      <p className="mt-1 text-muted-foreground">Three quick things and you are in. Takes about a minute.</p>
       <div className="mt-8">
         <OnboardingForm
           next={next}

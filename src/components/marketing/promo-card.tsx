@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-/* Flat accent block in the right rail, in the place the reference puts a promo. Tom's copy. */
+/* Flat accent block in the right rail, in the place the reference puts a promo. staff copy. */
 export function PromoCard() {
   return (
     <div className="rounded-xl bg-brand p-5 text-primary-foreground">

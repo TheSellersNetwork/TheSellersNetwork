@@ -7,7 +7,7 @@ import { renderMarkdown } from "@/lib/markdown/render";
 /*
   Posts the weekly numbers thread. Scheduled in vercel.json for Monday 07:00
   UTC and protected by CRON_SECRET. The template lives in
-  content/templates/weekly-numbers.md; Tom edits that file, never this one.
+  content/templates/weekly-numbers.md; Staff edit that file, never this one.
   The previous week's thread is unpinned so only the current one is pinned.
 */
 export async function GET(request: Request) {

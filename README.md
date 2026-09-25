@@ -41,7 +41,7 @@ Open http://localhost:3000. The brand chooser is at http://localhost:3000/brand.
 | `npm run seed`       | Launch categories, intro placeholders, optional CSV topics    |
 | `npm run blog:sync`  | Creates discussion threads for published blog posts           |
 | `npm run roundup`    | Drafts the Friday roundup from the week's solved threads      |
-| `npm run ask-tom:digest` | Drafts the monthly Ask Tom blog post from answered questions |
+| `npm run ask-the-team:digest` | Drafts the monthly Ask the team blog post from answered questions |
 
 ## Partners and sponsor slots
 
@@ -54,8 +54,8 @@ are counted in the database and sent to PostHog. Outbound links go through `/go/
 
 - Monday 07:00 UTC: `/api/cron/weekly-thread` posts the weekly numbers thread from
   `content/templates/weekly-numbers.md` (Vercel cron, protected by `CRON_SECRET`).
-- Ask Tom: staff open and close the monthly window at `/admin`. Answers Tom accepts are tagged and
-  `npm run ask-tom:digest` drafts the blog post.
+- Ask the team: staff open and close the monthly window at `/admin`. Answers Tom accepts are tagged and
+  `npm run ask-the-team:digest` drafts the blog post.
 
 ## Content
 

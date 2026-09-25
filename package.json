@@ -17,7 +17,7 @@
     "seed": "tsx scripts/seed.ts",
     "blog:sync": "tsx scripts/sync-blog.ts",
     "roundup": "tsx scripts/roundup.ts",
-    "ask-tom:digest": "tsx scripts/ask-tom-digest.ts"
+    "ask-the-team:digest": "tsx scripts/ask-the-team-digest.ts"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.6.1",

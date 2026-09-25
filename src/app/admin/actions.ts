@@ -24,6 +24,6 @@ export async function setAskTomWindow(_prev: AdminState, formData: FormData): Pr
 
   await supabase.from("moderation_log").insert({ actor_id: user.id, action: accepting ? "ask_tom_open" : "ask_tom_close", target_type: "category", target_id: parsed.data.category_id });
   revalidatePath("/admin");
-  revalidatePath("/community/c/ask-tom");
-  return { ok: true, message: accepting ? "Ask Tom is open." : "Ask Tom is closed." };
+  revalidatePath("/community/c/ask-the-team");
+  return { ok: true, message: accepting ? "Ask the team is open." : "Ask the team is closed." };
 }

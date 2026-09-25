@@ -1,7 +1,7 @@
 /*
   Generates this week's Friday roundup draft from the template, filling in the
   top solved threads and most discussed topics with their authors credited.
-  Output: content/blog/roundup-YYYY-MM-DD.mdx (a draft until Tom adds a date).
+  Output: content/blog/roundup-YYYY-MM-DD.mdx (a draft until a date is added).
   Needs SUPABASE_SERVICE_ROLE_KEY in .env.local.
 */
 
@@ -33,15 +33,15 @@ async function main() {
     supabase.from("topics").select("title, slug, short_id, reply_count, like_count").is("deleted_at", null).gte("last_post_at", since).order("reply_count", { ascending: false }).limit(5),
   ]);
 
-  const solvedLines = ((solved ?? []) as unknown as Row[]).map((t) => `- [${t.title}](/community/t/${t.slug}/${t.short_id}), answered by @${t.solution?.author?.username ?? "[TOM: author]"}`);
+  const solvedLines = ((solved ?? []) as unknown as Row[]).map((t) => `- [${t.title}](/community/t/${t.slug}/${t.short_id}), answered by @${t.solution?.author?.username ?? "[EDIT: author]"}`);
   const discussedLines = ((discussed ?? []) as unknown as Row[]).map((t) => `- [${t.title}](/community/t/${t.slug}/${t.short_id}), ${t.reply_count} replies`);
 
   const template = readFileSync(path.join(process.cwd(), "content", "blog", "_roundup-template.mdx"), "utf8");
   const fill = (src: string, marker: string, lines: string[]) =>
-    src.replace(new RegExp(`<!-- roundup:${marker} -->[\\s\\S]*?<!-- /roundup:${marker} -->`), `<!-- roundup:${marker} -->\n${lines.length ? lines.join("\n") : "- [TOM: nothing this week]"}\n<!-- /roundup:${marker} -->`);
+    src.replace(new RegExp(`<!-- roundup:${marker} -->[\\s\\S]*?<!-- /roundup:${marker} -->`), `<!-- roundup:${marker} -->\n${lines.length ? lines.join("\n") : "- [EDIT: nothing this week]"}\n<!-- /roundup:${marker} -->`);
 
   const today = new Date().toISOString().slice(0, 10);
-  const out = fill(fill(template, "solved", solvedLines), "discussed", discussedLines).replace("[TOM: date]", today);
+  const out = fill(fill(template, "solved", solvedLines), "discussed", discussedLines).replace("[EDIT: date]", today);
   const file = path.join(process.cwd(), "content", "blog", `roundup-${today}.mdx`);
   writeFileSync(file, out);
   console.log(`Wrote ${file}. Add a published date when it is ready.`);

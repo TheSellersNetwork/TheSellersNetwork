@@ -17,7 +17,7 @@ export default async function NewTopicPage({ searchParams }: PageProps<"/communi
   return (
     <ForumShell hideSidebar source={urls.newTopic()}>
       <h1 className="text-2xl font-semibold tracking-tight">New topic</h1>
-      <p className="mt-1 text-sm text-muted-foreground">[TOM: one line of guidance for a good question, e.g. include what you tried and the numbers]</p>
+      <p className="mt-1 text-sm text-muted-foreground">Say what you tried, what happened, and include the numbers. The more specific the question, the better the answer.</p>
       {!user.emailConfirmed ? (
         <Alert className="mt-4">
           <AlertTitle>Confirm your email first</AlertTitle>

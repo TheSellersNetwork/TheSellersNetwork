@@ -38,11 +38,11 @@ export default async function AccountPage() {
       </section>
       <section className="mt-12 rounded-lg border p-4 text-sm">
         <h2 className="font-semibold">Purchases and bookings</h2>
-        <p className="mt-1 text-muted-foreground">[TOM: shown once the course and mentoring are live]</p>
+        <p className="mt-1 text-muted-foreground">Nothing to show yet.</p>
       </section>
       <section className="mt-6 rounded-lg border border-destructive/40 p-4 text-sm">
         <h2 className="font-semibold">Delete your account</h2>
-        <p className="mt-1 text-muted-foreground">Deleting your account anonymises your posts and removes your profile. [TOM: link to the deletion request process until self-service lands]</p>
+        <p className="mt-1 text-muted-foreground">Deleting your account anonymises your posts and removes your profile. Email us from the address on your account and we will do it within a week.</p>
       </section>
     </main>
   );

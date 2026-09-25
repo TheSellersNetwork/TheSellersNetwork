@@ -8,10 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 /*
-  Opens or closes the monthly Ask Tom window. When closed, members can read and
+  Opens or closes the monthly Ask the team window. When closed, members can read and
   reply but cannot start new questions; the note explains when it reopens.
 */
-export function AskTomControls({ categoryId, accepting, note }: { categoryId: string; accepting: boolean; note: string }) {
+export function AskTheTeamControls({ categoryId, accepting, note }: { categoryId: string; accepting: boolean; note: string }) {
   const [state, action, pending] = useActionState<AdminState, FormData>(
     async (prev, fd) => {
       const r = await setAskTomWindow(prev, fd);
@@ -29,7 +29,7 @@ export function AskTomControls({ categoryId, accepting, note }: { categoryId: st
       </p>
       <div className="space-y-1.5">
         <Label htmlFor="note">Note shown on the category</Label>
-        <Textarea id="note" name="note" defaultValue={note} rows={2} maxLength={300} placeholder="[TOM: e.g. The next window opens on the first Monday of the month]" />
+        <Textarea id="note" name="note" defaultValue={note} rows={2} maxLength={300} placeholder="For example: The next window opens on the first Monday of the month" />
       </div>
       {state.message && !state.ok ? (
         <p className="text-sm text-destructive" role="alert">
@@ -45,7 +45,7 @@ export function AskTomControls({ categoryId, accepting, note }: { categoryId: st
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Questions Tom answers are tagged automatically. Run <code>npm run ask-tom:digest</code> to draft the blog post for the month.
+        Questions staff answer are tagged automatically. Run <code>npm run ask-the-team:digest</code> to draft the blog post for the month.
       </p>
     </form>
   );

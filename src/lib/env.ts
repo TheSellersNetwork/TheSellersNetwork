@@ -1,7 +1,7 @@
 /*
   Environment variables, read once and validated. Public values are inlined by
   Next.js at build time so they must be referenced by their full name.
-  Ask Tom for any value you do not have; never invent a real-looking key.
+  Ask the owner for any value you do not have; never invent a real-looking key.
 */
 
 function required(name: string, value: string | undefined): string {

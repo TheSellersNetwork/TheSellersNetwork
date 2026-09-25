@@ -75,7 +75,7 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
 
       {profile.trust_level >= 2 && !profile.is_staff && process.env.NEXT_PUBLIC_SHOW_MENTORING === "true" ? (
         <aside className="mt-4 rounded-lg bg-brand-soft p-4 text-sm">
-          [TOM: soft mentoring banner for established members]{" "}
+          Mentoring is available for established members.{" "}
           <Link href="/mentoring" className="font-medium text-brand underline underline-offset-2 hover:text-brand-deep">
             About mentoring
           </Link>
@@ -84,13 +84,13 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
 
       <section className="mt-8">
         <h2 className="mb-3 text-lg font-semibold">Topics</h2>
-        <TopicList topics={activity.topics} emptyMessage="[TOM: no topics yet on profile]" />
+        <TopicList topics={activity.topics} emptyMessage="No topics yet." />
       </section>
 
       <section className="mt-8">
         <h2 className="mb-3 text-lg font-semibold">Recent replies</h2>
         {activity.replies.length === 0 ? (
-          <p className="text-sm text-muted-foreground">[TOM: no replies yet on profile]</p>
+          <p className="text-sm text-muted-foreground">No replies yet.</p>
         ) : (
           <ul className="divide-y rounded-lg border bg-card">
             {activity.replies.map((r) => (

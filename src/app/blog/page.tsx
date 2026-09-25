@@ -30,7 +30,7 @@ export default async function BlogPage({ searchParams }: PageProps<"/blog">) {
   return (
     <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
       <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">The Sellers Network blog</h1>
-      <p className="mt-2 max-w-2xl text-muted-foreground">[TOM: blog standfirst]</p>
+      <p className="mt-2 max-w-2xl text-muted-foreground">Guides, case studies with real numbers, and a roundup of the week on the forum.</p>
       <nav aria-label="Filter by platform" className="mt-6 flex flex-wrap gap-1">
         {filters.map((f) => (
           <Link
@@ -44,7 +44,7 @@ export default async function BlogPage({ searchParams }: PageProps<"/blog">) {
         ))}
       </nav>
       {posts.length === 0 ? (
-        <p className="mt-10 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">[TOM: empty blog message]</p>
+        <p className="mt-10 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">Nothing published yet. The forums are the place to be in the meantime.</p>
       ) : (
         <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (

@@ -4,7 +4,7 @@ import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 
 /*
   Placeholder marketing pages so nothing in the header or footer 404s before
-  the week 2 tasks build them properly. Each is a title and a [TOM: ...] note.
+  the week 2 tasks build them properly. Each is a title and a note on what will go there.
 */
 const pages: Record<string, { title: string; description: string; note: string }> = {
   mentoring: { title: "Mentoring", description: "Group and one-to-one mentoring for UK resellers.", note: "group and one-to-one mentoring, pricing table, Cal.com booking (mentoring Phase 3)" },
@@ -34,7 +34,7 @@ export default async function MarketingPage({ params }: PageProps<"/[page]">) {
     <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-16 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{entry.title}</h1>
       <p className="mt-3 text-lg text-muted-foreground">{entry.description}</p>
-      <p className="mt-8 rounded-md border border-dashed bg-secondary px-3 py-2 text-sm text-muted-foreground">[TOM: {entry.note}]</p>
+      <p className="mt-8 text-sm text-muted-foreground">This page is being written. In the meantime, the forums are open.</p>
       {page === "autopilot" || page === "mentoring" || page === "course" ? (
         <div className="mt-10">
           <EmailSignupCard source={`/${page}`} variant="inline" />

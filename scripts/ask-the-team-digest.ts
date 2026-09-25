@@ -1,8 +1,8 @@
 /*
-  Drafts the monthly "Ask Tom" blog post from the questions Tom answered in
-  the last window: every topic in the ask-tom category tagged
-  ask-tom-answered in the last 35 days, with the question, a link and the
-  accepted answer. Output: content/blog/ask-tom-YYYY-MM.mdx as a draft.
+  Drafts the monthly "Ask the team" blog post from the questions staff answered in
+  the last window: every topic in the ask-the-team category tagged
+  ask-the-team-answered in the last 35 days, with the question, a link and the
+  accepted answer. Output: content/blog/ask-the-team-YYYY-MM.mdx as a draft.
   Needs SUPABASE_SERVICE_ROLE_KEY in .env.local.
 */
 
@@ -29,7 +29,7 @@ type Row = {
 
 async function main() {
   const since = new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: tag } = await supabase.from("tags").select("id").eq("slug", "ask-tom-answered").maybeSingle();
+  const { data: tag } = await supabase.from("tags").select("id").eq("slug", "ask-the-team-answered").maybeSingle();
   if (!tag) {
     console.log("No answered questions yet.");
     return;
@@ -55,8 +55,8 @@ async function main() {
     })
     .join("\n");
 
-  const mdx = `---\ntitle: "Ask Tom: [TOM: month] answers"\nexcerpt: "[TOM: one line on the themes this month]"\nplatforms: [ebay, amazon, vinted, other]\ncategory: "ask-tom"\nrelated_topic_ids: []\ncover:\npublished:\n---\n\n<Placeholder>Intro for this month's answers. Edit the answers below freely; they are copied from the threads.</Placeholder>\n\n${sections}\n<Signup source="/blog/ask-tom-${month}" />\n`;
-  const file = path.join(process.cwd(), "content", "blog", `ask-tom-${month}.mdx`);
+  const mdx = `---\ntitle: "Ask the team: [EDIT: month] answers"\nexcerpt: "[EDIT: one line on the themes this month]"\nplatforms: [ebay, amazon, vinted, other]\ncategory: "ask-the-team"\nrelated_topic_ids: []\ncover:\npublished:\n---\n\n<Placeholder>Intro for this month's answers. Edit the answers below freely; they are copied from the threads.</Placeholder>\n\n${sections}\n<Signup source="/blog/ask-the-team-${month}" />\n`;
+  const file = path.join(process.cwd(), "content", "blog", `ask-the-team-${month}.mdx`);
   writeFileSync(file, mdx);
   console.log(`Wrote ${file} with ${ids.length} answered question(s). Add a published date when ready.`);
 }

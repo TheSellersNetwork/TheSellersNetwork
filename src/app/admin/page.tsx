@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AskTomControls } from "@/components/admin/ask-tom-controls";
+import { AskTheTeamControls } from "@/components/admin/ask-the-team-controls";
 import { requireStaff } from "@/lib/auth";
 import { getCategoryBySlug, getOpenFlags, getUnansweredOlderThan } from "@/lib/forum/queries";
 import { urls } from "@/lib/forum/urls";
@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Staff", robots: { index: false } };
 /* A small staff home. The fuller dashboard is Phase C; this holds what exists now. */
 export default async function AdminPage() {
   await requireStaff();
-  const [flags, unanswered, askTom] = await Promise.all([getOpenFlags(), getUnansweredOlderThan(48), getCategoryBySlug("ask-tom")]);
+  const [flags, unanswered, askTheTeam] = await Promise.all([getOpenFlags(), getUnansweredOlderThan(48), getCategoryBySlug("ask-the-team")]);
 
   return (
     <main id="main" className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
@@ -32,11 +32,11 @@ export default async function AdminPage() {
         </li>
       </ul>
       <section className="mt-10">
-        <h2 className="text-lg font-semibold">Ask Tom</h2>
-        {askTom ? (
-          <AskTomControls categoryId={askTom.id} accepting={askTom.accepting_topics} note={askTom.accepting_note ?? ""} />
+        <h2 className="text-lg font-semibold">Ask the team</h2>
+        {askTheTeam ? (
+          <AskTheTeamControls categoryId={askTheTeam.id} accepting={askTheTeam.accepting_topics} note={askTheTeam.accepting_note ?? ""} />
         ) : (
-          <p className="mt-1 text-sm text-muted-foreground">The Ask Tom category does not exist yet. Run the seed script.</p>
+          <p className="mt-1 text-sm text-muted-foreground">The Ask the team forum does not exist yet. Run the seed script.</p>
         )}
       </section>
     </main>

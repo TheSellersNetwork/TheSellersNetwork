@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 /*
-  The partners directory. Every entry is Tom's copy. Paid relationships carry
+  The partners directory. Every entry is written by staff. Paid relationships carry
   a visible label and the link is marked rel="sponsored" for search engines.
 */
 export default async function PartnersPage() {
@@ -20,9 +20,9 @@ export default async function PartnersPage() {
   return (
     <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight">Partners</h1>
-      <p className="mt-2 max-w-2xl text-muted-foreground">[TOM: how partners are chosen, and that sponsored and affiliate relationships are always labelled]</p>
+      <p className="mt-2 max-w-2xl text-muted-foreground">Tools and services we use or members recommend. Where money changes hands it says so on the entry, every time.</p>
       {groups.length === 0 ? (
-        <p className="mt-10 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">[TOM: partners are on their way]</p>
+        <p className="mt-10 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">No partners listed yet.</p>
       ) : (
         groups.map((group) => (
           <section key={group.id} aria-labelledby={`partners-${group.id}`} className="mt-10">
@@ -53,7 +53,7 @@ export default async function PartnersPage() {
                         </a>
                         {label ? <span className="rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground">{label}</span> : null}
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">{p.blurb ?? `[TOM: one paragraph on ${p.name}]`}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{p.blurb ?? ""}</p>
                     </div>
                   </li>
                 );
@@ -63,7 +63,7 @@ export default async function PartnersPage() {
         ))
       )}
       <p className="mt-12 text-sm text-muted-foreground">
-        Want to be listed? [TOM: how to get in touch about partnerships]
+        Want to be listed? Post in Site feedback and staff will get back to you.
       </p>
     </main>
   );

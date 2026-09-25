@@ -149,10 +149,10 @@ export default async function CommunityPage({ searchParams }: PageProps<"/commun
           sponsorPage={urls.community()}
           emptyMessage={
             view === "unanswered"
-              ? "Every topic has a reply. [TOM: unanswered empty state]"
+              ? "Every topic has a reply. Nice work, everyone."
               : view === "following"
                 ? "Nothing yet from the categories you follow. Follow a category from its page to build your feed."
-                : "[TOM: empty community message]"
+                : "Nothing here yet. Start the first topic."
           }
         />
       </section>

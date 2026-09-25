@@ -1,5 +1,5 @@
 /*
-  Site-wide configuration. Values that Tom is likely to change live here
+  Site-wide configuration. Values the owner is likely to change live here
   rather than being scattered through components.
 */
 

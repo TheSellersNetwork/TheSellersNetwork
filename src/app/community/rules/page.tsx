@@ -14,7 +14,7 @@ export default function RulesPage() {
     <ForumShell source={urls.rules()}>
       <article className="measure">
         <h1 className="text-2xl font-semibold tracking-tight">House rules</h1>
-        <p className="mt-2 text-muted-foreground">[TOM: one paragraph on why the rules exist and how they are applied]</p>
+        <p className="mt-2 text-muted-foreground">Six rules, applied the same way to everyone. They exist so that the answers here stay useful and the place stays worth reading.</p>
         <ol className="mt-6 space-y-4">
           {houseRules.map((rule, i) => (
             <li key={rule.title} className="flex gap-4 rounded-lg border bg-card p-4">

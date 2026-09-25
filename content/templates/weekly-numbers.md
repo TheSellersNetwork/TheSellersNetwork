@@ -1,11 +1,9 @@
-[TOM: one line of welcome for the week of {{week}}]
+Week of {{week}}. Post your week in this format so the roundup can pick it up:
 
-Post your week in this format so the roundup can pick it up:
+- **Platforms:** where you sold this week
+- **Listed:** how many new listings
+- **Sold:** how many, and the total
+- **Best sale:** the item, what you paid, what it went for
+- **One thing I learned:** a sentence
 
-- **Platforms:** [TOM: e.g. which marketplaces]
-- **Listed:** [TOM: number of new listings]
-- **Sold:** [TOM: number sold and total sales]
-- **Best sale:** [TOM: item, what you paid, what it sold for]
-- **One thing I learned:** [TOM: a sentence]
-
-Real numbers welcome, screenshots welcome. Blur out buyer names and order numbers before you post.
+Real numbers welcome, screenshots welcome. Blur out buyer names and order numbers before you post. No links to listings or streams.

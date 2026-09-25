@@ -1,6 +1,6 @@
 /*
-  Seeds the launch categories with [TOM: ...] placeholders and a pinned
-  "Read this first" topic in each, then optionally loads Tom's seed topics
+  Seeds the launch categories with short descriptions and a pinned
+  "Read this first" topic in each, then optionally loads the owner's seed topics
   from a CSV. Idempotent: existing categories are updated by slug and intro
   topics are not duplicated.
 
@@ -8,9 +8,9 @@
     npm run seed                       categories and intro topics
     npm run seed -- --csv path.csv     also load topics from the CSV
 
-  Needs SUPABASE_SERVICE_ROLE_KEY and SEED_AUTHOR_EMAIL (Tom's account) in .env.local.
+  Needs SUPABASE_SERVICE_ROLE_KEY and SEED_AUTHOR_EMAIL (the owner's account) in .env.local.
   CSV columns: category_slug,title,body_md,author_username
-  Nothing here invents content. Every intro is a placeholder for Tom.
+  Nothing here invents content. Intro topics are short, neutral and editable.
 */
 
 import { config } from "dotenv";
@@ -24,13 +24,15 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const authorEmail = process.env.SEED_AUTHOR_EMAIL;
 if (!url || !key) throw new Error("NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required");
-if (!authorEmail) throw new Error("SEED_AUTHOR_EMAIL (Tom's account email) is required");
+if (!authorEmail) throw new Error("SEED_AUTHOR_EMAIL (the owner's account email) is required");
 
 const supabase = createClient(url, key, { auth: { persistSession: false } });
 
 type Cat = { slug: string; name: string; colour: string; children?: Cat[]; min_account_age_hours?: number; description?: string; accepting_topics?: boolean; accepting_note?: string };
 
 /* Launch categories: four platforms at top level, then Other platforms, then general. */
+const descriptions: Record<string, string> = {"ebay": "Selling on eBay UK, from your first listing to running a shop.", "ebay-listings-and-titles": "Titles, item specifics, photos and descriptions.", "ebay-pricing-and-offers": "Pricing from sold comps, Best Offer, watcher offers and sales.", "ebay-postage-and-packaging": "Royal Mail, couriers, packaging and postage pricing.", "ebay-buyers-and-disputes": "Returns, cases, INR claims, feedback and difficult buyers.", "ebay-account-health-and-policy": "Defects, VeRO, policy changes and account limits.", "ebay-promoted-listings-and-traffic": "Promoted Listings, views, impressions and getting seen.", "amazon": "Selling on Amazon UK, FBA and FBM.", "amazon-fba-and-fbm": "Prep, shipments, fees, storage and fulfilment choices.", "amazon-listings-and-content": "Listings, images, A+ content and catalogue problems.", "amazon-ads-and-ppc": "Sponsored ads, budgets, keywords and reading the reports.", "amazon-account-health-and-suspensions": "Account health, suspensions, appeals and verification.", "amazon-sourcing-and-wholesale": "Finding stock, wholesale accounts and ungating.", "vinted": "Selling on Vinted: listings, pricing, postage and buyers.", "facebook-marketplace": "Facebook Marketplace and local selling: listings, collection and payment.", "live-selling": "Selling live on Whatnot, eBay Live, TikTok Live and other streams.", "whatnot": "Whatnot shows, auctions, fees and shipping.", "ebay-live": "eBay Live streams and how they work.", "tiktok-live-and-other": "TikTok Live, Instagram Live and other live platforms.", "other-platforms": "Depop, Etsy, TikTok Shop, your own website and everything else.", "depop-and-clothing-resale": "Depop and clothing resale: listings, offers and shipping.", "etsy-and-handmade": "Etsy, handmade and print on demand.", "tiktok-shop": "TikTok Shop: setting up, listing, affiliates and fulfilment.", "own-website-and-shopify": "Your own website, Shopify and taking payments directly.", "reselling": "Everything that applies whatever platform you sell on.", "tax-bookkeeping-and-legal": "Tax, bookkeeping, VAT and business structure. Experience, not advice.", "tools-and-automation": "Listing tools, repricers, spreadsheets and what to automate.", "multi-channel-selling": "Selling the same stock on more than one platform.", "wins-and-case-studies": "What you sold, what you paid, what you made. Real numbers.", "introductions": "Say hello and tell us what you sell.", "site-feedback": "Bugs, ideas and requests for the forum itself."};
+
 const launch: Cat[] = [
   {
     slug: "ebay",
@@ -96,12 +98,12 @@ const launch: Cat[] = [
     ],
   },
   {
-    slug: "ask-tom",
-    name: "Ask Tom",
+    slug: "ask-the-team",
+    name: "Ask the team",
     colour: "general",
     accepting_topics: false,
-    accepting_note: "[TOM: when the monthly window opens, e.g. the first week of every month]",
-    description: "[TOM: what Ask Tom is: a monthly window where Tom answers questions in public]",
+    accepting_note: "The next window opens on the first Monday of the month.",
+    description: "A monthly window where the team answers your questions in public.",
   },
 ];
 
@@ -126,7 +128,7 @@ async function upsertCategory(cat: Cat, parentId: string | null, position: numbe
         min_account_age_hours: cat.min_account_age_hours ?? 0,
         accepting_topics: cat.accepting_topics ?? true,
         accepting_note: cat.accepting_note ?? null,
-        description: cat.description ?? `[TOM: one line describing ${cat.name}]`,
+        description: cat.description ?? descriptions[cat.slug] ?? null,
       },
       { onConflict: "slug" },
     )
@@ -136,9 +138,18 @@ async function upsertCategory(cat: Cat, parentId: string | null, position: numbe
   return data.id;
 }
 
-async function ensureIntroTopic(categoryId: string, categoryName: string, author: string) {
-  const { data: existing } = await supabase.from("topics").select("id").eq("category_id", categoryId).eq("is_pinned", true).limit(1);
-  if (existing && existing.length > 0) return;
+function introBody(categoryName: string, slug: string): string {
+  const what = descriptions[slug] ? ` ${descriptions[slug]}` : "";
+  return `Welcome to ${categoryName}.${what}\n\nStart a new topic for each question. Say what you tried and what happened, and include the numbers if you have them.\n\nThe [house rules](/community/rules) apply here as everywhere: be useful, no selling, real numbers welcome.`;
+}
+
+async function ensureIntroTopic(categoryId: string, categoryName: string, author: string, slug: string) {
+  const { data: existing } = await supabase.from("topics").select("id").eq("category_id", categoryId).eq("is_pinned", true).ilike("title", "Read this first%").limit(1);
+  if (existing && existing.length > 0) {
+    // Refresh any intro still holding an old placeholder.
+    await supabase.from("posts").update({ body_md: introBody(categoryName, slug), body_html: null }).eq("topic_id", existing[0].id).eq("post_number", 1).like("body_md", "[TOM:%");
+    return;
+  }
   const { data: topic, error } = await supabase
     .from("topics")
     .insert({ title: `Read this first: ${categoryName}`, category_id: categoryId, author_id: author, is_pinned: true })
@@ -148,7 +159,7 @@ async function ensureIntroTopic(categoryId: string, categoryName: string, author
   await supabase.from("posts").insert({
     topic_id: topic.id,
     author_id: author,
-    body_md: `[TOM: what belongs in ${categoryName}, what does not, and one or two examples of a good question here]`,
+    body_md: introBody(categoryName, slug),
   });
 }
 
@@ -192,13 +203,13 @@ async function main() {
     position += 1;
     const parentId = await upsertCategory(parent, null, position);
     if (!parent.children || parent.children.length === 0) {
-      await ensureIntroTopic(parentId, parent.name, author);
+      await ensureIntroTopic(parentId, parent.name, author, parent.slug);
     }
     let childPosition = 0;
     for (const child of parent.children ?? []) {
       childPosition += 1;
       const childId = await upsertCategory(child, parentId, childPosition);
-      await ensureIntroTopic(childId, child.name, author);
+      await ensureIntroTopic(childId, child.name, author, child.slug);
     }
   }
   console.log("Categories and intro topics are in place.");
@@ -209,7 +220,9 @@ async function main() {
     const { data: existing } = await supabase.from("topics").select("id").eq("category_id", tools.id).ilike("title", "When to automate%").limit(1);
     if (!existing || existing.length === 0) {
       const { data: t } = await supabase.from("topics").insert({ title: "When to automate", category_id: tools.id, author_id: author, is_pinned: true }).select("id").single();
-      if (t) await supabase.from("posts").insert({ topic_id: t.id, author_id: author, body_md: "[TOM: when doing it by hand stops making sense, and what Autopilot does]\n\n[Join the Autopilot waitlist](/autopilot)" });
+      if (t) await supabase.from("posts").insert({ topic_id: t.id, author_id: author, body_md: "This pinned topic is for one question: when does doing it by hand stop making sense? Share where you are, how many listings, how many hours a week, and what you would hand off first." });
+    } else {
+      await supabase.from("posts").update({ body_md: "This pinned topic is for one question: when does doing it by hand stop making sense? Share where you are, how many listings, how many hours a week, and what you would hand off first.", body_html: null }).eq("topic_id", existing[0].id).eq("post_number", 1).like("body_md", "[TOM:%");
     }
   }
 

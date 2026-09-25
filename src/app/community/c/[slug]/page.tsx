@@ -87,7 +87,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
             <span className="h-7 w-1 rounded-full" style={{ background: `var(--cat-${category.colour})` }} aria-hidden="true" />
             {category.name}
           </h1>
-          <p className="mt-1 max-w-prose text-sm text-muted-foreground">{category.description ?? "[TOM: category intro]"}</p>
+          <p className="mt-1 max-w-prose text-sm text-muted-foreground">{category.description ?? ""}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <FollowButton categoryId={category.id} level={follows.get(category.id) ?? null} signedIn={!!viewer} />
@@ -103,7 +103,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
       </div>
       {!category.accepting_topics ? (
         <p className="mb-4 rounded-lg border bg-brand-soft/60 p-3 text-sm">
-          New questions are closed for now. {category.accepting_note ?? "[TOM: when the window reopens]"}
+          New questions are closed for now. {category.accepting_note ?? "Check back soon."}
         </p>
       ) : null}
       {children.length > 0 ? (
@@ -127,7 +127,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
         moreHref={(c) => `${basePath}?view=${view}&period=${period}&cursor=${encodeURIComponent(c)}`}
         showCategory={children.length > 0}
         sponsorPage={basePath}
-        emptyMessage="[TOM: empty category message]"
+        emptyMessage="Nothing here yet. Start the first topic."
       />
     </ForumShell>
   );

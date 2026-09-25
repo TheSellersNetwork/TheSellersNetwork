@@ -31,7 +31,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/community
           <p className="mb-3 text-sm text-muted-foreground">
             {results.length === 0 ? "Nothing matched." : `${results.length} result${results.length === 1 ? "" : "s"} for "${q}"`}
           </p>
-          <TopicList topics={results} emptyMessage="[TOM: no search results message]" />
+          <TopicList topics={results} emptyMessage="Nothing matched. Try fewer words, or ask it as a new topic." />
         </div>
       ) : null}
     </ForumShell>

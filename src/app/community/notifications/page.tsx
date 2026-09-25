@@ -60,7 +60,7 @@ export default async function NotificationsPage() {
         ) : null}
       </div>
       {notifications.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">[TOM: empty notifications message]</p>
+        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">Nothing yet. Replies to your topics and mentions will show up here.</p>
       ) : (
         <ul className="divide-y rounded-lg border bg-card">
           {notifications.map((n) => (

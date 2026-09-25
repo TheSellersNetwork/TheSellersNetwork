@@ -30,7 +30,7 @@ export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCate
   if (topics.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-        {emptyMessage ?? "[TOM: empty topic list message]"}
+        {emptyMessage ?? "Nothing here yet."}
       </div>
     );
   }

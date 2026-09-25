@@ -70,7 +70,7 @@ function CategoryCard({ category, latest, onlineIds }: { category: Category; lat
           </div>
         </div>
       ) : (
-        <p className="mt-2 text-xs text-muted-foreground">{category.description ?? "[TOM: category intro]"}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{category.description ?? ""}</p>
       )}
     </div>
   );

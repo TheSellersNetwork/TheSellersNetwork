@@ -6,7 +6,7 @@ import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 
 /*
   Renders MDX content from the repo (guides, blog posts, course modules).
-  Only a small set of components is exposed so Tom's copy stays plain.
+  Only a small set of components is exposed so the copy stays plain.
 */
 const components = {
   a: (props: React.ComponentProps<"a">) => {
@@ -16,7 +16,7 @@ const components = {
   },
   Signup: ({ source }: { source: string }) => <EmailSignupCard source={source} variant="inline" className="not-prose my-8" />,
   Placeholder: ({ children }: { children: React.ReactNode }) => (
-    <p className="not-prose my-4 rounded-md border border-dashed bg-secondary px-3 py-2 text-sm text-muted-foreground">[TOM: {children}]</p>
+    <p className="not-prose my-4 rounded-md border border-dashed bg-secondary px-3 py-2 text-sm text-muted-foreground">[Draft note: {children}]</p>
   ),
 };
 

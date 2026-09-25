@@ -37,7 +37,7 @@ export async function resolveFlag(flagId: string, decision: "agreed" | "disagree
           user_id: post.author_id,
           type: "moderation",
           payload: {
-            message: `A post of yours was hidden by staff. ${reason || "[TOM: default warning reason]"}`,
+            message: `A post of yours was hidden by staff. ${reason || "It broke the house rules."}`,
             topic_title: post.topic?.title,
             topic_slug: post.topic?.slug,
             topic_short_id: post.topic?.short_id,

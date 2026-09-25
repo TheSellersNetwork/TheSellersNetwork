@@ -501,8 +501,8 @@ await step("solution_count follows the accepted answer", async () => {
   if (!top.rows.some((r) => r.username === "regular")) throw new Error("top_answerers missing regular");
 });
 
-await step("closed Ask Tom window blocks new topics and staff answers get tagged", async () => {
-  const c = await db.query(`insert into public.categories (slug, name, accepting_topics) values ('ask-tom', 'Ask Tom', false) returning id`);
+await step("closed Ask the team window blocks new topics and staff answers get tagged", async () => {
+  const c = await db.query(`insert into public.categories (slug, name, accepting_topics) values ('ask-the-team', 'Ask Tom', false) returning id`);
   ids.cat_ask = c.rows[0].id;
   await expectError(
     asUser(ids.member, `insert into public.topics (title, category_id, author_id) values ('Question for Tom', $1, $2)`, [ids.cat_ask, ids.member]),
@@ -514,7 +514,7 @@ await step("closed Ask Tom window blocks new topics and staff answers get tagged
   const a = await asUser(ids.staff, `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'The answer.') returning id`, [t.rows[0].id, ids.staff]);
   await asUser(ids.member, `update public.topics set is_solved = true, solution_post_id = $2 where id = $1`, [t.rows[0].id, a.rows[0].id]);
   const tags = await db.query(`select tg.slug from public.topic_tags tt join public.tags tg on tg.id = tt.tag_id where tt.topic_id = $1`, [t.rows[0].id]);
-  if (!tags.rows.some((r) => r.slug === "ask-tom-answered")) throw new Error("answered tag missing");
+  if (!tags.rows.some((r) => r.slug === "ask-the-team-answered")) throw new Error("answered tag missing");
 });
 
 await step("partners and placements: public read of live only, events deduplicated", async () => {

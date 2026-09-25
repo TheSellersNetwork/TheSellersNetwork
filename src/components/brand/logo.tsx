@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /*
-  Wordmark-led logo. Three mark options and a wordmark-only option, so Tom can
+  Wordmark-led logo. Three mark options and a wordmark-only option, so the owner can
   pick one at /brand. The mark inherits currentColor so it works on any palette
   and in dark mode; the accent dot uses the brand colour.
 
