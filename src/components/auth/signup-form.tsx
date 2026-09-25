@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { signUp, type SignupState } from "@/app/(auth)/signup/actions";
+import { VerifyCode } from "@/components/auth/verify-code";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ import { landingContext } from "@/components/analytics/landing-tracker";
 
 export function SignupForm({ turnstileSiteKey }: { turnstileSiteKey: string | null }) {
   const [token, setToken] = useState("");
+  const [email, setEmail] = useState("");
   const [state, action, pending] = useActionState<SignupState, FormData>(
     async (prev, formData) => {
       const result = await signUp(prev, formData);
@@ -21,19 +23,14 @@ export function SignupForm({ turnstileSiteKey }: { turnstileSiteKey: string | nu
   );
 
   if (state.ok) {
-    return (
-      <div className="rounded-lg border bg-card p-4 text-sm" role="status">
-        <p className="font-medium">Check your inbox</p>
-        <p className="mt-1 text-muted-foreground">{state.message}</p>
-      </div>
-    );
+    return <VerifyCode email={email} type="signup" next="/community" />;
   }
 
   return (
     <form action={action} className="space-y-4">
       <div className="space-y-1.5">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required />
+        <Input id="email" name="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value.trim())} />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="password">Password</Label>
@@ -57,7 +54,7 @@ export function SignupForm({ turnstileSiteKey }: { turnstileSiteKey: string | nu
       <Button type="submit" className="w-full" disabled={pending || (!!turnstileSiteKey && !token)}>
         {pending ? "Creating your account" : "Create account"}
       </Button>
-      <p className="text-xs text-muted-foreground">By joining you agree to the house rules and privacy policy.</p>
+      <p className="text-xs text-muted-foreground">We will email you a 6-digit code to confirm the address. By joining you agree to the house rules and privacy policy.</p>
     </form>
   );
 }
