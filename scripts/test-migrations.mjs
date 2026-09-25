@@ -72,8 +72,16 @@ async function asAnon(sql, params) {
   }
 }
 
-const sqlFiles = async (dir) =>
-  (await readdir(dir)).filter((f) => f.endsWith(".sql")).sort();
+// Files marked "-- pglite:skip" need pg_cron or Storage and only run on Supabase.
+async function sqlFiles(dir) {
+  const names = (await readdir(dir)).filter((f) => f.endsWith(".sql")).sort();
+  const kept = [];
+  for (const name of names) {
+    const head = (await readFile(path.join(dir, name), "utf8")).slice(0, 200);
+    if (!head.includes("pglite:skip")) kept.push(name);
+  }
+  return kept;
+}
 
 console.log("Stubbing Supabase auth schema and roles");
 await db.exec(`
@@ -84,6 +92,7 @@ await db.exec(`
   create table auth.users (
     id uuid primary key default gen_random_uuid(),
     email text unique,
+    raw_user_meta_data jsonb not null default '{}'::jsonb,
     created_at timestamptz not null default now()
   );
   create function auth.uid() returns uuid
@@ -113,20 +122,22 @@ console.log("Exercising schema");
 // Fixtures, inserted as superuser so RLS does not interfere with setup.
 const ids = {};
 await step("fixtures", async () => {
+  // The signup trigger creates the profile rows; the fixtures then set trust and staff.
   const users = await db.query(`
-    insert into auth.users (email) values
-      ('staff@example.test'), ('newbie@example.test'), ('regular@example.test'), ('member@example.test')
+    insert into auth.users (email, raw_user_meta_data) values
+      ('staff@example.test', '{"username":"tom","display_name":"Tom"}'),
+      ('newbie@example.test', '{"username":"newbie"}'),
+      ('regular@example.test', '{"username":"regular","display_name":"A Regular"}'),
+      ('member@example.test', '{"username":"member"}')
     returning id
   `);
   [ids.staff, ids.newbie, ids.regular, ids.member] = users.rows.map((r) => r.id);
-  await db.query(
-    `insert into public.profiles (id, username, display_name, trust_level, is_staff, marketplaces) values
-      ($1, 'tom', 'Tom', 4, true, '{ebay,amazon}'),
-      ($2, 'newbie', null, 0, false, '{vinted}'),
-      ($3, 'regular', 'A Regular', 3, false, '{ebay}'),
-      ($4, 'member', null, 2, false, '{facebook,other}')`,
-    [ids.staff, ids.newbie, ids.regular, ids.member],
-  );
+  await db.query(`update public.profiles set trust_level = 4, is_staff = true, marketplaces = '{ebay,amazon}' where id = $1`, [ids.staff]);
+  await db.query(`update public.profiles set trust_level = 0, marketplaces = '{vinted}' where id = $1`, [ids.newbie]);
+  await db.query(`update public.profiles set trust_level = 3, marketplaces = '{ebay}' where id = $1`, [ids.regular]);
+  await db.query(`update public.profiles set trust_level = 2, marketplaces = '{facebook,other}' where id = $1`, [ids.member]);
+  const check = await db.query(`select username, display_name from public.profiles where id = $1`, [ids.staff]);
+  if (check.rows[0].username !== "tom" || check.rows[0].display_name !== "Tom") throw new Error("signup trigger did not use metadata");
   const cats = await db.query(`
     insert into public.categories (slug, name, colour, position, min_account_age_hours) values
       ('ebay', 'eBay', 'ebay', 1, 0),
@@ -408,6 +419,72 @@ await step("email subscriber emails are unique regardless of case", async () => 
   );
   const anon = await asAnon(`select count(*)::int as n from public.email_subscribers`);
   if (anon.rows[0].n !== 0) throw new Error("anon could read subscribers");
+});
+
+await step("signup trigger creates a profile with a safe username", async () => {
+  const u = await db.query(
+    `insert into auth.users (email) values ('New.Person@example.test') returning id`,
+  );
+  const p = await db.query(`select username, display_name from public.profiles where id = $1`, [u.rows[0].id]);
+  if (p.rows[0].username !== "newperson" || p.rows[0].display_name !== null) {
+    throw new Error(`unexpected profile ${JSON.stringify(p.rows[0])}`);
+  }
+  // Same email prefix again gets a suffix rather than failing.
+  const u2 = await db.query(`insert into auth.users (email) values ('new.person@other.test') returning id`);
+  const p2 = await db.query(`select username from public.profiles where id = $1`, [u2.rows[0].id]);
+  if (!/^newperson_[0-9a-f]{4}$/.test(p2.rows[0].username)) throw new Error(`collision not handled: ${p2.rows[0].username}`);
+});
+
+await step("rate limit returns false once the window is full", async () => {
+  const results = [];
+  for (let i = 0; i < 4; i += 1) {
+    const r = await db.query(`select public.check_rate_limit('test:signup', 3, interval '1 hour') as ok`);
+    results.push(r.rows[0].ok);
+  }
+  if (results.join() !== "true,true,true,false") throw new Error(`got ${results.join()}`);
+});
+
+await step("replies notify watchers and mentions, never the author", async () => {
+  const topic = await asUser(
+    ids.regular,
+    `insert into public.topics (title, category_id, author_id) values ('Notification check', $1, $2) returning id`,
+    [ids.cat_ebay, ids.regular],
+  );
+  await asUser(ids.regular, `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'Opening.')`, [topic.rows[0].id, ids.regular]);
+  await asUser(
+    ids.member,
+    `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, $3)`,
+    [topic.rows[0].id, ids.member, "Reply mentioning @newbie and @regular and @member and @nobody_here"],
+  );
+  const n = await db.query(
+    `select user_id, type from public.notifications where payload ->> 'topic_id' = $1 order by type`,
+    [topic.rows[0].id],
+  );
+  const got = n.rows.map((r) => `${r.type}:${r.user_id === ids.regular ? "regular" : r.user_id === ids.newbie ? "newbie" : "other"}`).sort();
+  if (got.join() !== "mention:newbie,reply:regular") throw new Error(`got ${got.join()}`);
+  const own = await asUser(ids.regular, `select count(*)::int as n from public.notifications where user_id = $1`, [ids.regular]);
+  const other = await asUser(ids.member, `select count(*)::int as n from public.notifications where user_id = $1`, [ids.regular]);
+  if (own.rows[0].n < 1 || other.rows[0].n !== 0) throw new Error("notification visibility wrong");
+});
+
+await step("record_activity upserts today's stats", async () => {
+  await asUser(ids.member, `select public.record_activity(1, 4, 30, 0)`);
+  await asUser(ids.member, `select public.record_activity(0, 2, 15, 1)`);
+  const r = await db.query(`select topics_read, posts_read, time_read_secs, likes_given from public.user_stats_daily where user_id = $1`, [ids.member]);
+  const row = r.rows[0];
+  if (row.topics_read !== 1 || row.posts_read !== 6 || row.time_read_secs !== 45 || row.likes_given !== 1) {
+    throw new Error(`stats ${JSON.stringify(row)}`);
+  }
+});
+
+await step("trust cron promotes a qualifying TL0 to TL1", async () => {
+  await db.query(
+    `insert into public.user_stats_daily (user_id, day, topics_read, posts_read, time_read_secs) values ($1, current_date - 1, 5, 30, 600)`,
+    [ids.newbie],
+  );
+  await db.query(`select public.recompute_trust_levels()`);
+  const p = await db.query(`select trust_level, days_visited from public.profiles where id = $1`, [ids.newbie]);
+  if (p.rows[0].trust_level !== 1 || p.rows[0].days_visited !== 1) throw new Error(`profile ${JSON.stringify(p.rows[0])}`);
 });
 
 await step("every public table has RLS enabled", async () => {
