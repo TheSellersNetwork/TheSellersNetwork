@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Compass, HelpCircle, Info, LayoutGrid, MessageSquare, Sparkles, Tag } from "lucide-react";
+import { Bell, Compass, HelpCircle, Info, LayoutGrid, MessageSquare, Sparkles, Tag, Wrench } from "lucide-react";
 import { getPopularTags } from "@/lib/forum/overview-queries";
 import { getCategories } from "@/lib/forum/queries";
 import { urls } from "@/lib/forum/urls";
@@ -11,6 +11,7 @@ const links = [
   { href: `${urls.community()}?view=following`, label: "Following", icon: Bell, key: "following" },
   { href: `${urls.community()}?view=unanswered`, label: "Needs an answer", icon: HelpCircle, key: "unanswered" },
   { href: `${urls.community()}?view=top`, label: "Top this week", icon: Sparkles, key: "top" },
+  { href: "/kits", label: "Setups", icon: Wrench, key: "kits" },
   { href: "/partners", label: "Partners", icon: Compass, key: "partners" },
   { href: "/about", label: "About", icon: Info, key: "about" },
 ];

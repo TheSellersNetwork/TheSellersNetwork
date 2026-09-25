@@ -26,6 +26,7 @@ export default async function AccountPage() {
             email_on_reply: p.email_on_reply,
             email_on_mention: p.email_on_mention,
             email_digest: p.email_digest,
+            flair: p.flair ?? [],
           }}
         />
       </div>

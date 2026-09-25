@@ -20,13 +20,15 @@ type Props = {
   newSince?: string | null;
   /* Ids of members active in the last few minutes, for presence dots. */
   onlineIds?: Set<string>;
+  /* Deal forums: vote counts per topic. */
+  dealMeta?: Map<string, { valid: number; expired: number; heat: number }>;
 };
 
 /*
   Topic rows: title, category bar, tags, reply count, last activity, up to
   three avatars. No excerpts, as the brief asks.
 */
-export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCategory = true, sponsorPage, newSince, onlineIds }: Props) {
+export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCategory = true, sponsorPage, newSince, onlineIds, dealMeta }: Props) {
   if (topics.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -40,7 +42,7 @@ export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCate
       <ol className="forum-card divide-y rounded-lg border bg-card">
         {topics.map((topic, i) => (
           <li key={topic.id} className="contents">
-            <TopicRowItem topic={topic} showCategory={showCategory} isNew={!!newSince && topic.last_post_at > newSince} onlineIds={onlineIds} />
+            <TopicRowItem topic={topic} showCategory={showCategory} isNew={!!newSince && topic.last_post_at > newSince} onlineIds={onlineIds} deal={dealMeta?.get(topic.id)} />
             {sponsorPage && i === 4 ? (
               <div className="px-3 py-2 sm:px-4">
                 <SponsorSlot slot="topic_list" page={sponsorPage} />
@@ -62,7 +64,8 @@ export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCate
   );
 }
 
-function TopicRowItem({ topic, showCategory, isNew, onlineIds }: { topic: TopicRow; showCategory: boolean; isNew: boolean; onlineIds?: Set<string> }) {
+function TopicRowItem({ topic, showCategory, isNew, onlineIds, deal }: { topic: TopicRow; showCategory: boolean; isNew: boolean; onlineIds?: Set<string>; deal?: { valid: number; expired: number; heat: number } }) {
+  const ended = topic.expires_at ? new Date(topic.expires_at) < new Date() : false;
   const avatars = [topic.author, topic.last_poster].filter(
     (p, i, arr): p is NonNullable<typeof p> => !!p && arr.findIndex((x) => x?.id === p.id) === i,
   );
@@ -94,6 +97,13 @@ function TopicRowItem({ topic, showCategory, isNew, onlineIds }: { topic: TopicR
               {tag.name}
             </span>
           ))}
+          {deal ? (
+            <span className={ended ? "text-destructive" : "text-success"}>
+              {ended ? "Ended" : `${deal.valid} say valid`}
+              {deal.expired > 0 ? ` · ${deal.expired} say expired` : ""}
+              {topic.expires_at && !ended ? ` · ends ${new Date(topic.expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
+            </span>
+          ) : null}
         </div>
       </div>
       <div className="hidden -space-x-2 sm:flex">

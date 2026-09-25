@@ -15,6 +15,8 @@ import { getOnlineMembers } from "@/lib/forum/live-queries";
 import { LiveBar } from "@/components/forum/live-bar";
 import { recordCategoryVisit } from "@/app/community/presence-actions";
 import { createClient } from "@/lib/supabase/server";
+import { getCoverImages, getDealOrder } from "@/lib/forum/extras-queries";
+import { GalleryGrid } from "@/components/forum/gallery-grid";
 import { urls } from "@/lib/forum/urls";
 import type { TopicListView, TopPeriod } from "@/lib/db/types";
 
@@ -46,7 +48,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
   const children = all.filter((c) => c.parent_id === category.id);
   const categoryIds = [category.id, ...children.map((c) => c.id)];
 
-  const [page, online] = await Promise.all([getTopics({ view, period, cursor, categoryIds, includePinnedFirst: view === "latest" }), getOnlineMembers(50)]);
+  const [rawPage, online] = await Promise.all([getTopics({ view, period, cursor, categoryIds, includePinnedFirst: view === "latest", limit: category.layout === "list" ? undefined : 50 }), getOnlineMembers(50)]);
+  // Deals forums sort by heat; gallery forums show photo tiles.
+  const dealOrder = category.layout === "deals" && view === "latest" ? await getDealOrder(category.id) : null;
+  const page = dealOrder
+    ? { ...rawPage, topics: [...rawPage.topics].sort((a, b) => (dealOrder.get(b.id)?.heat ?? -999) - (dealOrder.get(a.id)?.heat ?? -999)) }
+    : rawPage;
+  const covers = category.layout === "gallery" ? await getCoverImages(page.topics.map((t) => t.id)) : null;
   const onlineIds = new Set(online.map((m) => m.id));
   const basePath = urls.category(category.slug);
 
@@ -119,9 +127,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
       ) : null}
       <ViewTabs basePath={basePath} view={view} period={period} />
       <LiveBar kind="topics" categoryIds={categoryIds} />
+      {covers ? (
+        <GalleryGrid topics={page.topics} covers={covers} emptyMessage="No photos yet. Post yours with a picture of your setup." />
+      ) : (
       <TopicList
         newSince={newSince}
         onlineIds={onlineIds}
+        dealMeta={dealOrder ?? undefined}
         topics={page.topics}
         nextCursor={page.nextCursor}
         moreHref={(c) => `${basePath}?view=${view}&period=${period}&cursor=${encodeURIComponent(c)}`}
@@ -129,6 +141,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
         sponsorPage={basePath}
         emptyMessage="Nothing here yet. Start the first topic."
       />
+      )}
     </ForumShell>
   );
 }

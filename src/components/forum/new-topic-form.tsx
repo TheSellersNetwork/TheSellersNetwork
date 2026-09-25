@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type Cat = { id: string; slug: string; name: string; parent_id: string | null; min_trust_to_post: number };
+type Cat = { id: string; slug: string; name: string; parent_id: string | null; min_trust_to_post: number; layout?: string };
 
 export function NewTopicForm({ categories, preselectedSlug, trustLevel }: { categories: Cat[]; preselectedSlug: string | null; trustLevel: number }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(createTopic, { ok: false, message: "" });
@@ -71,6 +71,14 @@ export function NewTopicForm({ categories, preselectedSlug, trustLevel }: { cate
           </SelectContent>
         </Select>
       </div>
+
+      {categories.find((c) => c.id === categoryId)?.layout === "deals" ? (
+        <div className="space-y-1.5">
+          <Label htmlFor="expires_at">When does the deal end? (optional)</Label>
+          <Input id="expires_at" name="expires_at" type="date" className="w-48" />
+          <p className="text-xs text-muted-foreground">Members can also vote &ldquo;still valid&rdquo; or &ldquo;expired&rdquo;.</p>
+        </div>
+      ) : null}
 
       <div className="space-y-1.5">
         <Label>Post</Label>

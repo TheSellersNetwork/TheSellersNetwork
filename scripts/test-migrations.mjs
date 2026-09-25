@@ -574,6 +574,49 @@ await step("newsletter issues are public only once sent", async () => {
   if (!recent.rows.some((r) => r.username === "regular")) throw new Error("recent_members missing regular");
 });
 
+await step("flair must match the member's platforms and carry no links", async () => {
+  await asUser(ids.member, `update public.profiles set flair = '[{"platform":"facebook","since":2019,"label":"Local legend"}]' where id = $1`, [ids.member]);
+  await expectError(asUser(ids.member, `update public.profiles set flair = '[{"platform":"amazon","since":2019}]' where id = $1`, [ids.member]), "flair_platform_not_yours");
+  await expectError(asUser(ids.member, `update public.profiles set flair = '[{"platform":"facebook","label":"see www.x.com"}]' where id = $1`, [ids.member]), "flair_label_invalid");
+});
+
+await step("deals sort by heat and expired ones sink", async () => {
+  const c = await db.query(`insert into public.categories (slug, name, layout) values ('deals', 'Deals', 'deals') returning id`);
+  const hot = await asUser(ids.regular, `insert into public.topics (title, category_id, author_id, expires_at) values ('Hot deal', $1, $2, now() + interval '5 days') returning id`, [c.rows[0].id, ids.regular]);
+  const dead = await asUser(ids.regular, `insert into public.topics (title, category_id, author_id, expires_at) values ('Dead deal', $1, $2, now() + interval '5 days') returning id`, [c.rows[0].id, ids.regular]);
+  for (const t of [hot, dead]) await asUser(ids.regular, `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, $3)`, [t.rows[0].id, ids.regular, `Body for ${t.rows[0].id}`]);
+  await asUser(ids.member, `insert into public.deal_votes (user_id, topic_id, vote) values ($1, $2, 'valid')`, [ids.member, hot.rows[0].id]);
+  await asUser(ids.member, `insert into public.deal_votes (user_id, topic_id, vote) values ($1, $2, 'expired')`, [ids.member, dead.rows[0].id]);
+  const r = await asAnon(`select topic_id from public.deal_topics($1, 10)`, [c.rows[0].id]);
+  if (r.rows[0].topic_id !== hot.rows[0].id) throw new Error("hot deal not first");
+});
+
+await step("kits are copyable and private copies stay private", async () => {
+  const k = await asUser(ids.regular, `insert into public.kits (user_id, title) values ($1, 'My packing setup') returning id`, [ids.regular]);
+  await asUser(ids.regular, `insert into public.kit_items (kit_id, kind, name, price_paid) values ($1, 'printer', 'Label printer', 89.99)`, [k.rows[0].id]);
+  const copy = await asUser(ids.member, `select public.copy_kit($1) as id`, [k.rows[0].id]);
+  const items = await asUser(ids.member, `select count(*)::int as n from public.kit_items where kit_id = $1`, [copy.rows[0].id]);
+  if (items.rows[0].n !== 1) throw new Error("items not copied");
+  const seen = await asAnon(`select count(*)::int as n from public.kits where id = $1`, [copy.rows[0].id]);
+  if (seen.rows[0].n !== 0) throw new Error("private copy visible to anon");
+  const src = await db.query(`select copy_count from public.kits where id = $1`, [k.rows[0].id]);
+  if (src.rows[0].copy_count !== 1) throw new Error("copy_count not bumped");
+});
+
+await step("numbers streak counts consecutive weeks", async () => {
+  const cat = ids.cat_ebay;
+  for (const weeksAgo of [2, 1, 0]) {
+    const t = await db.query(
+      `insert into public.topics (title, category_id, author_id, created_at) values ('What did you sell this week? Week ' || $3, $1, $2, now() - ($3 || ' weeks')::interval) returning id`,
+      [cat, ids.staff, weeksAgo],
+    );
+    await db.query(`insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'Opening week ' || $3)`, [t.rows[0].id, ids.staff, weeksAgo]);
+    if (weeksAgo !== 0) await db.query(`insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'My week ' || $3)`, [t.rows[0].id, ids.member, weeksAgo]);
+  }
+  const r = await asAnon(`select public.numbers_streak($1) as n`, [ids.member]);
+  if (r.rows[0].n !== 2) throw new Error(`streak ${r.rows[0].n}`);
+});
+
 await step("every public table has RLS enabled", async () => {
   const r = await db.query(`
     select c.relname from pg_class c

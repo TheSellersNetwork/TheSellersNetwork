@@ -5,6 +5,8 @@ import { ForumShell } from "@/components/layout/forum-shell";
 import { TopicList } from "@/components/forum/topic-list";
 import { UserAvatar } from "@/components/forum/user-avatar";
 import { Badge } from "@/components/ui/badge";
+import { FlairChips, StreakChip } from "@/components/forum/flair-chips";
+import { getKitsForUser, getStreak } from "@/lib/forum/extras-queries";
 import { getCurrentUser } from "@/lib/auth";
 import { getProfileActivity, getProfileByUsername } from "@/lib/forum/queries";
 import { displayName, longDate, plural, timeAgo, trustLabel } from "@/lib/format";
@@ -25,7 +27,8 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
   const profile = await getProfileByUsername(username);
   if (!profile) notFound();
 
-  const [activity, viewer] = await Promise.all([getProfileActivity(profile.id), getCurrentUser()]);
+  const [activity, viewer, streak, kits] = await Promise.all([getProfileActivity(profile.id), getCurrentUser(), getStreak(profile.id), getKitsForUser(profile.id)]);
+  const publicKits = kits.filter((k) => k.is_public || viewer?.id === profile.id);
   const isOwn = viewer?.id === profile.id;
   const marketplaces = siteConfig.marketplaces.filter((m) => (profile.marketplaces as string[]).includes(m.id));
 
@@ -38,12 +41,14 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
           <p className="text-muted-foreground">@{profile.username}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             <Badge variant="secondary">{trustLabel(profile.trust_level, profile.is_staff)}</Badge>
+            <StreakChip weeks={streak} />
             {marketplaces.map((m) => (
               <Badge key={m.id} variant="outline">
                 {m.label}
               </Badge>
             ))}
           </div>
+          <FlairChips flair={profile.flair} limit={6} className="mt-2 block" />
           {profile.bio ? <p className="mt-3 max-w-prose whitespace-pre-line text-sm">{profile.bio}</p> : null}
           <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground">
             <div>
@@ -80,6 +85,22 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
             About mentoring
           </Link>
         </aside>
+      ) : null}
+
+      {publicKits.length > 0 ? (
+        <section className="mt-8">
+          <h2 className="mb-3 text-lg font-semibold">Setups</h2>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {publicKits.map((k) => (
+              <li key={k.id} className="forum-card rounded-lg border bg-card p-3 text-sm">
+                <Link href={`/kits/${k.id}`} className="font-medium hover:underline">
+                  {k.title}
+                </Link>
+                <span className="ml-2 text-xs text-muted-foreground">{plural(k.item_count, "item")}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
 
       <section className="mt-8">

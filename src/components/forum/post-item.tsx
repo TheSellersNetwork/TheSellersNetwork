@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { UserAvatar } from "@/components/forum/user-avatar";
 import { PostActions } from "@/components/forum/post-actions";
+import { FlairChips, StreakChip } from "@/components/forum/flair-chips";
+import { getStreak } from "@/lib/forum/extras-queries";
 import { displayName, longDate, timeAgo, trustLabel } from "@/lib/format";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { urls } from "@/lib/forum/urls";
@@ -16,11 +18,14 @@ type Props = {
   isSolution: boolean;
   isOpening?: boolean;
   framed?: boolean;
+  /* Label for the like button, e.g. Kudos in weekly threads. */
+  likeLabel?: string;
 };
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 
-export async function PostItem({ post, topic, viewer, canMarkSolution, isSolution, isOpening, framed = true }: Props) {
+export async function PostItem({ post, topic, viewer, canMarkSolution, isSolution, isOpening, framed = true, likeLabel }: Props) {
+  const streak = post.author ? await getStreak(post.author.id) : 0;
   const anchor = `post-${post.post_number}`;
   const showEdited = post.edited_at && new Date(post.edited_at).getTime() - new Date(post.created_at).getTime() > FIVE_MINUTES;
   const isAuthor = viewer?.id === post.author_id;
@@ -59,7 +64,9 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
               </span>
             ) : null}
             {isOpening && post.author?.id === topic.author_id ? <span className="text-xs text-muted-foreground">Original poster</span> : null}
+            <StreakChip weeks={streak} />
           </div>
+          <FlairChips flair={post.author?.flair} className="mt-0.5 block" />
           <div className="text-xs text-muted-foreground">
             <a href={`#${anchor}`} className="hover:underline">
               <time dateTime={post.created_at} title={longDate(post.created_at)}>
@@ -93,6 +100,7 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
         canDelete={!!viewer && (isAuthor || viewer.profile.is_staff)}
         canMarkSolution={canMarkSolution && !isOpening}
         isSolution={isSolution}
+        likeLabel={likeLabel}
       />
     </article>
   );

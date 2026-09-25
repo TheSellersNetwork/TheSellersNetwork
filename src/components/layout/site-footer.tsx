@@ -8,6 +8,7 @@ const columns = [
     links: [
       { href: urls.community(), label: "Forum" },
       { href: urls.rules(), label: "House rules" },
+      { href: "/kits", label: "Setups" },
       { href: urls.search(), label: "Search" },
     ],
   },

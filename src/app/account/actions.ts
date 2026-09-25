@@ -35,9 +35,21 @@ export async function updateAccount(_prev: AccountState, formData: FormData): Pr
 
   const user = await requireUser("/account");
   const supabase = await createClient();
+
+  // Flair: one entry per ticked platform that has a year or a label.
+  const year = new Date().getFullYear();
+  const flair = parsed.data.marketplaces.flatMap((m) => {
+    const since = Number(formData.get(`flair_since_${m}`) ?? "");
+    const label = String(formData.get(`flair_label_${m}`) ?? "").trim().slice(0, 24);
+    if (!since && !label) return [];
+    if (/(https?:\/\/|www\.|\.co|\.com)/i.test(label)) return [];
+    return [{ platform: m, ...(since >= 1995 && since <= year ? { since } : {}), ...(label ? { label } : {}) }];
+  });
+
   const { error } = await supabase
     .from("profiles")
     .update({
+      flair,
       username: parsed.data.username,
       display_name: parsed.data.display_name || null,
       bio: parsed.data.bio || null,

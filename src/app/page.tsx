@@ -73,7 +73,7 @@ export default async function HomePage() {
               </h1>
             </div>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
-              Ask a question and get an answer from someone who has actually done it. <span className="text-brand">eBay</span>, <span className="text-brand">Vinted</span>,{" "}
+              Ask a question and get an answer from someone who has actually done it. <span className="text-brand">eBay</span>, <span className="text-brand">Amazon</span>, <span className="text-brand">Vinted</span>,{" "}
               <span className="text-brand">Whatnot</span>, car boots and everything in between. No fees, no selling in the threads, no nonsense.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">

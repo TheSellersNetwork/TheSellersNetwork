@@ -79,7 +79,7 @@ export default async function CommunityPage({ searchParams }: PageProps<"/commun
         <div className="space-y-6">
           <QuickAsk
             viewer={user ? { username: user.profile.username, display_name: user.profile.display_name, avatar_url: user.profile.avatar_url, trust_level: user.profile.trust_level } : null}
-            categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id, min_trust_to_post: c.min_trust_to_post }))}
+            categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id, min_trust_to_post: c.min_trust_to_post, layout: c.layout }))}
           />
           <CommunityStats />
           <HeroCards />

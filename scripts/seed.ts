@@ -28,7 +28,7 @@ if (!authorEmail) throw new Error("SEED_AUTHOR_EMAIL (the owner's account email)
 
 const supabase = createClient(url, key, { auth: { persistSession: false } });
 
-type Cat = { slug: string; name: string; colour: string; children?: Cat[]; min_account_age_hours?: number; description?: string; accepting_topics?: boolean; accepting_note?: string };
+type Cat = { slug: string; name: string; colour: string; children?: Cat[]; min_account_age_hours?: number; description?: string; accepting_topics?: boolean; accepting_note?: string; layout?: "list" | "deals" | "gallery" };
 
 /* Launch categories: four platforms at top level, then Other platforms, then general. */
 const descriptions: Record<string, string> = {"ebay": "Selling on eBay UK, from your first listing to running a shop.", "ebay-listings-and-titles": "Titles, item specifics, photos and descriptions.", "ebay-pricing-and-offers": "Pricing from sold comps, Best Offer, watcher offers and sales.", "ebay-postage-and-packaging": "Royal Mail, couriers, packaging and postage pricing.", "ebay-buyers-and-disputes": "Returns, cases, INR claims, feedback and difficult buyers.", "ebay-account-health-and-policy": "Defects, VeRO, policy changes and account limits.", "ebay-promoted-listings-and-traffic": "Promoted Listings, views, impressions and getting seen.", "amazon": "Selling on Amazon UK, FBA and FBM.", "amazon-fba-and-fbm": "Prep, shipments, fees, storage and fulfilment choices.", "amazon-listings-and-content": "Listings, images, A+ content and catalogue problems.", "amazon-ads-and-ppc": "Sponsored ads, budgets, keywords and reading the reports.", "amazon-account-health-and-suspensions": "Account health, suspensions, appeals and verification.", "amazon-sourcing-and-wholesale": "Finding stock, wholesale accounts and ungating.", "vinted": "Selling on Vinted: listings, pricing, postage and buyers.", "facebook-marketplace": "Facebook Marketplace and local selling: listings, collection and payment.", "live-selling": "Selling live on Whatnot, eBay Live, TikTok Live and other streams.", "whatnot": "Whatnot shows, auctions, fees and shipping.", "ebay-live": "eBay Live streams and how they work.", "tiktok-live-and-other": "TikTok Live, Instagram Live and other live platforms.", "other-platforms": "Depop, Etsy, TikTok Shop, your own website and everything else.", "depop-and-clothing-resale": "Depop and clothing resale: listings, offers and shipping.", "etsy-and-handmade": "Etsy, handmade and print on demand.", "tiktok-shop": "TikTok Shop: setting up, listing, affiliates and fulfilment.", "own-website-and-shopify": "Your own website, Shopify and taking payments directly.", "reselling": "Everything that applies whatever platform you sell on.", "tax-bookkeeping-and-legal": "Tax, bookkeeping, VAT and business structure. Experience, not advice.", "tools-and-automation": "Listing tools, repricers, spreadsheets and what to automate.", "multi-channel-selling": "Selling the same stock on more than one platform.", "wins-and-case-studies": "What you sold, what you paid, what you made. Real numbers.", "introductions": "Say hello and tell us what you sell.", "site-feedback": "Bugs, ideas and requests for the forum itself."};
@@ -93,6 +93,9 @@ const launch: Cat[] = [
       { slug: "tools-and-automation", name: "Tools and automation", colour: "general" },
       { slug: "multi-channel-selling", name: "Multi-channel selling", colour: "general" },
       { slug: "wins-and-case-studies", name: "Wins and case studies", colour: "general", min_account_age_hours: 24 },
+      { slug: "weekly-threads", name: "Weekly threads", colour: "general", description: "Monday numbers, Wednesday what would you pay, Friday wins. Posted every week, open to everyone." },
+      { slug: "deals", name: "Deals and fee changes", colour: "general", layout: "deals", description: "Postage deals, packaging bulk buys, fee and policy changes. Vote still valid or expired." },
+      { slug: "show-your-setup", name: "Show your setup", colour: "general", layout: "gallery", description: "Your packing station, storage and workspace. One photo minimum." },
       { slug: "introductions", name: "Introductions", colour: "general" },
       { slug: "site-feedback", name: "Site feedback", colour: "general" },
     ],
@@ -128,6 +131,7 @@ async function upsertCategory(cat: Cat, parentId: string | null, position: numbe
         min_account_age_hours: cat.min_account_age_hours ?? 0,
         accepting_topics: cat.accepting_topics ?? true,
         accepting_note: cat.accepting_note ?? null,
+        layout: cat.layout ?? "list",
         description: cat.description ?? descriptions[cat.slug] ?? null,
       },
       { onConflict: "slug" },

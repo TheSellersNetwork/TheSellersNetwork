@@ -38,15 +38,18 @@ export type Profile = {
   email_digest: boolean;
   solution_count: number;
   home_visited_at: string | null;
+  flair: Flair[];
   created_at: string;
   updated_at: string;
 };
+
+export type Flair = { platform: string; since?: number; label?: string };
 
 /* The subset of a profile shown next to posts and in topic rows. */
 export type ProfileSummary = Pick<
   Profile,
   "id" | "username" | "display_name" | "avatar_url" | "trust_level" | "is_staff" | "solution_count"
->;
+> & { flair?: Flair[] };
 
 export type Category = {
   id: string;
@@ -65,6 +68,7 @@ export type Category = {
   post_count: number;
   accepting_topics: boolean;
   accepting_note: string | null;
+  layout: "list" | "deals" | "gallery";
   created_at: string;
   updated_at: string;
 };
@@ -86,6 +90,7 @@ export type Topic = {
   like_count: number;
   last_post_at: string;
   last_poster_id: string | null;
+  expires_at: string | null;
   deleted_at: string | null;
   created_at: string;
   updated_at: string;
@@ -217,3 +222,27 @@ export type Placement = {
 export type LivePlacement = Placement & { partner: Pick<Partner, "id" | "name" | "slug" | "url" | "logo_url" | "relationship"> };
 
 export type CategoryFollow = { user_id: string; category_id: string; level: "following" | "muted" };
+
+export type Kit = {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  is_public: boolean;
+  copied_from: string | null;
+  copy_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type KitItem = {
+  id: string;
+  kit_id: string;
+  kind: string;
+  name: string;
+  price_paid: number | null;
+  bought_from: string | null;
+  url: string | null;
+  note: string | null;
+  position: number;
+};

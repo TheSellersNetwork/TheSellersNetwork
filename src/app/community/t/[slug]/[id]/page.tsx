@@ -10,6 +10,9 @@ import { TopicStaffTools } from "@/components/forum/topic-staff-tools";
 import { ReadTracker } from "@/components/forum/read-tracker";
 import { LandingTracker } from "@/components/analytics/landing-tracker";
 import { LiveBar } from "@/components/forum/live-bar";
+import { DealVotes } from "@/components/forum/deal-votes";
+import { getDealOrder, getMyDealVote } from "@/lib/forum/extras-queries";
+import { WEEKLY_THREADS_SLUG } from "@/lib/rituals";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { BreadcrumbJsonLd, TopicJsonLd } from "@/components/seo/json-ld";
 import { getCurrentUser } from "@/lib/auth";
@@ -61,6 +64,10 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
 
   const opening = posts[0];
   const replies = posts.slice(1);
+  const likeLabel = category?.slug === WEEKLY_THREADS_SLUG ? "Kudos" : undefined;
+  const isDeal = category?.layout === "deals";
+  const dealMeta = isDeal ? (await getDealOrder(category!.id)).get(topic.id) : undefined;
+  const myVote = isDeal && viewer ? await getMyDealVote(viewer.id, topic.id) : null;
   const canReply = !!viewer && (!topic.is_locked || viewer.profile.is_staff);
   const canMarkSolution = !!viewer && (viewer.id === topic.author_id || viewer.profile.is_staff || viewer.profile.trust_level >= 3);
 
@@ -153,8 +160,9 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
       </header>
 
       <div className="space-y-4">
+        {isDeal ? <DealVotes topicId={topic.id} valid={dealMeta?.valid ?? 0} expired={dealMeta?.expired ?? 0} mine={myVote} expiresAt={topic.expires_at} signedIn={!!viewer} /> : null}
         {opening ? (
-          <PostItem post={opening} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution={false} isOpening />
+          <PostItem post={opening} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution={false} isOpening likeLabel={likeLabel} />
         ) : null}
 
         {solution ? (
@@ -162,7 +170,7 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
             <h2 id="solution-heading" className="flex items-center gap-2 border-b border-success/30 px-4 py-2 text-sm font-semibold text-success">
               <CheckCircle2 className="size-4" /> Solution
             </h2>
-            <PostItem post={solution} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution framed={false} />
+            <PostItem post={solution} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution framed={false} likeLabel={likeLabel} />
             <div className="border-t p-4">
               <EmailSignupCard source={`${urls.topic(topic)}#solution`} variant="inline" />
             </div>
@@ -173,7 +181,7 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
           <h2 className="pt-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{plural(replies.length, "reply", "replies")}</h2>
         ) : null}
         {replies.map((post) => (
-          <PostItem key={post.id} post={post} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution={post.id === solution?.id} />
+          <PostItem key={post.id} post={post} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution={post.id === solution?.id} likeLabel={likeLabel} />
         ))}
       </div>
 

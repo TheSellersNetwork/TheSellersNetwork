@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { siteConfig } from "@/lib/site";
+import { FlairEditor } from "@/components/auth/flair-editor";
+import type { Flair } from "@/lib/db/types";
 
 type Initial = {
   username: string;
@@ -18,11 +20,13 @@ type Initial = {
   email_on_reply: boolean;
   email_on_mention: boolean;
   email_digest: boolean;
+  flair: Flair[];
 };
 
 export function AccountForm({ initial }: { initial: Initial }) {
   const [state, action, pending] = useActionState<AccountState, FormData>(updateAccount, { ok: false, message: "" });
   const [prefs, setPrefs] = useState({ reply: initial.email_on_reply, mention: initial.email_on_mention, digest: initial.email_digest });
+  const [marketplaces, setMarketplaces] = useState<string[]>(initial.marketplaces);
 
   return (
     <form action={action} className="space-y-8">
@@ -47,12 +51,17 @@ export function AccountForm({ initial }: { initial: Initial }) {
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {siteConfig.marketplaces.map((m) => (
               <label key={m.id} className="flex items-center gap-2 text-sm">
-                <Checkbox name="marketplaces" value={m.id} defaultChecked={initial.marketplaces.includes(m.id)} />
+                <Checkbox name="marketplaces" value={m.id} checked={marketplaces.includes(m.id)} onCheckedChange={(v) => setMarketplaces((s) => (v ? [...s, m.id] : s.filter((x) => x !== m.id)))} />
                 {m.label}
               </label>
             ))}
           </div>
         </fieldset>
+        <div>
+          <h3 className="text-sm font-medium">Flair</h3>
+          <p className="mb-2 text-xs text-muted-foreground">Optional. How long you have sold on each platform and a short label.</p>
+          <FlairEditor flair={initial.flair} marketplaces={marketplaces} />
+        </div>
       </section>
 
       <section className="space-y-4">

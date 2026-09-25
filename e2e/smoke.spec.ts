@@ -20,6 +20,7 @@ const pages: { path: string; heading: RegExp }[] = [
   { path: "/mentoring", heading: /Mentoring/ },
   { path: "/partners", heading: /Partners/ },
   { path: "/newsletter", heading: /Newsletter/ },
+  { path: "/kits", heading: /Setups/ },
 ];
 
 for (const page of pages) {
@@ -45,6 +46,8 @@ test("protected pages redirect to sign in", async ({ page }) => {
   await page.goto("/admin/flags");
   await expect(page).toHaveURL(/\/login/);
   await page.goto("/admin/partners");
+  await expect(page).toHaveURL(/\/login/);
+  await page.goto("/kits/new");
   await expect(page).toHaveURL(/\/login/);
 });
 

@@ -28,6 +28,7 @@ type Props = {
   canDelete: boolean;
   canMarkSolution: boolean;
   isSolution: boolean;
+  likeLabel?: string;
 };
 
 const reasons: { value: string; label: string }[] = [
@@ -113,6 +114,7 @@ export function PostActions(props: Props) {
     <footer className="flex flex-wrap items-center gap-1 border-t px-2 py-1.5">
       <Button type="button" variant="ghost" size="sm" onClick={like} aria-pressed={liked} aria-label={liked ? "Unlike" : "Like"} disabled={pending}>
         <Heart className={cn("size-4", liked && "fill-current text-destructive")} />
+        {props.likeLabel ? <span>{props.likeLabel}</span> : null}
         <span className="tabular-nums">{count}</span>
       </Button>
       {props.signedIn ? (

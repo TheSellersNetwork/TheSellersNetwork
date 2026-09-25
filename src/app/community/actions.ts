@@ -39,11 +39,13 @@ export async function createTopic(_prev: ActionState, formData: FormData): Promi
     title: z.string().trim().min(3, "Titles need at least 3 characters.").max(200, "Titles are at most 200 characters."),
     category_id: z.string().uuid("Pick a category."),
     body_md: bodySchema,
+    expires_at: z.string().optional(),
   });
   const parsed = schema.safeParse({
     title: formData.get("title"),
     category_id: formData.get("category_id"),
     body_md: formData.get("body_md"),
+    expires_at: formData.get("expires_at") || undefined,
   });
   if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message };
 
@@ -60,7 +62,12 @@ export async function createTopic(_prev: ActionState, formData: FormData): Promi
   const supabase = await createClient();
   const { data: topic, error: topicError } = await supabase
     .from("topics")
-    .insert({ title: parsed.data.title, category_id: parsed.data.category_id, author_id: user.id })
+    .insert({
+      title: parsed.data.title,
+      category_id: parsed.data.category_id,
+      author_id: user.id,
+      expires_at: parsed.data.expires_at ? new Date(`${parsed.data.expires_at}T23:59:59`).toISOString() : null,
+    })
     .select("id, slug, short_id")
     .single();
   if (topicError || !topic) return { ok: false, message: friendlyError(topicError) };

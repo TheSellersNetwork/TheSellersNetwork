@@ -6,7 +6,7 @@ import { NewTopicForm } from "@/components/forum/new-topic-form";
 import { UserAvatar } from "@/components/forum/user-avatar";
 import { urls } from "@/lib/forum/urls";
 
-type Cat = { id: string; slug: string; name: string; parent_id: string | null; min_trust_to_post: number };
+type Cat = { id: string; slug: string; name: string; parent_id: string | null; min_trust_to_post: number; layout?: string };
 type Viewer = { username: string; display_name: string | null; avatar_url: string | null; trust_level: number } | null;
 
 /*
