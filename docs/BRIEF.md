@@ -215,7 +215,7 @@ Definition of done: Tom can register, post a topic with an image, receive a repl
 
 ### Week 2 to 3
 
-Finish Phase A, then: landing page with three paths and email capture; /guides on MDX with table of contents and signup footer; email sequence tables and Resend jobs for the 7-day course; /autopilot waitlist; /about; outlines for the first 10 guides as MDX files with [TOM: ...] placeholders.
+Finish Phase A, then: landing page with three paths and email capture (done, free forum framing); /guides on MDX with table of contents and signup footer (done: all twenty guides plus the Amazon FBA manual written 25 September 2026, style in docs/guide-style.md); email sequence tables and Resend jobs for the 7-day course; /autopilot waitlist; /about; outlines for the first 10 guides as MDX files with [TOM: ...] placeholders.
 
 ### Weeks 4 onward
 
