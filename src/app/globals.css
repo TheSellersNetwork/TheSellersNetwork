@@ -249,7 +249,7 @@
   border-color: var(--card-border);
 }
 :root.dark .explore-card {
-  background: color-mix(in oklab, var(--card) 70%, var(--background));
+  background: var(--background);
 }
 
 /* Home hero: always dark, whatever the theme, so it reads like the reference */
