@@ -1,0 +1,150 @@
+/*
+  Design tokens for The Sellers Network.
+
+  This is the single source of truth for colour, type and spacing.
+  Tailwind and shadcn read these variables; nothing else should hard-code a colour.
+
+  Brand palettes are selected with data-brand on <html>:
+    navy | teal | slate | forest
+  The default (no attribute) is teal, per the brief. Tom picks the final one.
+
+  Each palette sets:
+    --brand        the accent, used for primary actions, links and focus rings
+    --brand-deep   hover and pressed states
+    --brand-soft   a tint for selected rows and subtle highlights
+  and overrides the neutral background and foreground so the page tone matches.
+
+  Category colours are used as 4px bars only, never as fills.
+*/
+
+/* Typography and layout tokens */
+:root {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), ui-serif, Georgia, serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --text-body: 1rem; /* 16px */
+  --leading-body: 1.6;
+  --measure: 680px; /* reading width for posts and articles */
+
+  --radius: 0.5rem;
+  --header-height: 3.5rem;
+  --rail-width: 300px;
+  --sidebar-width: 240px;
+}
+
+/* Palette 1: Navy */
+:root[data-brand="navy"] {
+  --brand: #1f4e79;
+  --brand-deep: #0b2545;
+  --brand-soft: #e6edf5;
+  --background: #f4f6f9;
+  --foreground: #1c2b3a;
+}
+:root[data-brand="navy"].dark {
+  --brand: #6ea3d6;
+  --brand-deep: #8fb9e2;
+  --brand-soft: #16273a;
+  --background: #0d1620;
+  --foreground: #e6ecf3;
+}
+
+/* Palette 2: Deep teal (default) */
+:root,
+:root[data-brand="teal"] {
+  --brand: #0f766e;
+  --brand-deep: #0b4f4a;
+  --brand-soft: #e3f1ef;
+  --background: #f3f7f6;
+  --foreground: #14342f;
+}
+:root.dark,
+:root[data-brand="teal"].dark {
+  --brand: #3fb8ac;
+  --brand-deep: #6fcdc3;
+  --brand-soft: #12302d;
+  --background: #0c1716;
+  --foreground: #e4efed;
+}
+
+/* Palette 3: Slate and electric blue */
+:root[data-brand="slate"] {
+  --brand: #2563eb;
+  --brand-deep: #1e293b;
+  --brand-soft: #e8eefc;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+:root[data-brand="slate"].dark {
+  --brand: #60a5fa;
+  --brand-deep: #93c5fd;
+  --brand-soft: #172033;
+  --background: #0b1220;
+  --foreground: #e2e8f0;
+}
+
+/* Palette 4: Forest green */
+:root[data-brand="forest"] {
+  --brand: #1b6b3a;
+  --brand-deep: #0f4726;
+  --brand-soft: #e5f0e9;
+  --background: #f5f8f5;
+  --foreground: #16261c;
+}
+:root[data-brand="forest"].dark {
+  --brand: #4fb373;
+  --brand-deep: #7ccb98;
+  --brand-soft: #14291c;
+  --background: #0c1710;
+  --foreground: #e3ede6;
+}
+
+/* Map the brand onto the shadcn semantic tokens, light mode */
+:root {
+  --primary: var(--brand);
+  --primary-foreground: #ffffff;
+  --ring: var(--brand);
+  --accent: var(--brand-soft);
+  --accent-foreground: var(--foreground);
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
+  --muted: color-mix(in oklab, var(--background) 60%, #ffffff);
+  --muted-foreground: color-mix(in oklab, var(--foreground) 65%, var(--background));
+  --border: color-mix(in oklab, var(--foreground) 12%, var(--background));
+  --input: color-mix(in oklab, var(--foreground) 16%, var(--background));
+  --secondary: color-mix(in oklab, var(--foreground) 6%, var(--background));
+  --secondary-foreground: var(--foreground);
+  --destructive: #b42318;
+  --success: #1a7f37;
+}
+
+/* Dark mode: same mapping, surfaces lifted off the background */
+:root.dark {
+  --primary: var(--brand);
+  --primary-foreground: #06100f;
+  --card: color-mix(in oklab, var(--background) 85%, #ffffff);
+  --card-foreground: var(--foreground);
+  --popover: color-mix(in oklab, var(--background) 82%, #ffffff);
+  --popover-foreground: var(--foreground);
+  --muted: color-mix(in oklab, var(--background) 88%, #ffffff);
+  --muted-foreground: color-mix(in oklab, var(--foreground) 62%, var(--background));
+  --border: color-mix(in oklab, var(--foreground) 14%, var(--background));
+  --input: color-mix(in oklab, var(--foreground) 18%, var(--background));
+  --secondary: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --secondary-foreground: var(--foreground);
+  --destructive: #f97066;
+  --success: #4ade80;
+}
+
+/* Category bar colours. Seeded categories reference these by name. */
+:root {
+  --cat-ebay: #e53238;
+  --cat-amazon: #ff9900;
+  --cat-vinted: #09b1ba;
+  --cat-etsy: #f1641e;
+  --cat-facebook: #1877f2;
+  --cat-website: #7c3aed;
+  --cat-general: #64748b;
+}
