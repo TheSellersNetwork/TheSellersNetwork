@@ -100,7 +100,9 @@ Staff sit above TL4. Every staff and TL4 action writes to moderation_log.
 
 ### Categories at launch (seed script)
 
-eBay: Listings and titles; Pricing and offers; Postage and packaging; Buyers and disputes; Account health and policy; Promoted Listings and traffic. Amazon: FBA and FBM; Listings and content; Ads and PPC; Account health and suspensions; Sourcing and wholesale. Other platforms: Vinted, Depop and clothing resale; Etsy and handmade; Facebook Marketplace and local selling; Own website and Shopify. Reselling in general: Sourcing and stock (car boots, charity shops, auctions, wholesale, liquidation); Tax, bookkeeping and legal; Tools and automation; Multi-channel selling; Wins and case studies; Introductions; Site feedback. Hidden: Inner Circle (private, for the paid mentoring group, Phase C).
+Decided 25 September 2026: four top-level platforms at launch, then an Other platforms section.
+
+eBay: Listings and titles; Pricing and offers; Postage and packaging; Buyers and disputes; Account health and policy; Promoted Listings and traffic. Amazon: FBA and FBM; Listings and content; Ads and PPC; Account health and suspensions; Sourcing and wholesale. Vinted: [TOM: subcategories, or a single category to start]. Facebook Marketplace: [TOM: subcategories, or a single category to start]. Other platforms: Depop and clothing resale; Etsy and handmade; Own website and Shopify. Reselling in general: Sourcing and stock (car boots, charity shops, auctions, wholesale, liquidation); Tax, bookkeeping and legal; Tools and automation; Multi-channel selling; Wins and case studies; Introductions; Site feedback. Hidden: Inner Circle (private, for the paid mentoring group, Phase C).
 
 Each category gets a one-line description, a colour, and a pinned "Read this first" topic with a [TOM: ...] placeholder.
 
@@ -192,7 +194,7 @@ Forum first, because it must be live and gathering members before the paid tiers
 ### Week 1 (forum foundations)
 
 - [x] Scaffold Next.js, TypeScript, Tailwind, shadcn, MDX, Supabase client, PostHog. Deploy to Vercel. CI with lint, tests and Lighthouse.
-- [ ] Migrations for every forum table, RLS policies, is_staff() and can_post(), tsvector columns and triggers.
+- [x] Migrations for every forum table, RLS policies, is_staff() and can_post(), tsvector columns and triggers.
 - [ ] Profile trigger on signup, username picker, multi-select platform choice, onboarding with house rules acceptance.
 - [ ] Design tokens, shared header, right rail, footer, dark mode.
 - [ ] /community category list.
@@ -223,8 +225,8 @@ Forum Phase B, then mentoring Phase 2 (Stripe, gated course, video), then forum 
 
 - Domain (thesellersnetwork.co.uk or .com) and email sending domain
 - Which extra platforms deserve their own category at launch versus living under Other platforms
-- Which platform categories are live at launch (eBay first, then Amazon, then the others as members ask), or everything from day one
-- Real names encouraged or usernames only
+- Which platform categories are live at launch. Decided 25 September 2026: eBay, Amazon, Vinted and Facebook Marketplace as top-level platforms from day one, plus Other platforms for Depop, Etsy and own website.
+- Real names encouraged or usernames only. Decided 25 September 2026: member's choice. Username is required (mentions and profile URL), display name is optional free text so it can be a real name, a shop name or left as the username.
 - Accent colour and logo, or placeholder wordmark (four palettes and four marks are at /brand, see docs/palette-options.png)
 - Community platform for live calls (Zoom or Google Meet link is fine to start)
 - Any change to the pricing table before Stripe products are created
