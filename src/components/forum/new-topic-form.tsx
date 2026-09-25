@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { createTopic, type ActionState } from "@/app/community/actions";
 import { Composer } from "@/components/composer/composer";
 import { SimilarTopics } from "@/components/forum/similar-topics";
@@ -16,6 +16,20 @@ export function NewTopicForm({ categories, preselectedSlug, trustLevel }: { cate
   const initial = categories.find((c) => c.slug === preselectedSlug)?.id ?? "";
   const [categoryId, setCategoryId] = useState(initial);
   const [title, setTitle] = useState("");
+
+  /* A question written on the landing page before signing up arrives here. */
+  useEffect(() => {
+    try {
+      const pending = localStorage.getItem("tsn:pending-title");
+      if (pending) {
+        localStorage.removeItem("tsn:pending-title");
+        // Deferred so the restore does not run inside the effect body.
+        queueMicrotask(() => setTitle(pending));
+      }
+    } catch {
+      // Storage unavailable.
+    }
+  }, []);
 
   const groups = useMemo(() => {
     const parents = categories.filter((c) => !c.parent_id);

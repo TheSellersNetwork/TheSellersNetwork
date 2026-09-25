@@ -7,6 +7,11 @@ import { HeroCards } from "@/components/forum/hero-cards";
 import { UserAvatar } from "@/components/forum/user-avatar";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { HeroCursors } from "@/components/marketing/hero-cursors";
+import { PlatformTiles } from "@/components/marketing/platform-tiles";
+import { MembersStrip } from "@/components/marketing/members-strip";
+import { AskFirst } from "@/components/marketing/ask-first";
+import { NewsletterProof } from "@/components/marketing/newsletter-proof";
+import { getCurrentUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { getCategories } from "@/lib/forum/queries";
 import { getCommunityStats, getOnlineMembers } from "@/lib/forum/live-queries";
@@ -22,9 +27,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-/* Platforms shown as wordmarks under the hero. Text, not logos, so nothing is borrowed. */
-const platforms = ["eBay", "Amazon", "Vinted", "Whatnot", "TikTok Shop", "Etsy", "Depop", "Facebook Marketplace"];
-
 /* The Categories card. Slugs match the seed script. */
 const quickCategories = [
   { slug: "ebay", label: "eBay", icon: ShoppingBag },
@@ -36,6 +38,7 @@ const quickCategories = [
 
 export default async function HomePage() {
   const supabase = await createClient();
+  const viewer = await getCurrentUser();
   const [categories, replies, topics, online, stats, { data: recentMembers }] = await Promise.all([
     getCategories(),
     getRecentReplies(6),
@@ -84,11 +87,9 @@ export default async function HomePage() {
                 </Link>
               </Button>
             </div>
-            <ul className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-3 text-lg font-semibold tracking-tight text-muted-foreground" aria-label="Platforms covered">
-              {platforms.map((p) => (
-                <li key={p}>{p}</li>
-              ))}
-            </ul>
+            <div className="mt-12">
+              <PlatformTiles />
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
@@ -190,6 +191,10 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <CommunityStats />
+        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <AskFirst categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id }))} signedIn={!!viewer} />
+          <MembersStrip />
+        </div>
       </section>
 
       <section className="border-y bg-card/60">
@@ -229,6 +234,7 @@ export default async function HomePage() {
 
       <section id="newsletter" className="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
         <EmailSignupCard source="/" variant="inline" />
+        <NewsletterProof />
       </section>
     </main>
   );

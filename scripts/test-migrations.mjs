@@ -564,6 +564,16 @@ await step("presence, stats and unread counts", async () => {
   if (other.rows[0].n !== 0) throw new Error("visits visible to others");
 });
 
+await step("newsletter issues are public only once sent", async () => {
+  await db.query(`insert into public.newsletter_issues (slug, subject, body_md) values ('draft-one', 'Draft', 'Not yet')`);
+  await db.query(`insert into public.newsletter_issues (slug, subject, body_md, sent_at, recipient_count) values ('issue-one', 'Issue one', 'Hello', now(), 12)`);
+  const seen = await asAnon(`select slug from public.newsletter_issues order by slug`);
+  if (seen.rows.map((r) => r.slug).join() !== "issue-one") throw new Error(`anon saw ${seen.rows.map((r) => r.slug).join()}`);
+  await db.query(`update public.profiles set onboarded_at = now() where id = $1`, [ids.regular]);
+  const recent = await asAnon(`select username from public.recent_members(7, 10)`);
+  if (!recent.rows.some((r) => r.username === "regular")) throw new Error("recent_members missing regular");
+});
+
 await step("every public table has RLS enabled", async () => {
   const r = await db.query(`
     select c.relname from pg_class c

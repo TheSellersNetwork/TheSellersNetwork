@@ -16,6 +16,7 @@ const columns = [
     links: [
       { href: urls.guides(), label: "Guides" },
       { href: urls.blog(), label: "Blog" },
+      { href: "/newsletter", label: "Newsletter" },
     ],
   },
   {

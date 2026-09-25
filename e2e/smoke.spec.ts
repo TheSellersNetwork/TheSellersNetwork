@@ -19,6 +19,7 @@ const pages: { path: string; heading: RegExp }[] = [
   { path: "/signup", heading: /Join/ },
   { path: "/mentoring", heading: /Mentoring/ },
   { path: "/partners", heading: /Partners/ },
+  { path: "/newsletter", heading: /Newsletter/ },
 ];
 
 for (const page of pages) {
