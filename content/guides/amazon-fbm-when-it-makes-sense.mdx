@@ -1,0 +1,130 @@
+---
+title: "Fulfilled by Merchant: when it makes sense"
+excerpt: "When posting Amazon orders yourself is the right call, the delivery metrics Amazon holds FBM sellers to and what happens when you miss them, how shipping templates and Buy Shipping work, handling returns yourself, and why most arbitrage sellers end up FBA only."
+categories: [amazon-fba-and-fbm]
+module: amazon-fba
+order: 5
+published: 2026-09-25
+---
+
+For sellers who are wondering whether to post some or all of their Amazon orders themselves instead of sending stock into FBA. After reading you will know the handful of situations where FBM genuinely earns its place, the four delivery metrics Amazon measures FBM sellers on and the exact thresholds, how to set up shipping templates so your promises are ones you can keep, how postage and returns work, and why sellers we know who started mixed have mostly ended up FBA only. It assumes the account setup in [the working manual](/guides/how-to-start-amazon-fba-uk).
+
+The short version: FBM is a tool for specific problems, not a way to avoid FBA fees. The fees you save come back as your time, your postage, your returns, and a set of metrics that can switch your FBM offers off in a fortnight.
+
+## What FBM actually is
+
+Fulfilled by Merchant means the order comes to you, you pack it, buy postage, post it, confirm dispatch with a tracking number, and deal with the return if there is one. Amazon still takes the referral fee; you keep the FBA fulfilment fee and pay your own costs instead. Your offer competes on the same listing as FBA offers, but without the Prime badge (unless you qualify for Seller Fulfilled Prime, which is a different business with its own bar) and with a delivery promise built from your handling time and transit time rather than Amazon's.
+
+Customers can see the difference, and so can the Buy Box. An FBM offer generally needs to be cheaper than an equivalent FBA offer to win it, which eats into the fee you saved.
+
+## When FBM is the right call
+
+Five situations, roughly in order of how often they come up.
+
+**1. The listing is closed to FBA.** Some ASINs are FBA ineligible: Amazon will not accept them into its warehouses at all, for size, category or classification reasons. If you already own the stock, FBM is the only way to sell it on Amazon.
+
+**2. Dangerous goods you cannot get classified.** Aerosols, perfume, some cosmetics and anything with a lithium battery need Amazon's hazmat classification before FBA will take them, and the [dangerous goods programme](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201003400?locale=en-GB) has a waiting list. FBM lets you sell them while you wait, provided you can post them legally; check the carrier's own restricted items list before listing.
+
+**3. Oversize and heavy items.** FBA's oversize fulfilment and storage rates can make a bulky, low margin item unprofitable, and the [box limits](/guides/amazon-adding-products-and-creating-shipments#the-box-limits-amazon-enforces) for sending it in are strict. If you can post it for less than Amazon charges to fulfil it, FBM wins on that product.
+
+**4. Speed.** Stock you buy on Monday can be on sale by Monday evening as FBM; the same stock takes a week or more to check in through FBA. For a short seasonal window, or a product where the price is falling and you want out before it does, FBM gets you to the customer first.
+
+**5. Testing.** A product you are unsure about can be listed FBM in small numbers to see if it sells and at what price, before committing a shipment. A few units posted from home is cheap information.
+
+What is not on the list: avoiding FBA fees on ordinary stock. On a typical arbitrage product the FBA fee buys warehousing, Prime, customer service, returns handling and a clean account health record. Replacing all of that with your own time rarely comes out ahead once the metrics below are counted.
+
+## The metrics Amazon holds you to
+
+FBA sellers can ignore the delivery performance section of Account Health because Amazon owns it. FBM sellers cannot. Amazon's [Order Performance policy](https://sellercentral.amazon.co.uk/help/hub/reference/external/GGJVNFDXQT8C3RA8?locale=en-GB) and the individual metric pages set these targets:
+
+| Metric | What it measures | Target | Window | Consequence of missing it |
+| --- | --- | --- | --- | --- |
+| Late dispatch rate | Orders confirmed dispatched after the expected dispatch date | Under 4% | 10 and 30 days | Loss or restriction of selling privileges; Amazon may first offer a five question quiz to avoid deactivation ([late shipment rate](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200285190?locale=en-GB)) |
+| Pre-fulfilment cancellation rate | Orders you cancel before dispatch | Under 2.5% | 7 days | FBM offers may be deactivated; an ASIN with two consecutive seller cancellations in 30 days can be removed ([cancellation rate](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200285210?locale=en-GB)) |
+| Valid tracking rate | Shipments confirmed with a valid tracking number | 95% or above, per category | 30 days | FBM offers in that category may be deactivated ([valid tracking rate](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201817070?locale=en-GB)) |
+| On-time delivery rate | Tracked units delivered by your promised date, before any extension Amazon adds | Minimum 90%; 95% recommended | Rolling 14 days, from units promised 7 to 21 days ago | Warning, then listing deactivations and, below 60%, loss of FBM listing rights ([OTDR policy](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200847280?locale=en-GB)) |
+
+Three things to take from the table.
+
+**The windows are short.** A cancellation rate measured over seven days means two cancelled orders in a slow week can put you over 2.5%. At low volume every order counts, in the same way one negative feedback spikes an order defect rate.
+
+**Tracking is not optional.** Domestic UK shipments need a tracking number for 95% of orders. Amazon's page exempts untracked large letter and letter services only when the postage is bought through Buy Shipping, which is a strong reason to buy postage there. Confirming dispatch without a tracking number, or with one typed wrong, counts against you.
+
+**On-time delivery is the newest and the sharpest.** Amazon began enforcing it in the UK in February 2026. It is measured against the date you promised through your handling and transit settings, not the padded date the customer saw. Between 80% and 90%, individual listings with a low rate are switched off until you reactivate them; between 60% and 80%, further listings go and reactivation needs a written plan; below 60%, you lose the right to list FBM at all until a plan is accepted. Sellers with fewer than 20 shipped units in the 14 day window are exempt, which is a small mercy for the testing use case above.
+
+Amazon also reviews your handling time against reality: if a SKU's actual handling is a day or more longer than you set, it switches that SKU to automated handling time for 90 days. Set a handling time you can meet including weekends and bank holidays, or set it to what Amazon measures.
+
+### The exemption worth knowing
+
+Amazon's OTDR page says orders will not count against your on-time rate if you use all three of its automation tools together: Shipping Settings Automation on your templates, Automated Handling Time (or a 0 to 1 day default handling time), and postage bought through Buy Shipping. You still have to dispatch on time, but a carrier's delay stops being your problem. If you are going to do FBM at any volume, this combination is the sensible default; it is also Amazon's stated route back if you lose FBM privileges (use all three for at least 180 days).
+
+## Shipping settings and templates
+
+Every FBM SKU sits on a shipping template, and the template is where your delivery promise comes from. Settings, Shipping settings; Amazon's [template page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201834090?locale=en-GB) walks through creating one. The decisions:
+
+- **Ship from address.** Check it before creating any template; it feeds the transit estimate and, with automation, the carrier data.
+- **Rate model.** Per item or weight based. Per item with free standard delivery is simplest and Amazon's own tip is that free delivery helps you win the featured offer.
+- **Regions.** UK mainland, then Northern Ireland, Highlands and Islands and other remote areas separately with longer transit times or excluded. Amazon's OTDR page notes that from 19 January 2026 the maximum standard transit time for UK mainland templates fell from five days to four, so a mainland promise of "up to five days" is no longer available.
+- **Handling time.** One day if you can post the next working day every time; two if you cannot. Do not set zero unless you post same day.
+- **Transit time.** Match the service you will actually buy. A 48 hour service with a two day transit promise is honest; a 48 hour service with a one day promise is a late delivery on your record.
+- **Shipping Settings Automation.** Turn it on. It sets transit times from carrier performance data and is one of the three legs of the OTDR exemption.
+
+Assign SKUs to the template from Manage Inventory (select, Actions, Change shipping template). A SKU on the wrong template is a promise you did not mean to make.
+
+## Buying postage
+
+You can buy postage anywhere and paste the tracking number into Confirm dispatch. In practice buy it through Amazon's [Buy Shipping](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200202220?locale=en-GB), from Manage Orders, for three reasons Amazon states on that page:
+
+1. It only offers services that can meet the delivery promise on the order, which is the easiest way to stop making promises you cannot keep.
+2. If you dispatch on time with a label bought there and the buyer leaves feedback purely about delivery, you can have it struck from your order defect rate; and A-to-z claims about delivery problems will not count against your order defect rate (you still bear the financial loss of the claim).
+3. It is one of the three tools that exempts orders from the on-time delivery metric, and untracked letter services bought there are exempt from the valid tracking rate.
+
+Labels can be bought singly or in bulk (up to 100 orders), you can link your own carrier accounts to use your own rates, and a thermal printer that already prints FBA labels prints these too. Confirm dispatch the moment the label is bought; the tracking goes on the order automatically.
+
+What it costs is on the current rate card for each carrier inside Buy Shipping, and it changes; look before pricing a product, and remember the price you see is the one that decides whether the FBM product is worth listing.
+
+## Returns
+
+With FBA, Amazon handles the return and you see the result. With FBM, the return is yours. Amazon's [pre-paid returns page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G202072200?locale=en-GB) sets out how it now works in the UK:
+
+- Any seller with a UK default return address is enrolled in Amazon pre-paid return labels. Returns within Amazon's policy are authorised automatically and the customer is given a tracked label from one of Amazon's integrated carriers. You cannot upload your own label for those items.
+- The label cost is charged to your account when the carrier scans the parcel, at Amazon's negotiated rate, calculated from the weight and dimensions on your listing. Keep those accurate or you pay for a heavier parcel than you sent.
+- Returns with a pre-paid label are refunded at first scan. For anything else, you must refund within two working days of receiving the item or Amazon may refund on your behalf and charge you.
+- Items over £100, hazmat, heavy and bulky and a few categories are exempt, and for those you provide a seller paid label yourself.
+- If the customer sends back something damaged, incomplete or different, you claim the refund back through a SAFE-T claim, with photographs.
+- You can deduct return postage from the refund when the return reason is the customer's fault, and you must explain the deduction in the return settings.
+
+Set a return address you check, decide on your return settings before the first order, and inspect every return the day it arrives. Then sell the good ones again, and log the bad ones as a cost against the product that produced them.
+
+## Why most arbitrage sellers end up FBA only
+
+Sellers we know who ran both for a year and then stopped FBM tend to give the same reasons.
+
+**The metrics punish things you cannot control.** A carrier misses a scan, a parcel sits in a depot over a bank holiday, a customer gives a wrong postcode, and your on-time delivery or valid tracking rate takes the hit. The automation exemption helps, but you are still watching a dashboard every day that FBA sellers never open.
+
+**Low volume makes it worse.** At five FBM orders a week, one cancellation is 20%. Arbitrage stock is small quantities of many products, which is exactly the pattern that makes seven day and fourteen day metrics swing.
+
+**The saved fee is not saved.** Add postage, packaging, a return label at Amazon's rate when a customer changes their mind, and an hour a day of packing and posting, and the FBA fee usually looks reasonable.
+
+**The Buy Box is harder.** Without Prime you need a lower price to hold the featured offer. The difference is often most of the fee saved.
+
+**Q4 breaks it.** Carriers slow down, order volume rises, and the on-time delivery window is measured through the busiest fortnight of the year. December is when FBM accounts get their warnings.
+
+**It is one more system to run.** Two fulfilment channels mean two sets of settings, two return flows, two kinds of problem, for a business one person is running in the evenings.
+
+So the pattern that works: FBA by default, and FBM as a tool for the five cases above, switched on for a product deliberately and switched off again when the reason is gone. If you must run FBM at volume, run it with all three automations on, a handling time you can meet on your worst day, and a daily check of the delivery performance page.
+
+## What goes wrong
+
+- **Promising a transit time faster than the service you buy.** Every parcel is late by your own definition.
+- **Cancelling because you cannot find the item.** Two in a month on one ASIN and Amazon can remove the offer; at low volume it takes your cancellation rate over 2.5% on its own.
+- **Confirming dispatch before it has actually gone.** The expected delivery date starts from your confirmation. If the parcel goes tomorrow, it is late.
+- **No tracking, or tracking typed in wrong.** Under 95% valid tracking and the category can be switched off.
+- **Leaving FBM offers live while you are away.** Set holiday settings or close the offers. Orders that wait are late dispatches.
+- **Wrong weight on the listing.** Amazon prices the pre-paid return label from it.
+- **Ignoring a warning notification.** The on-time delivery policy gives 30 days from the warning before enforcement. Use them.
+- **Running FBM for the fee saving alone.** See the section above.
+
+FBM problems, metric warnings and "is this product better as FBM" questions belong in [FBA and FBM](/community/c/amazon-fba-and-fbm). Post the metric, the window and what happened.
+
+<Signup source="/guides/amazon-fbm-when-it-makes-sense" />

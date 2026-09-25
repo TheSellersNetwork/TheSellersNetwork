@@ -1,0 +1,175 @@
+---
+title: "Inventory health: stranded stock, IPI, surcharges and capacity"
+excerpt: "How to keep stock in Amazon's warehouses sellable and cheap to hold. Stranded and unfulfillable inventory, what actually moves the Inventory Performance Index, the storage and aged inventory charges, capacity limits, and a monthly routine that takes an hour."
+categories: [amazon-fba-and-fbm]
+module: amazon-fba
+order: 4
+published: 2026-09-25
+---
+
+For sellers with stock already inside FBA who want it to stay sellable, stay cheap to store, and stay inside whatever space Amazon allows them. After reading you will know why a unit stops being sellable and how to get it back, what Amazon's inventory score is made of and which parts of it an arbitrage seller can influence, what it costs to leave stock sitting, and a routine that catches all of it once a month. It assumes the basics from [the working manual](/guides/how-to-start-amazon-fba-uk) and picks up where the weekly routine there leaves off.
+
+Every fee and threshold here comes from Amazon's own pages and links to them. Amazon revises inventory fees at least once a year, so read the linked page before you rely on a figure.
+
+## The four states of a unit
+
+Every unit you own inside Amazon is in one of four states, and the job of inventory health is to keep as many as possible in the first.
+
+| State | What it means | Does it earn | Does it cost |
+| --- | --- | --- | --- |
+| Fulfillable | Sellable, on an active listing | Yes | Storage |
+| Stranded | Physically fine, but the listing cannot sell it | No | Storage, and it counts against your score |
+| Unfulfillable | Damaged, expired, customer returned and not resellable | No | Storage until removed, then removal or disposal fee |
+| Reserved | Tied up in a customer order, a transfer between warehouses, or a removal | Soon | Nothing extra |
+
+Reserved sorts itself out. The other two are your problem, and both get worse the longer they are ignored.
+
+## Stranded inventory
+
+### What it is
+
+Amazon's definition is simple: FBA inventory in a fulfilment centre with no active offer, so nobody can buy it ([fix stranded inventory](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201436600?locale=en-GB)). You are paying storage on stock that cannot sell, it drags your inventory score down, and Amazon will not let you send more of that ASIN in while it is stranded; a shipment containing a stranded ASIN is blocked.
+
+### Why it happens
+
+Amazon publishes the [full list of stranded reasons](https://sellercentral.amazon.co.uk/help/hub/reference/external/GEYJTVJPWRYUTADQ?locale=en-GB) with what to do for each. The ones arbitrage sellers actually see:
+
+| Reason | What happened | Fix |
+| --- | --- | --- |
+| Listing closed | You closed it, or it had an end date | Relist |
+| Missing price | The offer has no price | Add one |
+| Potential high or low pricing error | Your price tripped the fair pricing rule | Update the price within Amazon's range |
+| Missing SKU | The units in the warehouse do not match a SKU in Manage Inventory, often because units arrived without a valid FNSKU or the product ID changed | Relist, or create a new listing for the ASIN and switch it to FBA |
+| Merchant fulfilled | The SKU was switched to FBM | Change to FBA |
+| Dangerous goods (in review or awaiting documents) | Hazmat classification incomplete | Upload the documents; wait |
+| Blocked listing | A policy, safety or intellectual property block | Appeal, or remove |
+| Expired product | Past its date | Remove; it cannot be sold |
+| Item discontinued or restricted | Amazon has stopped the ASIN | Remove and delete the listing |
+
+Two system generated SKUs are worth recognising. Units that arrive without a proper barcode are received under a SKU you did not create, in the format Amazon.Found.B… or FBA….Missing…, and sit stranded until you relist them. Amazon's page is blunt that both come from labelling failures, which is why [prep](/guides/amazon-prep-equipment-and-prep-centres) matters.
+
+### The stranded inventory page
+
+Inventory, Inventory planning, Fix stranded inventory. Amazon says this page is more accurate than Manage Inventory (a listing can show Active in one and Stranded in the other), and it shows the reason, the date the unit became stranded, and a recommended action. Most fixes are one click: Relist, Change to FBA, Update price. Bulk actions handle up to 25 listings at once.
+
+Two settings on that page do the work for you. **Automatic relist** relists stock stranded as Listing closed or Item discontinued after a number of days you choose (Amazon's default is seven; it can be set as low as two). **Automatic change to FBA** switches a merchant fulfilled stranded SKU back to FBA after five days by default, or as little as zero. Set both to short values. There is no good reason for an arbitrage seller's stock to sit stranded for a week because a listing closed.
+
+### Automatic removal of stranded stock
+
+Amazon's agreement requires stranded units to be removed eventually, and its [required removals page](https://sellercentral.amazon.co.uk/help/hub/reference/external/GKQ8DGGU529BJJ7E?locale=en-GB) says that if you have not set a preference the default is disposal after the maximum allowed days. Set the stranded removal preference to return to you, with an address, and note that this address is separate from the unfulfillable return address and has to be entered separately. Each listing can be given one 30 day delay if you need time to fix it.
+
+Fix stranded stock the day the email arrives. Amazon allows 24 hours for a fix to show on the page.
+
+## Unfulfillable inventory
+
+Units Amazon will not sell: customer returns that came back opened, warehouse damage, carrier damage, expired stock. They sit in your inventory as unfulfillable, costing storage, until removed.
+
+Amazon now decides what happens to them unless you have said otherwise. Its [automatic removal page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200678710?locale=en-GB) says the automated unfulfillable settings are enabled and cannot be switched off; if you have not chosen, the default is dispose, and Amazon will dispose of customer returned unfulfillable stock at its discretion and ask you to remove anything else within 14 days. Go to Settings, Fulfilment by Amazon, Automated unfulfillable settings, and choose:
+
+- **Return**, weekly, twice monthly or monthly, to an address you check. You get the units back, can inspect them, and can sell what is genuinely fine elsewhere. Removal fees apply per unit.
+- **Dispose** if the stock is low value and the return fee is more than it is worth.
+
+Per unit fees for both are on Amazon's [removal and disposal fees page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200685050?locale=en-GB); at the time of writing a standard size unit up to 200 g costs £0.49 to return or £0.74 to dispose of, rising with weight. Returns take 10 to 14 working days to leave the warehouse, and up to 30 or more in the festive period. From 1 May 2026 the fee is charged as each unit is removed.
+
+One caveat from the same page: lost, expired, and warehouse or carrier damaged units are not eligible for removal. Warehouse and carrier damage should be reimbursed instead; check the reimbursement report monthly and claim within the [window in the manual](/guides/how-to-start-amazon-fba-uk#the-numbers-you-will-need).
+
+## The Inventory Performance Index
+
+### What it is
+
+The IPI is Amazon's score for how well you run your FBA stock, shown on the Inventory Performance dashboard for Professional accounts with stock and recent activity ([inventory performance](https://sellercentral.amazon.co.uk/help/hub/reference/external/G202174810?locale=en-GB)). It matters because, once your account is old enough to have capacity limits, the limit is set partly on it, and a low score means less space.
+
+### What feeds it
+
+Amazon lists four categories, each with a colour bar from Excellent to Poor:
+
+1. **Excess inventory percentage.** The share of your units Amazon considers excess: more than 90 days of supply against its forecast for that product. Amazon's guidance is to hold 30 to 60 days of expected sales.
+2. **Sell-through rate.** Units shipped in the past 90 days divided by the average units on hand over the same period, using snapshots today and 30, 60 and 90 days ago. Amazon's [IPI FAQ](https://sellercentral.amazon.co.uk/help/hub/reference/external/GZJF4DY2W6MERBAL?locale=en-GB) works an example: 120 units sold over an average of 80 on hand is a sell-through of 1.5.
+3. **Stranded inventory percentage.** Units in the warehouse with no active offer.
+4. **In-stock rate.** How often your replenishable products were available over the last 30 days, weighted by sales.
+
+### Which of those you can move
+
+For an arbitrage seller, three of the four are within reach and one is a distraction.
+
+**Stranded** is entirely yours. Keep it at zero with the automatic settings above.
+
+**Excess and sell-through** are two views of the same thing: do not send in more than sells in a couple of months. Amazon's FAQ says a new ASIN does not count for its first 90 days, and that once you place a removal order the units drop out of the calculation. So the fix for a slow product is not to wait for it: reprice it to sell, or remove it.
+
+**In-stock rate** is where arbitrage sellers waste effort, and it is worth being precise. Amazon's FAQ says the in-stock rate is not a direct input to the score, and that a low in-stock rate does not hurt it unless your most popular products are constantly out of stock while what remains is slow, excess or aged. Arbitrage stock is mostly not replenishable: you bought twelve at a clearance price and will not see that price again. Amazon's dashboard will nag you to restock them. Do not. Instead, in Restock Inventory, use the Action menu to hide the recommendation for every SKU you cannot buy again. Amazon's own page says hiding all SKUs for an ASIN removes it from your in-stock rate, and the FAQ confirms marking a listing non replenishable does not affect the score. Ten minutes once a month keeps the metric honest and stops the "lost sales" figure on your dashboard being fiction.
+
+### The threshold
+
+Amazon does not publish a single permanent pass mark. Its FAQ says it tells sellers four to eight weeks before a period which IPI threshold and which score check weeks it will use. Read the notice when it comes rather than relying on a number from a forum post. What is stable is the direction: higher score, more capacity.
+
+## What it costs to leave stock sitting
+
+### Monthly storage
+
+Charged on the daily average cubic feet your stock occupies, at a rate that depends on size tier and time of year ([monthly storage fees](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200612770?locale=en-GB)). At the time of writing the UK base rate for standard size non clothing stock is £0.76 per cubic foot per month from January to September and £1.51 from October to December; oversize is £0.55 and £0.87. That doubling in Q4 is why stock that will not sell before Christmas should not be there in October.
+
+A **storage utilisation surcharge** sits on top for sellers whose stock sits too long relative to what they ship. Amazon's page says it applies only to Professional accounts more than a year into FBA, holding at least 0.71 cubic metres a day, with a storage utilisation ratio over 22 weeks (stock held divided by stock shipped over 13 weeks). New sellers and small volumes are exempt. If you are on it, the surcharge climbs steeply with the ratio: £0.42 per cubic foot at 22 to 28 weeks, £2.29 above 52 weeks, on all stock older than 30 days. The cure is the same as for IPI: sell or remove the slow stock.
+
+### Aged inventory surcharge
+
+Formerly the long term storage fee. Amazon assesses stock age on the 15th of each month, counting from the day a unit was checked in, and charges on top of monthly storage for anything 241 days or older ([aged inventory surcharge](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200684750?locale=en-GB)). The UK bands at the time of writing run from £1.18 per cubic foot at 241 to 270 days, through £3.14, £3.26 and £3.41 for the next three bands, to £5.71 per cubic foot or £0.20 per unit at 366 to 455 days and £6.14 or £0.25 per unit beyond that, whichever is greater. Clothing, footwear, bags, luggage, jewellery and watches are exempt from the 241 to 330 day bands only.
+
+Three details from the same page that change what you do:
+
+- Submitting the removal request before the 15th is enough; the removal does not need to be complete.
+- The Recommended Removal report, under Reports, Fulfilment by Amazon, lists what will be charged at the next assessment and pre fills a removal order.
+- An ASIN you remove to dodge the surcharge should not be sent back in for eight weeks, and Amazon's shipment tool will block it for a period after such a removal.
+
+Eight months is a long time for arbitrage stock to sit. If a unit is approaching 241 days, it was a bad buy; take the lesson and the removal fee.
+
+## Capacity limits and the Capacity Manager
+
+### How limits work
+
+Amazon's [capacity limits page](https://sellercentral.amazon.co.uk/help/hub/reference/external/GAFNWEYTJUV2GBFC?locale=en-GB) sets out who gets one:
+
+| Account | Limit |
+| --- | --- |
+| Individual plan | 15 cubic feet, fixed, cannot be increased |
+| Professional, active in FBA under 39 weeks | No limit while Amazon learns your sales |
+| Professional, over 39 weeks | A monthly limit per storage type, set on IPI and sales |
+
+Usage counts stock on hand plus open shipments, in cubic feet, by storage type (standard, oversize, clothing, footwear, extra large; dangerous goods separately). Capacity cannot be traded between types. Limits are announced in the fourth week of the month for the following month, with estimates for two months beyond, in the Capacity Monitor at the bottom of the FBA dashboard. If on hand plus inbound would exceed the limit, you cannot create a shipment.
+
+Two things reduce usage quickly: cancelling open shipments you will not send (they count until cancelled), and removal orders, which come off your usage within 24 hours of creation even while pending.
+
+### Capacity Manager
+
+If you need more space than Amazon has given you, [Capacity Manager](https://sellercentral.amazon.co.uk/help/hub/reference/external/GM6SJGQDA625AUCJ?locale=en-GB) lets you bid for it. You ask for a volume for a future month and name the maximum reservation fee per cubic foot you would pay. Amazon grants requests every few days, highest fee first, and everyone granted in the same week pays the same, lowest, fee. Nothing is paid up front. You then earn a performance credit of £0.15 for every £1 of FBA sales made using the extra space, prorated by the share of your total limit the extra represents, which can offset all of the fee if you sell through.
+
+Whether to use it: only if you are confident the stock will sell in the month. Amazon's own page warns that if it does not, you pay the reservation fee less whatever credits you earned. For most arbitrage sellers the better answer to a tight limit is a cleaner inventory, because the limit follows the score.
+
+## The monthly routine
+
+An hour, on a fixed day, after the storage fee has posted (Amazon charges it between the 7th and 15th) and before the aged inventory assessment on the 15th.
+
+1. **Fix stranded inventory.** Open the page, clear everything, and check the automatic relist and change to FBA settings are still short. Target: zero stranded units.
+2. **Unfulfillable.** Check what has accumulated and what your automated setting will do with it on its next cycle. If a batch of returns is worth more than the return fee, make sure return is selected; if not, dispose.
+3. **Recommended Removal report.** Anything due an aged inventory surcharge on the 15th: reprice it hard this week, or submit the removal before the 15th.
+4. **FBA Inventory page, sorted by age.** Anything over 90 days: is it moving? If not, reprice or remove. Anything Amazon flags as excess: same decision.
+5. **Restock Inventory.** Hide every recommendation for a product you cannot buy again at a workable price. Restock the few you can.
+6. **Inventory Performance dashboard.** Read the four bars. Note the score. If it fell, the reason is in one of the four bars and you have already done the fix above.
+7. **Capacity Monitor.** Note next month's limit against what you plan to send. Cancel any shipment plan you are not going to ship.
+8. **Reimbursements.** Compare the Inventory Ledger report's lost and damaged lines with what Amazon has reimbursed; claim the gaps within the window.
+
+Write the numbers down each month: units on hand, stranded, unfulfillable, sell-through, IPI, storage fee paid. Six months of those on one line each tells you more about your buying than any dashboard.
+
+## What goes wrong
+
+- **A stranded email ignored for a month.** Storage paid on stock that could not sell, a score dented, and a shipment blocked when you try to send more.
+- **Never setting a return address for unfulfillable stock.** Default is dispose. Units you could have sold elsewhere are gone.
+- **Chasing the in-stock rate.** Sending in more of a one off clearance buy because the dashboard said restock. It is not an input to the score; hide the recommendation instead.
+- **Holding on for the price to recover.** A unit at 240 days in the warehouse is about to cost more per month than it will ever earn. Remove it or price it to go.
+- **Buying deep in September.** Storage nearly doubles in October. Q4 stock should sell in Q4, not sit through it.
+- **Bidding for capacity on hope.** The reservation fee is real money if the stock does not sell.
+- **Two return addresses, one updated.** Stranded and unfulfillable returns use separate address settings. Update both.
+- **Assuming Amazon reimbursed everything.** It reimburses some losses automatically. Check the ledger and claim the rest.
+
+Inventory questions, and screenshots of a dashboard you do not understand, go in [FBA and FBM](/community/c/amazon-fba-and-fbm).
+
+<Signup source="/guides/amazon-inventory-health" />

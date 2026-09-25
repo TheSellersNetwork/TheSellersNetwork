@@ -1,0 +1,157 @@
+---
+title: "Adding products and creating your first FBA shipment"
+excerpt: "The two jobs between buying stock and it going on sale: attaching your offer to the right listing, then building a shipment Amazon will accept first time. Every limit and window comes from Amazon's own pages."
+categories: [amazon-fba-and-fbm]
+module: amazon-fba
+order: 2
+published: 2026-09-25
+---
+
+This is for anyone who has stock on the kitchen table and an Amazon seller account, and needs to get one into the other without a refused shipment or a lost box. By the end you will be able to add an offer to an existing listing in a couple of minutes, then create, label and hand over a shipment in the Send to Amazon workflow, and you will know the three or four figures that Amazon actually enforces at the dock. It assumes you have already done the setup in [the working manual](/guides/how-to-start-amazon-fba-uk); this guide picks up at "week four: first shipment".
+
+Amazon changes its shipment screens more often than its policies, so where a number matters it links to the page it came from, and the page wins.
+
+## Part one: adding your offer to a listing
+
+As a reseller you almost never create a listing. The product already exists in Amazon's catalogue; your job is to attach an offer to it. Getting the attachment wrong (wrong variant, wrong pack size, wrong condition) is the mistake that produces "not as described" complaints later, so slow down here.
+
+### Find the exact listing
+
+In Seller Central go to Catalogue, then Add products. Search by the identifier, not the name: the EAN from the barcode on the product, or the ASIN from the listing you sourced against. A name search returns every variant and every lookalike; a barcode search returns the thing in your hand. When the results come back, check the ASIN against the one in your sourcing notes, and check the pack count, size and colour in the title and the images. If your product is a twin pack and the listing is a single, stop. That is a different ASIN.
+
+### What the button next to the listing means
+
+Amazon's own [approval page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200333160?locale=en-GB) sets out the three states you will see next to a search result:
+
+| What you see | What it means | What to do |
+| --- | --- | --- |
+| Sell this product | No approval needed; you can list now | Carry on |
+| Apply to sell | The brand, category or ASIN is gated | Click Show limitations to see what is being asked. Apply with an invoice dated within 180 days, or leave the product until you have one |
+| Not available | The product cannot be listed by your account | Nothing. If the message is "your account does not qualify", Amazon says the decision cannot be appealed |
+
+Two things trip new sellers up. First, "Apply to sell" can appear on a product you were able to add last month; restrictions are added to existing listings all the time, so check every time you buy, not just the first time. Second, some listings offer you a "Copy listing" button (create a new listing using this one as a template) rather than the option to add an offer. For a branded product from a retailer, that is not an invitation. It means you cannot attach to that ASIN, and creating a duplicate page for a brand's product is a listing policy problem waiting to happen. Treat it as a no and move on.
+
+### Fill in the offer
+
+Once you are through, Amazon asks for a handful of fields. Most have a right answer for an arbitrage seller.
+
+- **Condition.** New, and only if the item is sealed, complete and free of retailer stickers. Anything else is a different condition and a different SKU.
+- **SKU.** Your own code for this product. Leave it blank and Amazon generates one; better to use a short pattern you will recognise in reports (supplier, date, product). Note that Amazon's [Send to Amazon page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G8SXKYFWPG6DAW6T?locale=en-GB) says SKUs cannot be reused, even after the offer using them is deleted, so do not recycle codes.
+- **Price.** Put in your intended selling price now. You can change it the moment it goes live, but a blank or placeholder price has a way of being forgotten.
+- **Fulfilment channel.** Amazon will fulfil (FBA). You can switch a SKU between FBA and merchant fulfilment later, but only FBA SKUs appear in the shipment workflow.
+- **Barcode.** Amazon barcode. Since 31 March 2026 resellers must label every unit with an Amazon barcode (an FNSKU) whether or not the product has a manufacturer barcode; brand owners are the only sellers who can send stock in on the EAN alone ([FBA barcode requirements](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201100910?locale=en-GB)). Units that arrive without one are marked defective and relabelled by Amazon, and are not eligible for reimbursement if they go missing ([barcode FAQ](https://sellercentral.amazon.co.uk/help/hub/reference/external/GEFKUGES6NSE7CBP?locale=en-GB)).
+- **Batteries and dangerous goods.** You will be asked whether the product contains or is a battery, and whether it is a dangerous good. Answer from the packaging, not from hope. Amazon's [dangerous goods guide](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201003400?locale=en-GB) is clear that everyday items (aerosols, perfume, nail polish, power banks, speakers with magnets, many cleaning products and cosmetics) are regulated, and that the absence of a warning label does not mean an item is not a dangerous good. A product flagged for hazmat review cannot be added to a shipment until the review completes; Amazon says that takes up to four business days if the classification is straightforward, and longer if it asks you for a safety data sheet.
+- **Expiry.** If the product has a best before, use by or production date, or a period after opening symbol, Amazon treats it as expiry dated and you must say so ([expiry dates on FBA products](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201003420?locale=en-GB)).
+
+Save, and the SKU appears in Manage Inventory, usually within minutes; Amazon's note on the shipment page is that listing changes can take up to 15 minutes to propagate. If it is not in the Send to Amazon list after that, the fulfilment channel is set to merchant, the offer is under hazmat review, or the SKU is stranded (Amazon shows an error and points you at the stranded inventory page).
+
+## Part two: creating the shipment
+
+Amazon's workflow is called Send to Amazon. It lives under Inventory, Shipments (or from the Send to Amazon button on the shipping queue), and the [overview page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G6925SDD66GDLXJW?locale=en-GB) lists the steps: choose inventory, pack units, confirm shipping, print box labels, and for pallets two more. For a home seller sending boxes by parcel carrier, it is four screens. Before you open it, have the stock prepped, labelled and boxed, and each box on the scales. The workflow asks for real weights and dimensions and Amazon says it enforces them.
+
+### Step 1: choose inventory to send
+
+Set the ship from address (your house or your prep centre; it cannot be changed after step 2) and the marketplace (United Kingdom). Then for each SKU, tell Amazon how it is packed and how many you are sending.
+
+**Individual units or case packs.** Individual units. Case pack templates are for boxes of one SKU in a fixed quantity, which is wholesale, not arbitrage.
+
+**Prep category.** Amazon's [packaging requirements](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200141500?locale=en-GB) define categories (fragile, liquids, small, sets, textiles and so on) and each one carries a prep rule. Pick the one that matches the product. If it says no prep needed and you can see the product would not survive a drop, prep it anyway; the category sets what Amazon expects at minimum, not what protects the item.
+
+**Who preps and who labels.** By seller for both. Amazon used to offer paid prep and labelling on arrival, but its [label service page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200483750?locale=en-GB) says those services were withdrawn for European stores, including the UK, from 1 July 2026. The units you send are the units Amazon receives; if they are not ready, they are defective on arrival. See [prep equipment and prep centres](/guides/amazon-prep-equipment-and-prep-centres) for how to get them ready.
+
+**Expiry dates.** If the SKU is expiry dated you are prompted for the date here. Amazon's current rule is that at check in a product must have enough shelf life left to be consumed in full plus a further 90 days, with a table of longer minimums by product type (for example 180 days for cereal bars and pet food, 270 days for drinks), and dates must be printed in DD-MM-YYYY or MM-YYYY on each unit and on the box in 36 point or larger ([expiry page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201003420?locale=en-GB)). One expiry date per ASIN per box: if you have two dates of the same product, they go in separate boxes.
+
+**Quantity.** Enter the number of sellable units. Count them twice. The shipment record is your evidence if units go missing.
+
+**SKU labels.** Click Print SKU labels next to each product (or Print all SKU labels at the bottom). Amazon's [barcode page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200141490?locale=en-GB) sets the label rules: black on white, non reflective, removable adhesive, between 25.4 mm x 50.8 mm and 50.8 mm x 76.2 mm; thermal or laser, never inkjet; on a flat surface with 6 mm clear from the edge, on the outside of any poly bag, covering every other barcode except a serial number or Transparency code. Apply the right label to the right product before you box anything.
+
+### Step 1b: pack individual units
+
+Now Amazon sorts your SKUs into **pack groups**. A pack group is a set of SKUs Amazon will allow in the same box, decided by size and weight, prep and labelling ownership, and dangerous goods status ([pack individual units](https://sellercentral.amazon.co.uk/help/hub/reference/external/GQ2HY393LHXF3GZN?locale=en-GB)). The rule that matters: hazmat and non hazmat never share a box, because they go to different warehouses. Oversize items and standard items are also usually separated. If you see two pack groups, you are packing at least two boxes, whatever you planned.
+
+For each pack group:
+
+1. Say whether everything fits in one box or several.
+2. If several, provide **box contents**: how many of each SKU is in each box. The web form is fine for a few boxes; a spreadsheet upload or scan and pack for more. Label each box on the outside in pencil (group 1, box 2) so you can match it to the right label later.
+3. Enter each box's **weight** (packed, including filler) and **outside dimensions**. Amazon compares these with the units it thinks are inside and warns you if the box is more than 10% lighter or smaller than the contents should be.
+
+Do not skip box contents. The alternative is Amazon manually processing the boxes for a fee, and Amazon says those shipments are received much more slowly and that inaccurate contents can lead to future shipments being blocked.
+
+### The box limits Amazon enforces
+
+All from Amazon's [shipping and routing requirements](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200141510?locale=en-GB). Check the page before a large shipment; these are the current figures.
+
+| Rule | Figure |
+| --- | --- |
+| Box containing standard size items | No smaller than 15.2 cm x 10 cm x 2.5 cm, no side longer than 63.5 cm |
+| Weight of a standard box | At least 0.15 kg, no more than 23 kg |
+| Heavy label | Any box over 15 kg needs a "Heavy parcel" or "Team lift" label on the top and all four sides, five labels in total. Amazon does not supply it; print your own |
+| Box with a single oversize item | May exceed 63.5 cm only if it contains one oversize unit and is not much bigger than it; may exceed 23 kg but never 30 kg |
+| Box construction | Rigid, six sided, flaps intact; no stretch wrap, no boxes wrapped in tape, no staples, no wood or metal, no bundling boxes together |
+| Filler | Bubble wrap, paper sheets, air pillows or foam sheeting only. No packing peanuts, shredded paper or crinkle wrap |
+| Contents | One shipment ID per box. Never mix two shipments in one box |
+| Old barcodes | Cover or strike through every barcode on the outside of a reused box |
+
+In practice: keep boxes under 15 kg and you never need the heavy label; a double walled box around 40 to 50 cm holds a sensible mix without going over.
+
+### Step 2: confirm shipping
+
+Amazon now tells you where the boxes are going. Expect more than one destination: Amazon's [confirm shipping page](https://sellercentral.amazon.co.uk/help/hub/reference/external/GWC4BVUFCZ2FKHQW?locale=en-GB) says inventory may be routed to more than one fulfilment centre, though it will not split the contents of a single box. If your one pack group has become two shipments to two warehouses, that is Amazon's placement decision and you cannot cancel one shipment on its own (voiding cancels the whole workflow). You can, sometimes, merge a shipment with another eligible one; the option appears here if it applies. Otherwise, send both. Two half boxes is the cost of doing business.
+
+Then choose:
+
+- **Ship date.** The day you will hand the boxes to the carrier. Be honest; it can be changed in step 3.
+- **Shipping mode.** Small parcel delivery.
+- **Carrier.** Amazon partnered carrier. It is cheaper than booking the same carrier yourself (Amazon negotiates the rate), it tracks automatically, and the labels print from the workflow. A non partnered carrier means buying postage elsewhere and typing tracking numbers in by hand. Two conditions from the [partnered carrier page](https://sellercentral.amazon.co.uk/help/hub/reference/external/GJLGAFR936JJ6SYP?locale=en-GB): the shipment must contain no dangerous goods, and every box must have accurate weights and dimensions because the quote is built on them.
+
+Review the estimated cost and click Accept charges and confirm shipping. The placement offer only lasts 72 hours from when it is shown, and if the details sit unconfirmed for 24 hours they can change; do not build a shipment on Friday and confirm it on Tuesday.
+
+### Step 3: print box labels
+
+Click Print box labels. For a partnered carrier shipment the PDF contains two labels per box: the FBA box ID label (which tells the warehouse what is inside) and the carrier label (which gets it there). Both go on the same box, side by side on a flat face, not over a seam, not over each other. Amazon's [label page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G200178470?locale=en-GB) says labels are 8.4 cm x 10.2 cm on paper or 10.2 cm x 15.2 cm from a thermal printer, each label is unique, and you must not photocopy or reuse one. Match the label to the box you pencilled in step 1b; the box ID label carries that box's contents, so a swapped label means a miscounted shipment.
+
+### Booking the collection
+
+Confirming the shipment does not book the driver. Amazon's page is explicit: after the workflow is finished you contact the carrier to arrange collection, or take the boxes to a drop off point; the contact details are shown under the delivery charges section of the shipment. Book a collection rather than driving to a depot; the scan at your door is the start of your evidence trail if anything is lost. Amazon does not accept parcels handed in at reception, and private vehicles cannot deliver to a fulfilment centre.
+
+## Changing your mind
+
+Once you have accepted the charges, the clock runs. From Amazon's [change or cancel page](https://sellercentral.amazon.co.uk/help/hub/reference/external/GP29SYECJZGJ9XMR?locale=en-GB) and the partnered carrier page:
+
+| What you want to do | Window |
+| --- | --- |
+| Void the partnered carrier charges and get a full refund (small parcel) | 24 hours from accepting the charges. After that, cancelling the shipment does not cancel the charges and Amazon says no refund is available |
+| Void charges on a pallet shipment | One hour |
+| Edit box weights, dimensions, or add or remove boxes | 24 hours (small parcel). Then reprint and reapply every box label |
+| Change unit quantities of a SKU already in the shipment | Before it arrives, by up to 5% or six units per SKU, whichever is greater |
+| Add a new SKU to a confirmed shipment | Not possible. Cancel and start again |
+| Cancel one shipment out of several in a workflow | Not possible. Voiding cancels all of them |
+
+Voiding is a two part action: cancel the shipment and, separately, void the charges on the Provide details tab. Do both. Cancelled labels must come off any box before it leaves the house; a box that arrives on a cancelled label is a box Amazon is not expecting.
+
+## When Amazon splits your shipment
+
+It will happen. You packed one box of twelve products and Amazon has produced two shipments to two warehouses. What to do, in order:
+
+1. Look for the merge option in step 2. If it is offered, take it.
+2. If not, go back to step 1 and remove the SKU or SKUs that are causing the second destination (often an oversize or a hazmat item), confirm the main shipment, and send the removed items in their own workflow another day. Remember the placement can change when you change the contents.
+3. If neither works, repack into two boxes as instructed. Two partnered carrier boxes from the UK are cheap; a refused shipment is not.
+
+Never send a box to a different warehouse from the one on its label because it is closer. It will be received against the wrong shipment or not at all.
+
+## What goes wrong
+
+- **Wrong variant.** You attached to the 500ml when you bought the 250ml. Check the EAN, not the picture.
+- **Unlabelled units.** A unit without an FNSKU is defective on arrival and off the reimbursement list if it vanishes. Label before boxing.
+- **Guessing weights.** A box declared at 8 kg that weighs 14 kg is a surcharge from the carrier and a mark against your inbound performance. Weigh every box.
+- **Over 23 kg.** Amazon says overweight boxes can block future shipments. Split the box.
+- **Missing the void window.** Twenty five hours after accepting charges you are paying for a label you will not use. If a shipment is doubtful, do not accept charges until it is certain.
+- **Hazmat with everything else.** A dangerous good cannot use the partnered carrier and cannot share a box with ordinary stock. Send it separately, by a non partnered carrier, and apply for the dangerous goods programme early.
+
+## After it leaves
+
+Track it under Shipments and watch the received count on the Contents tab. Wait for the shipment to close fully before opening a reconciliation for missing units; the [claim window](/guides/how-to-start-amazon-fba-uk#the-numbers-you-will-need) is short. Sellers we know keep a plain checklist taped to the prep table (label, bag, box, weigh, contents, confirm, book). Your first shipment takes an evening. Your tenth takes forty minutes.
+
+Questions about a shipment that has gone wrong, or a listing that will not let you in, belong in [FBA and FBM](/community/c/amazon-fba-and-fbm), with the shipment ID and what the screen said.
+
+<Signup source="/guides/amazon-adding-products-and-creating-shipments" />
