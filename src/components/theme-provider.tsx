@@ -9,6 +9,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       attribute="class"
       defaultTheme="dark"
       enableSystem={false}
+      storageKey="tsn-theme"
       disableTransitionOnChange
     >
       {children}
