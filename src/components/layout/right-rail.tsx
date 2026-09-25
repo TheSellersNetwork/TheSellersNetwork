@@ -12,7 +12,7 @@ export function RightRail({ children, source }: { children?: React.ReactNode; so
         <EmailSignupCard source={source ?? "rail"} />
         <TopAnswerers />
         <SponsorSlot slot="rail" page={source ?? "rail"} />
-        <div className="rounded-lg border bg-card p-4 text-sm">
+        <div className="forum-card rail-card rounded-lg border bg-card p-4 text-sm">
           <h2 className="font-semibold">House rules</h2>
           <p className="mt-1 text-muted-foreground">
             Be useful, no selling, real numbers welcome.{" "}
@@ -30,7 +30,7 @@ export function RightRail({ children, source }: { children?: React.ReactNode; so
 export function GuideCard({ guide }: { guide: { slug: string; title: string; excerpt: string } | null }) {
   if (!guide) return null;
   return (
-    <div className="rounded-lg border bg-card p-4 text-sm">
+    <div className="forum-card rail-card rounded-lg border bg-card p-4 text-sm">
       <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Related guide</h2>
       <Link href={urls.guide(guide.slug)} className="mt-1 block font-semibold hover:underline">
         {guide.title}

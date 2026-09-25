@@ -148,3 +148,61 @@
   --cat-website: #7c3aed;
   --cat-general: #64748b;
 }
+
+/*
+  Visual styles. Selected with data-style on <html>:
+    publication (default)  white cards, light borders, Inter throughout
+    editorial              serif headings, ruled lines instead of cards, more air
+    compact                dense rows, dark category sidebar, sharp corners
+    warm                   rounder, softer surfaces, a little more space
+  Members can choose their own; the site default is NEXT_PUBLIC_STYLE.
+  Structural rules that tokens alone cannot express live under "Style rules"
+  in globals.css and key off the same attribute.
+*/
+:root {
+  --font-heading: var(--font-sans);
+  --row-py: 0.75rem;
+  --card-border: var(--border);
+  --sidebar-bg: transparent;
+  --sidebar-fg: var(--foreground);
+  --sidebar-muted: var(--muted-foreground);
+  --sidebar-active: var(--secondary);
+}
+
+:root[data-style="editorial"] {
+  --font-heading: var(--font-serif);
+  --radius: 0.25rem;
+  --row-py: 1rem;
+  --card: var(--background);
+  --card-border: color-mix(in oklab, var(--foreground) 18%, var(--background));
+  --text-body: 1.0625rem;
+}
+
+:root[data-style="compact"] {
+  --radius: 0.25rem;
+  --row-py: 0.45rem;
+  --text-body: 0.9375rem;
+  --card-border: color-mix(in oklab, var(--foreground) 16%, var(--background));
+  --sidebar-bg: var(--brand-deep);
+  --sidebar-fg: #ffffff;
+  --sidebar-muted: color-mix(in oklab, #ffffff 70%, var(--brand-deep));
+  --sidebar-active: color-mix(in oklab, #ffffff 14%, var(--brand-deep));
+}
+:root[data-style="compact"].dark {
+  --sidebar-bg: color-mix(in oklab, var(--background) 70%, #000000);
+  --sidebar-fg: var(--foreground);
+  --sidebar-muted: var(--muted-foreground);
+  --sidebar-active: color-mix(in oklab, var(--foreground) 12%, var(--background));
+}
+
+:root[data-style="warm"] {
+  --radius: 0.875rem;
+  --row-py: 0.875rem;
+  --background: color-mix(in oklab, var(--brand-soft) 35%, #fbf9f5);
+  --card: #fffdf9;
+  --card-border: color-mix(in oklab, var(--foreground) 9%, var(--background));
+}
+:root[data-style="warm"].dark {
+  --background: #14120f;
+  --card: #1c1916;
+}

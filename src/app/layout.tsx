@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/lib/site";
+import { currentStyle } from "@/lib/style-server";
 import "./globals.css";
 
 const inter = Inter({
@@ -35,11 +36,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const style = await currentStyle();
   return (
     <html
       lang="en-GB"
       data-brand={siteConfig.brand}
+      data-style={style}
       className={`${inter.variable} ${sourceSerif.variable} h-full`}
       suppressHydrationWarning
     >

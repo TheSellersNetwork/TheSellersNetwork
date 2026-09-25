@@ -9,7 +9,7 @@ export async function TopAnswerers() {
   const answerers = await getTopAnswerers(30, 5);
   if (answerers.length === 0) return null;
   return (
-    <div className="rounded-lg border bg-card p-4 text-sm">
+    <div className="forum-card rail-card rounded-lg border bg-card p-4 text-sm">
       <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Top answerers this month</h2>
       <ol className="mt-2 space-y-2">
         {answerers.map((a) => (

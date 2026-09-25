@@ -37,7 +37,7 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
   }
 
   return (
-    <article id={anchor} className={cn("scroll-mt-20", framed && "rounded-lg border bg-card", post.is_hidden && "opacity-70")}>
+    <article id={anchor} className={cn("scroll-mt-20", framed && "forum-card rounded-lg border bg-card", post.is_hidden && "opacity-70")}>
       <header className="flex items-center gap-3 px-4 pt-4">
         <UserAvatar profile={post.author} size="md" />
         <div className="min-w-0 flex-1 text-sm">

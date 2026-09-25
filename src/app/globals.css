@@ -53,6 +53,11 @@
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
   }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+  }
   /* Visible focus rings everywhere, for keyboard users */
   :focus-visible {
     outline: 2px solid var(--ring);
@@ -95,4 +100,61 @@
 .tiptap .mention {
   color: var(--brand);
   font-weight: 500;
+}
+
+/* Style rules: structure that tokens alone cannot express */
+.forum-card {
+  border-color: var(--card-border);
+}
+.topic-row {
+  padding-top: var(--row-py);
+  padding-bottom: var(--row-py);
+}
+.category-sidebar {
+  background: var(--sidebar-bg);
+  color: var(--sidebar-fg);
+}
+.category-sidebar .sidebar-muted {
+  color: var(--sidebar-muted);
+}
+.category-sidebar .sidebar-active,
+.category-sidebar a:hover {
+  background: var(--sidebar-active);
+  color: var(--sidebar-fg);
+}
+
+:root[data-style="editorial"] .forum-card {
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+  background: transparent;
+}
+:root[data-style="editorial"] .forum-card.rail-card {
+  border: 0;
+  border-top: 2px solid var(--foreground);
+  padding-left: 0;
+  padding-right: 0;
+}
+:root[data-style="editorial"] h1 {
+  letter-spacing: -0.01em;
+}
+:root[data-style="editorial"] .topic-title {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+}
+
+:root[data-style="compact"] .category-sidebar {
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  margin-left: -0.5rem;
+}
+:root[data-style="compact"] .category-sidebar .sidebar-bar {
+  opacity: 0.9;
+}
+:root[data-style="compact"] .topic-title {
+  font-size: 0.9375rem;
+}
+
+:root[data-style="warm"] .forum-card {
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
 }

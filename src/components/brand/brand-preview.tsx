@@ -6,6 +6,8 @@ import { Logo, type LogoMark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Brand } from "@/lib/site";
+import { StyleSwitcher } from "@/components/style-switcher";
+import type { StyleId } from "@/lib/style";
 import { cn } from "@/lib/utils";
 
 const palettes: { id: Brand; name: string; accent: string; deep: string; bg: string; text: string }[] =
@@ -23,7 +25,7 @@ const marks: { id: LogoMark; name: string; note: string }[] = [
   { id: "none", name: "Wordmark only", note: "No mark. Cleanest, relies on typography." },
 ];
 
-export function BrandPreview() {
+export function BrandPreview({ initialStyle }: { initialStyle: StyleId }) {
   const [brand, setBrand] = useState<Brand>("teal");
   const [mark, setMark] = useState<LogoMark>("nodes");
   const { resolvedTheme, setTheme } = useTheme();
@@ -91,7 +93,17 @@ export function BrandPreview() {
 
       <section className="mb-12">
         <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          2. Logo
+          2. Style
+        </h2>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Changes the whole site as you click. Open the community in another tab to see it on real pages. Members can also pick their own from their account page.
+        </p>
+        <StyleSwitcher initialStyle={initialStyle} />
+      </section>
+
+      <section className="mb-12">
+        <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          3. Logo
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {marks.map((m) => (
@@ -115,7 +127,7 @@ export function BrandPreview() {
 
       <section>
         <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          3. In context
+          4. In context
         </h2>
         <SampleForumChrome mark={mark} />
         <div className="mt-6 grid gap-6 lg:grid-cols-2">

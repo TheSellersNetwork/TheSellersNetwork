@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { AccountForm } from "@/components/auth/account-form";
 import { requireUser } from "@/lib/auth";
+import { StyleSwitcher } from "@/components/style-switcher";
+import { currentStyle } from "@/lib/style-server";
 import { urls } from "@/lib/forum/urls";
 
 export const metadata: Metadata = { title: "Account", robots: { index: false } };
@@ -8,6 +10,7 @@ export const metadata: Metadata = { title: "Account", robots: { index: false } }
 export default async function AccountPage() {
   const user = await requireUser(urls.account());
   const p = user.profile;
+  const style = await currentStyle();
 
   return (
     <main id="main" className="mx-auto w-full max-w-2xl flex-1 px-4 py-10 sm:px-6">
@@ -26,6 +29,13 @@ export default async function AccountPage() {
           }}
         />
       </div>
+      <section className="mt-12">
+        <h2 className="text-lg font-semibold">How the forum looks to you</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Your choice only. Dark mode is the moon button in the header.</p>
+        <div className="mt-3">
+          <StyleSwitcher initialStyle={style} layout="list" />
+        </div>
+      </section>
       <section className="mt-12 rounded-lg border p-4 text-sm">
         <h2 className="font-semibold">Purchases and bookings</h2>
         <p className="mt-1 text-muted-foreground">[TOM: shown once the course and mentoring are live]</p>
