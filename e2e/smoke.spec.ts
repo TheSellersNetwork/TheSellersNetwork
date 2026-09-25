@@ -17,7 +17,6 @@ const pages: { path: string; heading: RegExp }[] = [
   { path: "/signup", heading: /Join/ },
   { path: "/mentoring", heading: /Mentoring/ },
   { path: "/partners", heading: /Partners/ },
-  { path: "/brand", heading: /Brand options/ },
 ];
 
 for (const page of pages) {
@@ -29,10 +28,12 @@ for (const page of pages) {
   });
 }
 
-test("brand page switches palette", async ({ page }) => {
+test("site defaults are slate and warm, and brand is staff only", async ({ page }) => {
+  await page.goto("/community");
+  await expect(page.locator("html")).toHaveAttribute("data-brand", "slate");
+  await expect(page.locator("html")).toHaveAttribute("data-style", "warm");
   await page.goto("/brand");
-  await page.getByRole("button", { name: /Navy/ }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-brand", "navy");
+  await expect(page).toHaveURL(/\/login/);
 });
 
 test("protected pages redirect to sign in", async ({ page }) => {

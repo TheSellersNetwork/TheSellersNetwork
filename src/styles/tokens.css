@@ -6,7 +6,7 @@
 
   Brand palettes are selected with data-brand on <html>:
     navy | teal | slate | forest
-  The default (no attribute) is teal, per the brief. Tom picks the final one.
+  The default (no attribute) is slate, chosen on 25 September 2026.
 
   Each palette sets:
     --brand        the accent, used for primary actions, links and focus rings
@@ -49,8 +49,7 @@
   --foreground: #e6ecf3;
 }
 
-/* Palette 2: Deep teal (default) */
-:root,
+/* Palette 2: Deep teal */
 :root[data-brand="teal"] {
   --brand: #0f766e;
   --brand-deep: #0b4f4a;
@@ -58,7 +57,6 @@
   --background: #f3f7f6;
   --foreground: #14342f;
 }
-:root.dark,
 :root[data-brand="teal"].dark {
   --brand: #3fb8ac;
   --brand-deep: #6fcdc3;
@@ -67,7 +65,8 @@
   --foreground: #e4efed;
 }
 
-/* Palette 3: Slate and electric blue */
+/* Palette 3: Slate and electric blue (default) */
+:root,
 :root[data-brand="slate"] {
   --brand: #2563eb;
   --brand-deep: #1e293b;
@@ -75,6 +74,7 @@
   --background: #f8fafc;
   --foreground: #0f172a;
 }
+:root.dark,
 :root[data-brand="slate"].dark {
   --brand: #60a5fa;
   --brand-deep: #93c5fd;

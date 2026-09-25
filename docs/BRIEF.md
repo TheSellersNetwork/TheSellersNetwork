@@ -227,7 +227,7 @@ Forum Phase B, then mentoring Phase 2 (Stripe, gated course, video), then forum 
 - Which extra platforms deserve their own category at launch versus living under Other platforms
 - Which platform categories are live at launch. Decided 25 September 2026: eBay, Amazon, Vinted and Facebook Marketplace as top-level platforms from day one, plus Other platforms for Depop, Etsy and own website.
 - Real names encouraged or usernames only. Decided 25 September 2026: member's choice. Username is required (mentions and profile URL), display name is optional free text so it can be a real name, a shop name or left as the username.
-- Accent colour and logo, or placeholder wordmark (four palettes and four marks are at /brand, see docs/palette-options.png)
+- Accent colour and logo. Decided 25 September 2026: slate and electric blue, warm style, nodes mark. Alternatives remain at /brand for staff.
 - Community platform for live calls (Zoom or Google Meet link is fine to start)
 - Any change to the pricing table before Stripe products are created
 

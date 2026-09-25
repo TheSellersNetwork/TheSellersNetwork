@@ -26,7 +26,7 @@ const marks: { id: LogoMark; name: string; note: string }[] = [
 ];
 
 export function BrandPreview({ initialStyle }: { initialStyle: StyleId }) {
-  const [brand, setBrand] = useState<Brand>("teal");
+  const [brand, setBrand] = useState<Brand>("slate");
   const [mark, setMark] = useState<LogoMark>("nodes");
   const { resolvedTheme, setTheme } = useTheme();
   /* True only after hydration, so the theme button never mismatches the server render. */

@@ -1,4 +1,4 @@
-/* Visual styles a member can choose. The site default comes from NEXT_PUBLIC_STYLE. */
+/* Visual styles a member can choose. Site default is warm (chosen 25 September 2026), or NEXT_PUBLIC_STYLE. */
 export const styles = [
   { id: "publication", name: "Publication", note: "White cards, light borders, Inter throughout. Calm and professional." },
   { id: "editorial", name: "Editorial", note: "Serif headings and ruled lines instead of cards. Reads like a newspaper site." },
@@ -16,5 +16,5 @@ export function isStyleId(value: unknown): value is StyleId {
 
 export function defaultStyle(): StyleId {
   const env = process.env.NEXT_PUBLIC_STYLE;
-  return isStyleId(env) ? env : "publication";
+  return isStyleId(env) ? env : "warm";
 }

@@ -11,8 +11,8 @@ export const siteConfig = {
   description:
     "The community for UK resellers. Real numbers, moderated answers and no selling in threads.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  /* [TOM: pick the brand palette. Options: navy, teal, slate, forest. See /brand] */
-  brand: (process.env.NEXT_PUBLIC_BRAND as Brand | undefined) ?? "teal",
+  /* Chosen 25 September 2026: slate and electric blue. Other options remain at /brand for staff. */
+  brand: (process.env.NEXT_PUBLIC_BRAND as Brand | undefined) ?? "slate",
   /* Marketplaces a member can pick during onboarding. Order is display order. */
   marketplaces: [
     { id: "ebay", label: "eBay" },
