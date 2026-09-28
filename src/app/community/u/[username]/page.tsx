@@ -9,6 +9,7 @@ import { FlairChips, StreakChip } from "@/components/forum/flair-chips";
 import { getKitsForUser, getStreak } from "@/lib/forum/extras-queries";
 import { getCurrentUser } from "@/lib/auth";
 import { getProfileActivity, getProfileByUsername } from "@/lib/forum/queries";
+import { getAnonymousAccountId } from "@/lib/forum/anonymous";
 import { displayName, longDate, plural, timeAgo, trustLabel } from "@/lib/format";
 import { excerpt } from "@/lib/markdown/render";
 import { urls } from "@/lib/forum/urls";
@@ -25,7 +26,8 @@ export async function generateMetadata({ params }: PageProps<"/community/u/[user
 export default async function ProfilePage({ params }: PageProps<"/community/u/[username]">) {
   const { username } = await params;
   const profile = await getProfileByUsername(username);
-  if (!profile) notFound();
+  // The shared anonymous account has no public profile; listing its posts would only help guess who wrote them.
+  if (!profile || profile.id === (await getAnonymousAccountId())) notFound();
 
   const [activity, viewer, streak, kits] = await Promise.all([getProfileActivity(profile.id), getCurrentUser(), getStreak(profile.id), getKitsForUser(profile.id)]);
   const publicKits = kits.filter((k) => k.is_public || viewer?.id === profile.id);

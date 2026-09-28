@@ -290,3 +290,16 @@
     animation: none;
   }
 }
+
+/* Glossary terms in posts and guides: dotted underline, explained on hover or tap. */
+abbr.gloss {
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in oklab, var(--brand) 70%, transparent);
+  text-underline-offset: 3px;
+  cursor: help;
+  border-radius: 2px;
+}
+abbr.gloss:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}

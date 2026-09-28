@@ -617,6 +617,48 @@ await step("numbers streak counts consecutive weeks", async () => {
   if (r.rows[0].n !== 2) throw new Error(`streak ${r.rows[0].n}`);
 });
 
+await step("polls: author adds, members vote once, votes stay private", async () => {
+  const t = await asUser(ids.regular, `insert into public.topics (title, category_id, author_id) values ('Which courier do you use?', $1, $2) returning id`, [ids.cat_ebay, ids.regular]);
+  const topicId = t.rows[0].id;
+  await asUser(ids.regular, `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'Vote below')`, [topicId, ids.regular]);
+  const p = await asUser(ids.regular, `insert into public.polls (topic_id, question) values ($1, 'Which courier?') returning id`, [topicId]);
+  const pollId = p.rows[0].id;
+  await expectError(asUser(ids.member, `insert into public.polls (topic_id, question) values ($1, 'Hijack')`, [topicId]), DENIED);
+  const o = await asUser(ids.regular, `insert into public.poll_options (poll_id, position, label) values ($1, 0, 'Royal Mail'), ($1, 1, 'Evri') returning id`, [pollId]);
+  const [rm, evri] = o.rows.map((r) => r.id);
+  await asUser(ids.member, `insert into public.poll_votes (poll_id, user_id, option_id) values ($1, $2, $3)`, [pollId, ids.member, rm]);
+  await asUser(ids.member, `update public.poll_votes set option_id = $3 where poll_id = $1 and user_id = $2`, [pollId, ids.member, evri]);
+  await expectError(asUser(ids.member, `insert into public.poll_votes (poll_id, user_id, option_id) values ($1, $2, $3)`, [pollId, ids.member, rm]), "duplicate");
+  const seen = await asUser(ids.regular, `select count(*)::int as n from public.poll_votes where poll_id = $1`, [pollId]);
+  if (seen.rows[0].n !== 0) throw new Error("other members' votes visible");
+  const r = await asAnon(`select option_id, votes from public.poll_results($1)`, [pollId]);
+  const evriVotes = r.rows.find((x) => x.option_id === evri)?.votes;
+  if (evriVotes !== 1) throw new Error(`evri votes ${evriVotes}`);
+  await db.query(`update public.polls set closes_at = now() - interval '1 minute' where id = $1`, [pollId]);
+  await expectError(asUser(ids.regular, `insert into public.poll_votes (poll_id, user_id, option_id) values ($1, $2, $3)`, [pollId, ids.regular, rm]), DENIED);
+});
+
+await step("anonymous: members cannot set it, mapping is private", async () => {
+  const t = await asUser(ids.regular, `insert into public.topics (title, category_id, author_id) values ('Suspended help', $1, $2) returning id, is_anonymous`, [ids.cat_ebay, ids.regular]);
+  const post = await asUser(ids.regular, `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'Help') returning id`, [t.rows[0].id, ids.regular]);
+  await asUser(ids.regular, `update public.posts set is_anonymous = true where id = $1`, [post.rows[0].id]);
+  const flag = await db.query(`select is_anonymous from public.posts where id = $1`, [post.rows[0].id]);
+  if (flag.rows[0].is_anonymous) throw new Error("member set is_anonymous");
+  await db.query(`insert into public.anonymous_authors (post_id, user_id) values ($1, $2)`, [post.rows[0].id, ids.regular]);
+  const own = await asUser(ids.regular, `select count(*)::int as n from public.anonymous_authors`);
+  const other = await asUser(ids.member, `select count(*)::int as n from public.anonymous_authors`);
+  const staff = await asUser(ids.staff, `select count(*)::int as n from public.anonymous_authors`);
+  if (own.rows[0].n !== 1 || other.rows[0].n !== 0 || staff.rows[0].n !== 1) throw new Error(`own ${own.rows[0].n} other ${other.rows[0].n} staff ${staff.rows[0].n}`);
+  await expectError(asUser(ids.regular, `insert into public.anonymous_authors (post_id, user_id) values ($1, $2)`, [post.rows[0].id, ids.member]), DENIED);
+});
+
+await step("push subscriptions are private to their owner", async () => {
+  await asUser(ids.member, `insert into public.push_subscriptions (user_id, endpoint, p256dh, auth) values ($1, 'https://push.example.test/abc', 'k', 'a')`, [ids.member]);
+  const other = await asUser(ids.regular, `select count(*)::int as n from public.push_subscriptions`);
+  if (other.rows[0].n !== 0) throw new Error("subscription visible to another member");
+  await expectError(asUser(ids.member, `insert into public.push_subscriptions (user_id, endpoint, p256dh, auth) values ($1, 'http://insecure.test', 'k', 'a')`, [ids.member]), "push_subscriptions_endpoint_https");
+});
+
 await step("every public table has RLS enabled", async () => {
   const r = await db.query(`
     select c.relname from pg_class c

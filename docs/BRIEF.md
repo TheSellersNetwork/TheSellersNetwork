@@ -242,3 +242,11 @@ Forum Phase B, then mentoring Phase 2 (Stripe, gated course, video), then forum 
 - Screenshot hint and redaction reminder in the composer.
 - Search-landing funnel events for signed-out visitors, carried through to signup events.
 - Blog templates for evergreen guide, case study, news reaction and member spotlight.
+
+## Additions agreed on 28 September 2026
+
+- Tools section at /tools: parcel size checker (Royal Mail, Evri, Parcelforce limits from the carriers' own guides), tax dates and thresholds (from GOV.UK, countdown worked out from the fixed yearly deadlines), fee and policy change tracker (content/policy-changes.json, each entry linked to the official announcement, also shown on /newsletter and in the roundup draft), free spreadsheets (bookkeeping, stock tracker, sourcing log, built by `npm run downloads:build`, each tied to its guide), and a glossary.
+- Glossary tooltips: the first use of each term in a post or guide gets a dotted underline and a plain-words explanation (src/lib/glossary.ts).
+- Polls in topics: one per topic, up to six answers, optional closing date, private votes with public totals.
+- Anonymous posting in the two account health forums: posts are written as a shared "Anonymous member" account so the public API never names the author; staff and the author can see who wrote it (anonymous_authors). Created by `npm run seed`.
+- Install as an app (web manifest, icons from `npm run icons:build`) and push notifications for replies, mentions and solutions (web push with VAPID keys; turned on per device from the account and notifications pages).

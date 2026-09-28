@@ -69,6 +69,8 @@ export type Category = {
   accepting_topics: boolean;
   accepting_note: string | null;
   layout: "list" | "deals" | "gallery";
+  /* Members may post without their name showing (staff still see it). */
+  allow_anonymous: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -91,6 +93,7 @@ export type Topic = {
   last_post_at: string;
   last_poster_id: string | null;
   expires_at: string | null;
+  is_anonymous: boolean;
   deleted_at: string | null;
   created_at: string;
   updated_at: string;
@@ -120,6 +123,7 @@ export type Post = {
   hidden_reason: string | null;
   edited_at: string | null;
   edit_count: number;
+  is_anonymous: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -245,4 +249,17 @@ export type KitItem = {
   url: string | null;
   note: string | null;
   position: number;
+};
+
+export type PollOption = { id: string; position: number; label: string; votes: number };
+
+export type Poll = {
+  id: string;
+  topic_id: string;
+  question: string;
+  closes_at: string | null;
+  options: PollOption[];
+  total: number;
+  myOptionId: string | null;
+  isOpen: boolean;
 };

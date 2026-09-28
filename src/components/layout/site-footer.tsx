@@ -18,6 +18,9 @@ const columns = [
       { href: urls.guides(), label: "Guides" },
       { href: urls.blog(), label: "Blog" },
       { href: "/newsletter", label: "Newsletter" },
+      { href: "/tools", label: "Tools" },
+      { href: "/tools/parcel-size", label: "Parcel size checker" },
+      { href: "/tools/policy-changes", label: "Fee and policy changes" },
     ],
   },
   {

@@ -70,7 +70,7 @@ export function PostActions(props: Props) {
 
   function quote() {
     const lines = props.bodyMd.split("\n").slice(0, 12).join("\n");
-    const md = `> @${props.authorUsername ?? "member"} wrote:\n${lines
+    const md = `> ${props.authorUsername ? `@${props.authorUsername}` : "A member"} wrote:\n${lines
       .split("\n")
       .map((l) => `> ${l}`)
       .join("\n")}`;

@@ -26,7 +26,7 @@ export default async function NewTopicPage({ searchParams }: PageProps<"/communi
       ) : null}
       <div className="mt-6">
         <NewTopicForm
-          categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id, min_trust_to_post: c.min_trust_to_post, layout: c.layout }))}
+          categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id, min_trust_to_post: c.min_trust_to_post, layout: c.layout, allow_anonymous: c.allow_anonymous }))}
           preselectedSlug={preselected}
           trustLevel={user.profile.trust_level}
         />

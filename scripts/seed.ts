@@ -15,6 +15,7 @@
 
 import { config } from "dotenv";
 import { readFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
 import { parse } from "csv-parse/sync";
 import { createClient } from "@supabase/supabase-js";
 
@@ -28,7 +29,7 @@ if (!authorEmail) throw new Error("SEED_AUTHOR_EMAIL (the owner's account email)
 
 const supabase = createClient(url, key, { auth: { persistSession: false } });
 
-type Cat = { slug: string; name: string; colour: string; children?: Cat[]; min_account_age_hours?: number; description?: string; accepting_topics?: boolean; accepting_note?: string; layout?: "list" | "deals" | "gallery" };
+type Cat = { slug: string; name: string; colour: string; children?: Cat[]; min_account_age_hours?: number; description?: string; accepting_topics?: boolean; accepting_note?: string; layout?: "list" | "deals" | "gallery"; allow_anonymous?: boolean };
 
 /* Launch categories: four platforms at top level, then Other platforms, then general. */
 const descriptions: Record<string, string> = {"ebay": "Selling on eBay UK, from your first listing to running a shop.", "ebay-listings-and-titles": "Titles, item specifics, photos and descriptions.", "ebay-pricing-and-offers": "Pricing from sold comps, Best Offer, watcher offers and sales.", "ebay-postage-and-packaging": "Royal Mail, couriers, packaging and postage pricing.", "ebay-buyers-and-disputes": "Returns, cases, INR claims, feedback and difficult buyers.", "ebay-account-health-and-policy": "Defects, VeRO, policy changes and account limits.", "ebay-promoted-listings-and-traffic": "Promoted Listings, views, impressions and getting seen.", "amazon": "Selling on Amazon UK, FBA and FBM.", "amazon-fba-and-fbm": "Prep, shipments, fees, storage and fulfilment choices.", "amazon-listings-and-content": "Listings, images, A+ content and catalogue problems.", "amazon-ads-and-ppc": "Sponsored ads, budgets, keywords and reading the reports.", "amazon-account-health-and-suspensions": "Account health, suspensions, appeals and verification.", "amazon-sourcing-and-wholesale": "Finding stock, wholesale accounts and ungating.", "vinted": "Selling on Vinted: listings, pricing, postage and buyers.", "facebook-marketplace": "Facebook Marketplace and local selling: listings, collection and payment.", "live-selling": "Selling live on Whatnot, eBay Live, TikTok Live and other streams.", "whatnot": "Whatnot shows, auctions, fees and shipping.", "ebay-live": "eBay Live streams and how they work.", "tiktok-live-and-other": "TikTok Live, Instagram Live and other live platforms.", "other-platforms": "Depop, Etsy, TikTok Shop, your own website and everything else.", "depop-and-clothing-resale": "Depop and clothing resale: listings, offers and shipping.", "etsy-and-handmade": "Etsy, handmade and print on demand.", "tiktok-shop": "TikTok Shop: setting up, listing, affiliates and fulfilment.", "own-website-and-shopify": "Your own website, Shopify and taking payments directly.", "reselling": "Everything that applies whatever platform you sell on.", "tax-bookkeeping-and-legal": "Tax, bookkeeping, VAT and business structure. Experience, not advice.", "tools-and-automation": "Listing tools, repricers, spreadsheets and what to automate.", "multi-channel-selling": "Selling the same stock on more than one platform.", "wins-and-case-studies": "What you sold, what you paid, what you made. Real numbers.", "introductions": "Say hello and tell us what you sell.", "site-feedback": "Bugs, ideas and requests for the forum itself."};
@@ -43,7 +44,7 @@ const launch: Cat[] = [
       { slug: "ebay-pricing-and-offers", name: "Pricing and offers", colour: "ebay" },
       { slug: "ebay-postage-and-packaging", name: "Postage and packaging", colour: "ebay" },
       { slug: "ebay-buyers-and-disputes", name: "Buyers and disputes", colour: "ebay" },
-      { slug: "ebay-account-health-and-policy", name: "Account health and policy", colour: "ebay" },
+      { slug: "ebay-account-health-and-policy", name: "Account health and policy", colour: "ebay", allow_anonymous: true },
       { slug: "ebay-promoted-listings-and-traffic", name: "Promoted Listings and traffic", colour: "ebay" },
     ],
   },
@@ -55,7 +56,7 @@ const launch: Cat[] = [
       { slug: "amazon-fba-and-fbm", name: "FBA and FBM", colour: "amazon" },
       { slug: "amazon-listings-and-content", name: "Listings and content", colour: "amazon" },
       { slug: "amazon-ads-and-ppc", name: "Ads and PPC", colour: "amazon" },
-      { slug: "amazon-account-health-and-suspensions", name: "Account health and suspensions", colour: "amazon" },
+      { slug: "amazon-account-health-and-suspensions", name: "Account health and suspensions", colour: "amazon", allow_anonymous: true },
       { slug: "amazon-sourcing-and-wholesale", name: "Sourcing and wholesale", colour: "amazon" },
     ],
   },
@@ -132,6 +133,7 @@ async function upsertCategory(cat: Cat, parentId: string | null, position: numbe
         accepting_topics: cat.accepting_topics ?? true,
         accepting_note: cat.accepting_note ?? null,
         layout: cat.layout ?? "list",
+        allow_anonymous: cat.allow_anonymous ?? false,
         description: cat.description ?? descriptions[cat.slug] ?? null,
       },
       { onConflict: "slug" },
@@ -200,8 +202,30 @@ async function loadCsv(file: string, fallbackAuthor: string) {
   console.log(`Loaded ${loaded} of ${rows.length} topics from ${file}`);
 }
 
+/*
+  The shared "Anonymous member" account that anonymous posts are written as.
+  It never signs in: no password anyone knows, never onboarded, so it never
+  shows among members. Created once, then found by its site_accounts row.
+*/
+async function ensureAnonymousAccount() {
+  const { data: existing } = await supabase.from("site_accounts").select("profile_id").eq("key", "anonymous").maybeSingle();
+  if (existing) return;
+  const { data, error } = await supabase.auth.admin.createUser({
+    email: "anonymous-member@example.com",
+    password: randomBytes(32).toString("base64url"),
+    email_confirm: true,
+    user_metadata: { username: "anonymous_member", display_name: "Anonymous member" },
+  });
+  if (error || !data.user) throw error ?? new Error("Could not create the anonymous account.");
+  await supabase.from("profiles").update({ username: "anonymous_member", display_name: "Anonymous member" }).eq("id", data.user.id);
+  const { error: linkError } = await supabase.from("site_accounts").insert({ key: "anonymous", profile_id: data.user.id });
+  if (linkError) throw linkError;
+  console.log("Anonymous member account created.");
+}
+
 async function main() {
   const author = await authorId();
+  await ensureAnonymousAccount();
   let position = 0;
   for (const parent of launch) {
     position += 1;

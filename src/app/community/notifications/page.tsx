@@ -8,6 +8,7 @@ import { markNotificationsRead } from "@/app/community/actions";
 import { timeAgo } from "@/lib/format";
 import { urls } from "@/lib/forum/urls";
 import type { Notification } from "@/lib/db/types";
+import { AppCard } from "@/components/app/app-card";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Notifications", robots: { index: false } };
@@ -59,6 +60,7 @@ export default async function NotificationsPage() {
           </form>
         ) : null}
       </div>
+      <AppCard className="mb-6" />
       {notifications.length === 0 ? (
         <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">Nothing yet. Replies to your topics and mentions will show up here.</p>
       ) : (

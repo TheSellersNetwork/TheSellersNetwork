@@ -36,12 +36,17 @@ async function main() {
   const solvedLines = ((solved ?? []) as unknown as Row[]).map((t) => `- [${t.title}](/community/t/${t.slug}/${t.short_id}), answered by @${t.solution?.author?.username ?? "[EDIT: author]"}`);
   const discussedLines = ((discussed ?? []) as unknown as Row[]).map((t) => `- [${t.title}](/community/t/${t.slug}/${t.short_id}), ${t.reply_count} replies`);
 
+  // New entries in the fee and policy tracker from the last fortnight.
+  const changes = JSON.parse(readFileSync(path.join(process.cwd(), "content", "policy-changes.json"), "utf8")) as { date: string; title: string; summary: string; url: string }[];
+  const fortnight = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const changeLines = changes.filter((c) => c.date >= fortnight).map((c) => `- [${c.title}](${c.url}). ${c.summary}`);
+
   const template = readFileSync(path.join(process.cwd(), "content", "blog", "_roundup-template.mdx"), "utf8");
   const fill = (src: string, marker: string, lines: string[]) =>
     src.replace(new RegExp(`<!-- roundup:${marker} -->[\\s\\S]*?<!-- /roundup:${marker} -->`), `<!-- roundup:${marker} -->\n${lines.length ? lines.join("\n") : "- [EDIT: nothing this week]"}\n<!-- /roundup:${marker} -->`);
 
   const today = new Date().toISOString().slice(0, 10);
-  const out = fill(fill(template, "solved", solvedLines), "discussed", discussedLines).replace("[EDIT: date]", today);
+  const out = fill(fill(fill(template, "solved", solvedLines), "discussed", discussedLines), "changes", changeLines).replace("[EDIT: date]", today);
   const file = path.join(process.cwd(), "content", "blog", `roundup-${today}.mdx`);
   writeFileSync(file, out);
   console.log(`Wrote ${file}. Add a published date when it is ready.`);

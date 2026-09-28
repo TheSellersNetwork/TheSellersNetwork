@@ -17,7 +17,9 @@
     "seed": "tsx scripts/seed.ts",
     "blog:sync": "tsx scripts/sync-blog.ts",
     "roundup": "tsx scripts/roundup.ts",
-    "ask-the-team:digest": "tsx scripts/ask-the-team-digest.ts"
+    "ask-the-team:digest": "tsx scripts/ask-the-team-digest.ts",
+    "downloads:build": "tsx scripts/build-downloads.ts",
+    "icons:build": "node scripts/build-icons.mjs"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.6.1",
@@ -66,6 +68,7 @@
     "tiptap-markdown": "^0.9.0",
     "tw-animate-css": "^1.4.0",
     "unified": "^11.0.5",
+    "web-push": "^3.6.7",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -80,10 +83,12 @@
     "@types/node": "^24.13.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "@vitejs/plugin-react": "^6.1.1",
     "dotenv": "^18.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
+    "exceljs": "^4.4.0",
     "jsdom": "^29.1.1",
     "prettier": "^3.9.9",
     "tailwindcss": "^4",

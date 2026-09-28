@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { StyleSwitcher } from "@/components/style-switcher";
 import { currentStyle } from "@/lib/style-server";
 import { urls } from "@/lib/forum/urls";
+import { AppCard } from "@/components/app/app-card";
 
 export const metadata: Metadata = { title: "Account", robots: { index: false } };
 
@@ -30,6 +31,7 @@ export default async function AccountPage() {
           }}
         />
       </div>
+      <AppCard className="mt-12" />
       <section className="mt-12">
         <h2 className="text-lg font-semibold">How the forum looks to you</h2>
         <p className="mt-1 text-sm text-muted-foreground">Your choice only. Dark mode is the moon button in the header.</p>

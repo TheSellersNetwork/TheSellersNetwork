@@ -17,9 +17,10 @@ type Props = {
   isLocked: boolean;
   signedIn: boolean;
   emailConfirmed: boolean;
+  allowAnonymous?: boolean;
 };
 
-export function ReplySection({ topicId, topicSlug, shortId, canReply, isLocked, signedIn, emailConfirmed }: Props) {
+export function ReplySection({ topicId, topicSlug, shortId, canReply, isLocked, signedIn, emailConfirmed, allowAnonymous }: Props) {
   const router = useRouter();
   const insertRef = useRef<((md: string) => void) | null>(null);
   const [state, action, pending] = useActionState<ActionState, FormData>(
@@ -76,6 +77,7 @@ export function ReplySection({ topicId, topicSlug, shortId, canReply, isLocked, 
       {!emailConfirmed ? <p className="text-sm text-muted-foreground">Confirm your email address to post. Check your inbox for the link.</p> : null}
       <input type="hidden" name="topic_id" value={topicId} />
       <Composer draftKey={`reply:${topicId}`} insertRef={insertRef} placeholder="Answer with what you actually did and what happened." />
+      {allowAnonymous ? <AnonymousToggle /> : null}
       {state.message && !state.ok ? (
         <p className="text-sm text-destructive" role="alert">
           {state.message}
@@ -85,5 +87,20 @@ export function ReplySection({ topicId, topicSlug, shortId, canReply, isLocked, 
         {pending ? "Posting" : "Post reply"}
       </Button>
     </form>
+  );
+}
+
+/* Shared by replies and new topics in forums that allow it. */
+export function AnonymousToggle() {
+  return (
+    <label className="flex items-start gap-2 rounded-md border bg-secondary/40 px-3 py-2 text-sm">
+      <input type="checkbox" name="anonymous" className="mt-1 size-4 accent-[var(--brand)]" />
+      <span>
+        <span className="font-medium">Post anonymously</span>
+        <span className="block text-xs text-muted-foreground">
+          Your name and profile will not show on this post. Staff can still see who wrote it, and the rules still apply. You can delete it later but not edit it.
+        </span>
+      </span>
+    </label>
   );
 }

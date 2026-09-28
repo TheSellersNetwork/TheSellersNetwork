@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Toaster } from "@/components/ui/sonner";
+import { GlossaryTerms } from "@/components/content/glossary-terms";
+import { ServiceWorker } from "@/components/app/service-worker";
 import { siteConfig } from "@/lib/site";
 import { currentStyle } from "@/lib/style-server";
 import "./globals.css";
@@ -34,7 +36,12 @@ export const metadata: Metadata = {
     locale: "en_GB",
     type: "website",
   },
+  icons: { apple: "/icons/apple-touch-icon.png" },
+  appleWebApp: { capable: true, title: "Sellers Network", statusBarStyle: "black-translucent" },
 };
+
+// Matches the dark navy in tokens.css so the phone's status bar blends in.
+export const viewport: Viewport = { themeColor: "#0b1220" };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const style = await currentStyle();
@@ -59,6 +66,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             {children}
             <SiteFooter />
             <Toaster position="bottom-center" />
+            <GlossaryTerms />
+            <ServiceWorker />
           </AnalyticsProvider>
         </ThemeProvider>
       </body>

@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/send";
+import { sendPush } from "@/lib/push";
 import { ReplyEmail } from "@/emails/reply-email";
 import { MentionEmail } from "@/emails/mention-email";
 import { SolutionEmail } from "@/emails/solution-email";
@@ -52,6 +53,17 @@ export async function dispatchEmailsForPost(postId: string, only?: "solution"): 
   const topicUrl = `${siteConfig.url}/community/t/${topic.slug}/${topic.short_id}#post-${post.post_number}`;
   const snippet = excerpt(post.body_md, 240);
   const actorName = displayName(author);
+
+  // Push goes to every device the member turned it on for, whatever their email settings.
+  const pushText = (type: string) =>
+    type === "reply" ? `${actorName} replied in "${topic.title}"` : type === "mention" ? `${actorName} mentioned you in "${topic.title}"` : `Your reply in "${topic.title}" was marked as the solution`;
+  const byType = new Map<string, string[]>();
+  for (const n of pending as Notification[]) byType.set(n.type, [...(byType.get(n.type) ?? []), n.user_id]);
+  await Promise.all(
+    Array.from(byType, ([type, ids]) =>
+      sendPush(ids, { title: pushText(type), body: type === "solution" ? "" : snippet, url: topicUrl, tag: `post-${post.id}` }),
+    ),
+  );
 
   for (const n of pending as Notification[]) {
     const pref = prefs.get(n.user_id);

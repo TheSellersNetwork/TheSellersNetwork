@@ -10,6 +10,9 @@ import { friendlyError } from "@/lib/errors";
 import { urls } from "@/lib/forum/urls";
 import { dispatchEmailsForPost } from "@/lib/email/notify";
 import { trackServer } from "@/lib/analytics/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createAnonymousReply, createAnonymousTopic, isAnonymousAuthor } from "@/lib/forum/anonymous";
+import { parsePollInput } from "@/lib/forum/polls";
 import type { Topic } from "@/lib/db/types";
 
 export type ActionState = { ok: boolean; message: string; redirectTo?: string };
@@ -59,27 +62,55 @@ export async function createTopic(_prev: ActionState, formData: FormData): Promi
     return { ok: false, message: "You are posting quickly. Wait a few minutes." };
   }
 
-  const supabase = await createClient();
-  const { data: topic, error: topicError } = await supabase
-    .from("topics")
-    .insert({
-      title: parsed.data.title,
-      category_id: parsed.data.category_id,
-      author_id: user.id,
-      expires_at: parsed.data.expires_at ? new Date(`${parsed.data.expires_at}T23:59:59`).toISOString() : null,
-    })
-    .select("id, slug, short_id")
-    .single();
-  if (topicError || !topic) return { ok: false, message: friendlyError(topicError) };
+  const { poll, error: pollError } = parsePollInput(formData.get("poll_question"), formData.getAll("poll_option"), formData.get("poll_days"));
+  if (pollError) return { ok: false, message: pollError };
 
+  const supabase = await createClient();
   const body_html = await renderMarkdown(parsed.data.body_md);
-  const { error: postError } = await supabase
-    .from("posts")
-    .insert({ topic_id: topic.id, author_id: user.id, body_md: parsed.data.body_md, body_html });
-  if (postError) {
-    // The topic exists without a body; remove it so nothing dangles.
-    await supabase.from("topics").delete().eq("id", topic.id);
-    return { ok: false, message: friendlyError(postError) };
+  const anonymous = formData.get("anonymous") === "on";
+  let topic: { id: string; slug: string; short_id: string };
+
+  if (anonymous) {
+    const result = await createAnonymousTopic({
+      userId: user.id,
+      categoryId: parsed.data.category_id,
+      title: parsed.data.title,
+      bodyMd: parsed.data.body_md,
+      bodyHtml: body_html,
+    });
+    if (!result.ok) return { ok: false, message: result.message };
+    topic = result.value;
+  } else {
+    const { data, error: topicError } = await supabase
+      .from("topics")
+      .insert({
+        title: parsed.data.title,
+        category_id: parsed.data.category_id,
+        author_id: user.id,
+        expires_at: parsed.data.expires_at ? new Date(`${parsed.data.expires_at}T23:59:59`).toISOString() : null,
+      })
+      .select("id, slug, short_id")
+      .single();
+    if (topicError || !data) return { ok: false, message: friendlyError(topicError) };
+    topic = data;
+
+    const { error: postError } = await supabase
+      .from("posts")
+      .insert({ topic_id: topic.id, author_id: user.id, body_md: parsed.data.body_md, body_html });
+    if (postError) {
+      // The topic exists without a body; remove it so nothing dangles.
+      await supabase.from("topics").delete().eq("id", topic.id);
+      return { ok: false, message: friendlyError(postError) };
+    }
+  }
+
+  if (poll) {
+    // Anonymous topics belong to the shared account, so their poll is written by the server.
+    const writer = anonymous ? createAdminClient() : supabase;
+    const { data: created } = await writer.from("polls").insert({ topic_id: topic.id, question: poll.question, closes_at: poll.closesAt }).select("id").single();
+    if (created) {
+      await writer.from("poll_options").insert(poll.labels.map((label, position) => ({ poll_id: created.id, position, label })));
+    }
   }
 
   if (user.profile.post_count === 0) {
@@ -115,18 +146,32 @@ export async function createReply(_prev: ActionState, formData: FormData): Promi
 
   const supabase = await createClient();
   const body_html = await renderMarkdown(parsed.data.body_md);
-  const { data: post, error: postError } = await supabase
-    .from("posts")
-    .insert({
-      topic_id: parsed.data.topic_id,
-      author_id: user.id,
-      body_md: parsed.data.body_md,
-      body_html,
-      reply_to_post_id: parsed.data.reply_to_post_id,
-    })
-    .select("id, post_number, topic:topics (slug, short_id)")
-    .single();
-  if (postError || !post) return { ok: false, message: friendlyError(postError) };
+  let post: { id: string; post_number: number; topic: unknown };
+  if (formData.get("anonymous") === "on") {
+    const result = await createAnonymousReply({
+      userId: user.id,
+      topicId: parsed.data.topic_id,
+      bodyMd: parsed.data.body_md,
+      bodyHtml: body_html,
+      replyToPostId: parsed.data.reply_to_post_id,
+    });
+    if (!result.ok) return { ok: false, message: result.message };
+    post = result.value;
+  } else {
+    const { data, error: postError } = await supabase
+      .from("posts")
+      .insert({
+        topic_id: parsed.data.topic_id,
+        author_id: user.id,
+        body_md: parsed.data.body_md,
+        body_html,
+        reply_to_post_id: parsed.data.reply_to_post_id,
+      })
+      .select("id, post_number, topic:topics (slug, short_id)")
+      .single();
+    if (postError || !data) return { ok: false, message: friendlyError(postError) };
+    post = data;
+  }
 
   if (user.profile.post_count === 0) {
     await trackServer("first_post", { kind: "reply" }, user.id);
@@ -168,10 +213,11 @@ export async function editPost(_prev: ActionState, formData: FormData): Promise<
 export async function deletePost(postId: string): Promise<ActionState> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, message: "Sign in first." };
-  const supabase = await createClient();
+  // Anonymous posts belong to the shared account; their real author deletes through the server.
+  const supabase = (await isAnonymousAuthor(postId, user.id)) ? createAdminClient() : await createClient();
   const { data, error } = await supabase
     .from("posts")
-    .update({ is_deleted: true })
+    .update({ is_deleted: true, deleted_by: user.id, deleted_at: new Date().toISOString() })
     .eq("id", postId)
     .select("topic:topics (slug, short_id)")
     .single();
@@ -232,7 +278,10 @@ export async function flagPost(_prev: ActionState, formData: FormData): Promise<
 export async function markSolved(topicId: string, postId: string | null): Promise<ActionState> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, message: "Sign in first." };
-  const supabase = await createClient();
+  let supabase = await createClient();
+  // The real author of an anonymous topic marks solutions through the server.
+  const { data: opening } = await supabase.from("posts").select("id, is_anonymous").eq("topic_id", topicId).eq("post_number", 1).maybeSingle();
+  if (opening?.is_anonymous && (await isAnonymousAuthor(opening.id, user.id))) supabase = createAdminClient();
   const { data, error } = await supabase
     .from("topics")
     .update({ is_solved: postId !== null, solution_post_id: postId })
@@ -292,4 +341,16 @@ export async function recordRead(topicsRead: number, postsRead: number, seconds:
     p_posts_read: postsRead,
     p_time_read_secs: Math.min(seconds, 600),
   });
+}
+
+/* One vote per member per poll; voting again changes the vote. */
+export async function votePoll(pollId: string, optionId: string): Promise<ActionState> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, message: "Sign in to vote." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("poll_votes").upsert({ poll_id: pollId, user_id: user.id, option_id: optionId }, { onConflict: "poll_id,user_id" });
+  if (error) return { ok: false, message: "That poll is closed." };
+  const { data: poll } = await supabase.from("polls").select("topic:topics (slug, short_id)").eq("id", pollId).single();
+  if (poll) revalidatePath(urls.topic(poll.topic as unknown as Pick<Topic, "slug" | "short_id">));
+  return { ok: true, message: "Vote saved." };
 }

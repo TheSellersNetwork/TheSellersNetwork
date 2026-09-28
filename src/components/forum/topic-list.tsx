@@ -66,7 +66,7 @@ export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCate
 
 function TopicRowItem({ topic, showCategory, isNew, onlineIds, deal }: { topic: TopicRow; showCategory: boolean; isNew: boolean; onlineIds?: Set<string>; deal?: { valid: number; expired: number; heat: number } }) {
   const ended = topic.expires_at ? new Date(topic.expires_at) < new Date() : false;
-  const avatars = [topic.author, topic.last_poster].filter(
+  const avatars = [topic.is_anonymous ? null : topic.author, topic.last_poster].filter(
     (p, i, arr): p is NonNullable<typeof p> => !!p && arr.findIndex((x) => x?.id === p.id) === i,
   );
   const colour = topic.category?.colour ?? "general";

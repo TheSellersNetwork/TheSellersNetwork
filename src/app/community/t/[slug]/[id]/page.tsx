@@ -11,6 +11,9 @@ import { ReadTracker } from "@/components/forum/read-tracker";
 import { LandingTracker } from "@/components/analytics/landing-tracker";
 import { LiveBar } from "@/components/forum/live-bar";
 import { DealVotes } from "@/components/forum/deal-votes";
+import { PollCard } from "@/components/forum/poll-card";
+import { getPoll } from "@/lib/forum/polls";
+import { getAnonymousAuthors } from "@/lib/forum/anonymous";
 import { getDealOrder, getMyDealVote } from "@/lib/forum/extras-queries";
 import { WEEKLY_THREADS_SLUG } from "@/lib/rituals";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
@@ -69,12 +72,19 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
   const dealMeta = isDeal ? (await getDealOrder(category!.id)).get(topic.id) : undefined;
   const myVote = isDeal && viewer ? await getMyDealVote(viewer.id, topic.id) : null;
   const canReply = !!viewer && (!topic.is_locked || viewer.profile.is_staff);
-  const canMarkSolution = !!viewer && (viewer.id === topic.author_id || viewer.profile.is_staff || viewer.profile.trust_level >= 3);
+  const [poll, anonymousAuthors] = await Promise.all([
+    getPoll(topic.id, viewer?.id),
+    viewer ? getAnonymousAuthors(posts.filter((p) => p.is_anonymous).map((p) => p.id)) : Promise.resolve(new Map<string, { user_id: string; username: string }>()),
+  ]);
+  const isAnonymousOwner = !!viewer && !!opening?.is_anonymous && anonymousAuthors.get(opening.id)?.user_id === viewer.id;
+  const canMarkSolution = !!viewer && (viewer.id === topic.author_id || isAnonymousOwner || viewer.profile.is_staff || viewer.profile.trust_level >= 3);
 
   const toLd = (p: (typeof posts)[number]) => ({
     text: excerpt(p.body_md, 500),
     dateCreated: p.created_at,
-    author: { name: displayName(p.author), url: p.author ? `${siteConfig.url}${urls.profile(p.author.username)}` : siteConfig.url },
+    author: p.is_anonymous
+      ? { name: "Anonymous member", url: siteConfig.url }
+      : { name: displayName(p.author), url: p.author ? `${siteConfig.url}${urls.profile(p.author.username)}` : siteConfig.url },
     upvoteCount: p.like_count,
     url: urls.topic(topic, p.post_number),
   });
@@ -161,8 +171,9 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
 
       <div className="space-y-4">
         {isDeal ? <DealVotes topicId={topic.id} valid={dealMeta?.valid ?? 0} expired={dealMeta?.expired ?? 0} mine={myVote} expiresAt={topic.expires_at} signedIn={!!viewer} /> : null}
+        {poll ? <PollCard poll={poll} signedIn={!!viewer} returnTo={urls.topic(topic)} /> : null}
         {opening ? (
-          <PostItem post={opening} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution={false} isOpening likeLabel={likeLabel} />
+          <PostItem post={opening} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution={false} isOpening likeLabel={likeLabel} anonymousAuthor={anonymousAuthors.get(opening.id)} />
         ) : null}
 
         {solution ? (
@@ -170,7 +181,7 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
             <h2 id="solution-heading" className="flex items-center gap-2 border-b border-success/30 px-4 py-2 text-sm font-semibold text-success">
               <CheckCircle2 className="size-4" /> Solution
             </h2>
-            <PostItem post={solution} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution framed={false} likeLabel={likeLabel} />
+            <PostItem post={solution} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution framed={false} likeLabel={likeLabel} anonymousAuthor={anonymousAuthors.get(solution.id)} />
             <div className="border-t p-4">
               <EmailSignupCard source={`${urls.topic(topic)}#solution`} variant="inline" />
             </div>
@@ -181,13 +192,13 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
           <h2 className="pt-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{plural(replies.length, "reply", "replies")}</h2>
         ) : null}
         {replies.map((post) => (
-          <PostItem key={post.id} post={post} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution={post.id === solution?.id} likeLabel={likeLabel} />
+          <PostItem key={post.id} post={post} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution={post.id === solution?.id} likeLabel={likeLabel} anonymousAuthor={anonymousAuthors.get(post.id)} />
         ))}
       </div>
 
       <LiveBar kind="replies" topicId={topic.id} />
       <div className="mt-8">
-        <ReplySection topicId={topic.id} topicSlug={topic.slug} shortId={topic.short_id} canReply={canReply} isLocked={topic.is_locked} signedIn={!!viewer} emailConfirmed={viewer?.emailConfirmed ?? false} />
+        <ReplySection allowAnonymous={!!category?.allow_anonymous} topicId={topic.id} topicSlug={topic.slug} shortId={topic.short_id} canReply={canReply} isLocked={topic.is_locked} signedIn={!!viewer} emailConfirmed={viewer?.emailConfirmed ?? false} />
       </div>
     </ForumShell>
   );

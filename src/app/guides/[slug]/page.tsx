@@ -41,7 +41,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
           </p>
           <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{guide.title}</h1>
           <p className="mt-3 max-w-prose text-lg text-muted-foreground">{guide.excerpt}</p>
-          <div className="prose prose-neutral mt-8 max-w-none measure dark:prose-invert prose-a:text-brand">
+          <div data-glossary className="prose prose-neutral mt-8 max-w-none measure dark:prose-invert prose-a:text-brand">
             <Mdx source={guide.content} />
           </div>
           <div className="mt-10 border-t pt-6">

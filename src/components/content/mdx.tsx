@@ -3,6 +3,8 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
+import { DownloadCard } from "@/components/tools/download-card";
+import { TaxDates } from "@/components/tools/tax-dates";
 
 /*
   Renders MDX content from the repo (guides, blog posts, course modules).
@@ -15,6 +17,8 @@ const components = {
     return <a {...props} rel="noopener" />;
   },
   Signup: ({ source }: { source: string }) => <EmailSignupCard source={source} variant="inline" className="not-prose my-8" />,
+  Download: ({ file }: { file: "bookkeeping" | "stock" | "sourcing" }) => <DownloadCard file={file} showGuide={false} className="my-8" />,
+  TaxDates: () => <TaxDates count={4} compact className="my-8" />,
   Placeholder: ({ children }: { children: React.ReactNode }) => (
     <p className="not-prose my-4 rounded-md border border-dashed bg-secondary px-3 py-2 text-sm text-muted-foreground">[Draft note: {children}]</p>
   ),

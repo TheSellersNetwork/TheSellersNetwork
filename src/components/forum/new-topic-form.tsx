@@ -4,12 +4,14 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 import { createTopic, type ActionState } from "@/app/community/actions";
 import { Composer } from "@/components/composer/composer";
 import { SimilarTopics } from "@/components/forum/similar-topics";
+import { AnonymousToggle } from "@/components/forum/reply-section";
+import { PollBuilder } from "@/components/forum/poll-builder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type Cat = { id: string; slug: string; name: string; parent_id: string | null; min_trust_to_post: number; layout?: string };
+type Cat = { id: string; slug: string; name: string; parent_id: string | null; min_trust_to_post: number; layout?: string; allow_anonymous?: boolean };
 
 export function NewTopicForm({ categories, preselectedSlug, trustLevel }: { categories: Cat[]; preselectedSlug: string | null; trustLevel: number }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(createTopic, { ok: false, message: "" });
@@ -84,6 +86,10 @@ export function NewTopicForm({ categories, preselectedSlug, trustLevel }: { cate
         <Label>Post</Label>
         <Composer draftKey="new-topic" minHeight={260} />
       </div>
+
+      <PollBuilder />
+
+      {categories.find((c) => c.id === categoryId)?.allow_anonymous ? <AnonymousToggle /> : null}
 
       {state.message ? (
         <p className="text-sm text-destructive" role="alert">
