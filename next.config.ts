@@ -41,6 +41,8 @@ const nextConfig: NextConfig = {
   redirects: async () => [
     { source: "/pickups", destination: "/community/pickups", permanent: true },
     { source: "/pickups/:path*", destination: "/community/pickups/:path*", permanent: true },
+    // Search engines look for /sitemap.xml; the index of our split sitemaps lives at /sitemap-index.xml.
+    { source: "/sitemap.xml", destination: "/sitemap-index.xml", permanent: false },
   ],
   headers: async () => [
     {

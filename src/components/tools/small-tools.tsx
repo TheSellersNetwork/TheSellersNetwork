@@ -111,6 +111,11 @@ export function StockAgeing() {
   );
 }
 
+/* The column that names each listing: a title if there is one, not an item number. */
+function titleCol(headers: string[]): string {
+  return headers.find((h) => /title/i.test(h)) ?? headers.find((h) => /name|description/i.test(h)) ?? headers.find((h) => /item/i.test(h) && !/number|id|sku/i.test(h)) ?? headers[0];
+}
+
 /* ---- Bulk price change ---- */
 export function BulkPrice() {
   const [rows, setRows] = useState<{ headers: string[]; rows: Record<string, string>[] } | null>(null);
@@ -199,7 +204,7 @@ export function BulkPrice() {
                   <tbody className="divide-y">
                     {preview.slice(0, 200).map(({ r, old, next }, i) => (
                       <tr key={i}>
-                        <td className="max-w-xs truncate p-2">{r[rows.headers.find((h) => /title|name|item/i.test(h)) ?? rows.headers[0]]}</td>
+                        <td className="max-w-xs truncate p-2">{r[titleCol(rows.headers)]}</td>
                         <td className="p-2 text-right tabular-nums text-muted-foreground">{gbp(old)}</td>
                         <td className="p-2 text-right font-medium tabular-nums">{gbp(next)}</td>
                       </tr>

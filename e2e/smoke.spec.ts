@@ -7,7 +7,7 @@ import { test, expect } from "@playwright/test";
 */
 
 const pages: { path: string; heading: RegExp }[] = [
-  { path: "/", heading: /community/i },
+  { path: "/", heading: /free forum/i },
   { path: "/community", heading: /Explore forums/ },
   { path: "/community?view=latest", heading: /Latest topics/ },
   { path: "/community/c/ebay", heading: /eBay/ },
@@ -21,6 +21,16 @@ const pages: { path: string; heading: RegExp }[] = [
   { path: "/partners", heading: /Partners/ },
   { path: "/newsletter", heading: /Newsletter/ },
   { path: "/kits", heading: /Setups/ },
+  { path: "/tools", heading: /Free tools/ },
+  { path: "/community/pickups", heading: /Pickups/ },
+  { path: "/community/pickups/bolo", heading: /BOLO/ },
+  { path: "/about", heading: /About/ },
+  { path: "/privacy", heading: /Privacy/ },
+  { path: "/terms", heading: /Terms/ },
+  { path: "/cookies", heading: /Cookies/ },
+  { path: "/accessibility", heading: /Accessibility/ },
+  { path: "/contact", heading: /Contact/ },
+  { path: "/report", heading: /Report/ },
 ];
 
 for (const page of pages) {

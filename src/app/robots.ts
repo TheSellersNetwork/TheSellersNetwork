@@ -10,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin", "/account", "/onboarding", "/community/u/", "/community/search", "/community/notifications", "/community/new", "/api/", "/auth/", "/brand", "/go/"],
       },
     ],
-    sitemap: `${siteConfig.url}/sitemap.xml`,
+    sitemap: `${siteConfig.url}/sitemap-index.xml`,
   };
 }

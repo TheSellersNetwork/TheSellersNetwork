@@ -270,6 +270,13 @@ async function main() {
   }
   console.log("Categories and intro topics are in place.");
 
+  // The "Ask Tom" forum was renamed "Ask the team"; rename any intro topic still carrying the old name.
+  const { data: oldTitles } = await supabase.from("topics").select("id, title").ilike("title", "%Ask Tom%");
+  for (const t of oldTitles ?? []) {
+    await supabase.from("topics").update({ title: String(t.title).replace(/Ask Tom/g, "Ask the team") }).eq("id", t.id);
+  }
+  if (oldTitles?.length) console.log(`Renamed ${oldTitles.length} topic(s) from Ask Tom to Ask the team.`);
+
   // Tools and automation gets its pinned "when to automate" topic linking the Autopilot waitlist.
   const { data: tools } = await supabase.from("categories").select("id").eq("slug", "tools-and-automation").single();
   if (tools) {
