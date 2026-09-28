@@ -37,6 +37,12 @@ function shortVersion(content: string): string {
 }
 
 async function main() {
+  // Threads need their poll; without migration 1800 there is nowhere to put it.
+  const { error: pollsMissing } = await supabase.from("polls").select("id").limit(1);
+  if (pollsMissing) {
+    console.log("Skipping: the polls table is missing. Apply supabase/migrations/20260928001800_polls_anonymous_push.sql first.");
+    return;
+  }
   const { data: users } = await supabase.auth.admin.listUsers({ perPage: 1000 });
   const author = users.users.find((u) => u.email?.toLowerCase() === authorEmail!.toLowerCase());
   if (!author) throw new Error(`No auth user with email ${authorEmail}.`);

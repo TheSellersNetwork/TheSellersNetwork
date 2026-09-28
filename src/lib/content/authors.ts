@@ -3,14 +3,14 @@
   no invented credentials, photos or forum accounts.
 */
 
-export type AuthorId = "james-callaghan" | "rachel-doyle";
+export type AuthorId = "jamie-callaghan" | "rachel-doyle";
 
 export type Author = { id: AuthorId; name: string; initials: string; covers: string };
 
 export const authors: Record<AuthorId, Author> = {
-  "james-callaghan": {
-    id: "james-callaghan",
-    name: "James Callaghan",
+  "jamie-callaghan": {
+    id: "jamie-callaghan",
+    name: "Jamie Callaghan",
     initials: "JC",
     covers: "eBay, Depop, Royal Mail and Evri",
   },
@@ -24,7 +24,7 @@ export const authors: Record<AuthorId, Author> = {
 
 /* Who writes about what, used when a post does not name its author. */
 export function defaultAuthor(platform: string): AuthorId {
-  return ["ebay", "depop", "royal-mail", "evri"].includes(platform) ? "james-callaghan" : "rachel-doyle";
+  return ["ebay", "depop", "royal-mail", "evri"].includes(platform) ? "jamie-callaghan" : "rachel-doyle";
 }
 
 export function getAuthor(id: string | null | undefined, platform = "general"): Author {

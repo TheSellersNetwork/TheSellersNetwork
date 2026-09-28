@@ -44,7 +44,7 @@ for (const file of files) {
   if (data.platform && !platforms.includes(data.platform)) fail(file, `unknown platform ${data.platform}`);
   if (data.status && !["in-effect", "coming", "announced"].includes(data.status)) fail(file, `unknown status ${data.status}`);
   if (data.impact && !["high", "medium", "low"].includes(data.impact)) fail(file, `unknown impact ${data.impact}`);
-  if (data.author && !["james-callaghan", "rachel-doyle"].includes(data.author)) fail(file, `unknown author ${data.author}`);
+  if (data.author && !["jamie-callaghan", "rachel-doyle"].includes(data.author)) fail(file, `unknown author ${data.author}`);
   if (data.forum && !forums.includes(data.forum)) fail(file, `unknown forum ${data.forum}`);
   if (data.source && !/^https:\/\//.test(String(data.source))) fail(file, "source must be an https link");
   if (String(data.title ?? "").length > 90) fail(file, "title over 90 characters");
