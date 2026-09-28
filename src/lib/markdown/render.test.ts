@@ -31,6 +31,14 @@ describe("renderMarkdown", () => {
     expect(html).toContain('rel="nofollow ugc noopener"');
   });
 
+  it("drops images that are not from our own storage", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://proj.supabase.co");
+    const html = await renderMarkdown("![a](https://proj.supabase.co/storage/v1/object/public/post-images/u/a.webp) ![b](https://tracker.test/pixel.png)");
+    vi.unstubAllEnvs();
+    expect(html).toContain("proj.supabase.co/storage");
+    expect(html).not.toContain("tracker.test");
+  });
+
   it("allows https images only", async () => {
     const html = await renderMarkdown("![a](https://x.test/a.png) ![b](http://x.test/b.png)");
     expect(html).toContain('src="https://x.test/a.png"');

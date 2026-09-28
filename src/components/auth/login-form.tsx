@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { safeNext } from "@/lib/safe-next";
 import { VerifyCode } from "@/components/auth/verify-code";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +31,8 @@ export function LoginForm({ next }: { next: string }) {
     if (mode === "code") {
       const { error: codeError } = await supabase.auth.signInWithOtp({ email: address, options: { shouldCreateUser: false } });
       setPending(false);
-      if (codeError) setError(codeError.message.toLowerCase().includes("signups not allowed") ? "No account with that email. Create one first." : "We could not send the code. Check the address and try again.");
+      // An unknown address looks the same as a known one, so the form cannot be used to find out who has an account.
+      if (codeError && !codeError.message.toLowerCase().includes("signups not allowed")) setError("We could not send the code. Check the address and try again.");
       else setCodeSent(true);
       return;
     }
@@ -41,7 +43,7 @@ export function LoginForm({ next }: { next: string }) {
       setError("That email and password do not match.");
       return;
     }
-    router.push(next);
+    router.push(safeNext(next));
     router.refresh();
   }
 

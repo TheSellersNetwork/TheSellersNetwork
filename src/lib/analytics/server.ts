@@ -1,5 +1,7 @@
 import "server-only";
 import { PostHog } from "posthog-node";
+import { createHash } from "node:crypto";
+import { cookies } from "next/headers";
 
 let client: PostHog | null = null;
 
@@ -18,10 +20,20 @@ function getClient(): PostHog | null {
 
 export type ServerEvent = "signup" | "first_post" | "solution_marked" | "signup_form_submitted" | "partner_click";
 
-/* Fire-and-forget server-side event. Silent when PostHog is not configured. */
-export async function trackServer(event: ServerEvent, properties: Record<string, unknown>, distinctId: string) {
+/*
+  Fire-and-forget server-side event. Silent when PostHog is not configured or
+  the visitor has not accepted analytics. The id is always hashed, so an email
+  address or account id never reaches PostHog.
+*/
+export async function trackServer(event: ServerEvent, properties: Record<string, unknown>, id: string) {
   const ph = getClient();
   if (!ph) return;
+  try {
+    if ((await cookies()).get("tsn-consent")?.value !== "analytics") return;
+  } catch {
+    return;
+  }
+  const distinctId = createHash("sha256").update(`${process.env.PLACEMENT_HASH_SALT ?? "tsn"}:${id.toLowerCase()}`).digest("hex").slice(0, 32);
   try {
     ph.capture({ distinctId, event, properties });
     await ph.flush();

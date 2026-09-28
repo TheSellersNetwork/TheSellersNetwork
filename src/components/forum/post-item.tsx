@@ -35,8 +35,9 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
   const isAuthor = !!viewer && (anonymous ? anonymousAuthor?.user_id === viewer.id : viewer.id === post.author_id);
   // Anonymous posts are written by the server, so only staff can edit them.
   const canEdit = !!viewer && !post.is_deleted && (isAuthor && !anonymous ? viewer.profile.trust_level >= 1 || viewer.profile.is_staff : viewer.profile.is_staff);
-  // body_html is cached at write time; render on the fly only if a row predates the cache.
-  const html = post.body_html ?? (await renderMarkdown(post.body_md));
+  // Always rendered from the Markdown through the sanitiser. Stored HTML is never trusted,
+  // because anything in the database could have been written by a member through the API.
+  const html = await renderMarkdown(post.body_md);
 
   if (post.is_deleted) {
     return (
@@ -117,7 +118,7 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
         likeCount={post.like_count}
         likedByMe={post.liked_by_me ?? false}
         signedIn={!!viewer}
-        canFlag={!!viewer && (viewer.profile.trust_level >= 1 || viewer.profile.is_staff) && !isAuthor}
+        canFlag={!!viewer && !isAuthor}
         canEdit={canEdit}
         canDelete={!!viewer && (isAuthor || viewer.profile.is_staff)}
         canMarkSolution={canMarkSolution && !isOpening}

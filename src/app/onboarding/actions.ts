@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { safeNext } from "@/lib/safe-next";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -51,5 +52,5 @@ export async function completeOnboarding(_prev: OnboardingState, formData: FormD
 
   await followFromMarketplaces(user.id, parsed.data.marketplaces);
 
-  redirect(parsed.data.next ?? "/community");
+  redirect(safeNext(parsed.data.next));
 }

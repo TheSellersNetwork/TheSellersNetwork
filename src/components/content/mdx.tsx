@@ -3,6 +3,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
+import { OperatorDetails } from "@/components/legal/operator-details";
 import { DownloadCard } from "@/components/tools/download-card";
 import { TaxDates } from "@/components/tools/tax-dates";
 import { PercentCalculator, PerUnitCalculator } from "@/components/tools/impact-calculators";
@@ -19,6 +20,7 @@ const components = {
   },
   Signup: ({ source }: { source: string }) => <EmailSignupCard source={source} variant="inline" className="not-prose my-8" />,
   Download: ({ file }: { file: "bookkeeping" | "stock" | "sourcing" }) => <DownloadCard file={file} showGuide={false} className="my-8" />,
+  OperatorDetails,
   PerUnitCalculator,
   PercentCalculator,
   TaxDates: () => <TaxDates count={4} compact className="my-8" />,

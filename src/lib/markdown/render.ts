@@ -18,7 +18,7 @@ const schema = {
   attributes: {
     ...defaultSchema.attributes,
     a: [...(defaultSchema.attributes?.a ?? []), "href", "rel", "className"],
-    img: ["src", "alt", "width", "height", "loading"],
+    img: ["src", "alt", "width", "height", "loading", "referrerPolicy"],
     code: [...(defaultSchema.attributes?.code ?? []), "className"],
   },
   protocols: {
@@ -29,6 +29,18 @@ const schema = {
 };
 
 const MENTION = /(^|[^a-z0-9_/@])@([a-z0-9][a-z0-9_]{2,29})\b/gi;
+
+/* Images must be served from the project's Supabase Storage. Without a configured URL (tests, local dev) any https image is allowed. */
+function isOwnImage(src: string): boolean {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!base) return src.startsWith("https://");
+  try {
+    const url = new URL(src);
+    return url.origin === new URL(base).origin && url.pathname.startsWith("/storage/v1/object/public/");
+  } catch {
+    return false;
+  }
+}
 
 function isElement(node: unknown): node is Element {
   return typeof node === "object" && node !== null && (node as Element).type === "element";
@@ -48,7 +60,13 @@ function rehypeForum() {
             if (/^https?:\/\//i.test(href)) child.properties.className = ["external"];
           }
           if (child.tagName === "img") {
-            child.properties = { ...child.properties, loading: "lazy" };
+            // Only images from our own storage: an outside image would let its host log every reader's IP.
+            if (!isOwnImage(String(child.properties?.src ?? ""))) {
+              children.splice(i, 1);
+              i -= 1;
+              continue;
+            }
+            child.properties = { ...child.properties, loading: "lazy", referrerPolicy: "no-referrer" };
           }
           visit(child, node, inLink || child.tagName === "a" || child.tagName === "code" || child.tagName === "pre");
           continue;

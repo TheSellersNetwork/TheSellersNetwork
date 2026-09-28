@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink, MessageCircle, MessagesSquare } from "lucide-react";
 import { Mdx } from "@/components/content/mdx";
 import { ImpactBadge, PlatformChip, StatusBadge } from "@/components/changes/change-badges";
+import { InfoDisclaimer } from "@/components/legal/info-disclaimer";
 import { PollCard } from "@/components/forum/poll-card";
 import { UserAvatar } from "@/components/forum/user-avatar";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
@@ -69,7 +70,12 @@ export async function ChangeArticle({ change }: { change: Change }) {
           </span>
           <span>
             <span className="font-medium">By {author.name}</span>
-            <span className="block text-xs text-muted-foreground">{readingTime(change.content)} min read</span>
+            <span className="block text-xs text-muted-foreground">
+              {readingTime(change.content)} min read ·{" "}
+              <Link href="/about#who-writes-what" className="underline">
+                a pen name for our staff writers
+              </Link>
+            </span>
           </span>
         </p>
         {change.affects.length > 0 ? (
@@ -144,6 +150,8 @@ export async function ChangeArticle({ change }: { change: Change }) {
               ) : null}
             </div>
           </section>
+
+          <InfoDisclaimer className="mt-10" />
 
           <section aria-labelledby="sources-heading" className="mt-10">
             <h2 id="sources-heading" className="text-lg font-semibold">

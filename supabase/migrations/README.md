@@ -11,6 +11,12 @@ dashboard. Every file has a matching reverse script in `down/` with the same nam
   them.
 - Every migration is reversible. Write the `down/` script at the same time and keep the order
   of drops the reverse of the creates.
+- Security: every new migration must assume a member can call the REST API directly with
+  their own session. Server-owned columns need protecting on insert as well as update.
+  Functions that must stay server-only (`check_rate_limit`, `recompute_trust_levels`,
+  `refresh_topic_counters`, `record_placement_event`, `user_can_see_category`) are revoked
+  in `20260928001900`; if a later migration ends with `grant execute on all functions`,
+  repeat those revokes after it. See `docs/security-and-compliance.md`.
 - No seed data here. Seeding is a script (task: seed script) that reads Tom's CSV.
 
 ## Testing without a database

@@ -11,10 +11,15 @@ export const partnerCategories: { id: Partner["category"]; label: string }[] = [
   { id: "other", label: "Other" },
 ];
 
+/*
+  Labels shown on every partner and sponsor entry (CAP Code 2.1: ads must be
+  obviously identifiable; the ASA says "affiliate" alone is not clear enough).
+  "partner" means no money or benefit changes hands; anything paid is an ad.
+*/
 export const relationshipLabels: Record<Partner["relationship"], string | null> = {
-  partner: null,
-  sponsored: "Sponsored",
-  affiliate: "Affiliate link",
+  partner: "Partner, unpaid",
+  sponsored: "Ad",
+  affiliate: "Ad · affiliate link",
 };
 
 export const getPartners = cache(async (): Promise<Partner[]> => {

@@ -334,11 +334,11 @@ await step("author can mark own topic solved", async () => {
   if (!t.rows[0].is_solved || t.rows[0].solution_post_id !== ids.reply) throw new Error("solution not set");
 });
 
-await step("TL0 cannot flag, TL1 can, TL3 flag hides on its own", async () => {
-  await expectError(
-    asUser(ids.newbie, `insert into public.flags (post_id, reporter_id, reason) values ($1, $2, 'spam')`, [ids.reply, ids.newbie]),
-    DENIED,
-  );
+await step("anyone can report, TL0 reports do not hide, TL3 flag hides on its own", async () => {
+  // Reporting illegal content must be open to every member (Online Safety Act); only established members' flags hide posts.
+  await asUser(ids.newbie, `insert into public.flags (post_id, reporter_id, reason) values ($1, $2, 'illegal')`, [ids.reply, ids.newbie]);
+  let p0 = await db.query(`select is_hidden from public.posts where id = $1`, [ids.reply]);
+  if (p0.rows[0].is_hidden) throw new Error("a TL0 report should not hide");
   await asUser(ids.member, `insert into public.flags (post_id, reporter_id, reason) values ($1, $2, 'spam')`, [ids.reply, ids.member]);
   let p = await db.query(`select is_hidden from public.posts where id = $1`, [ids.reply]);
   if (p.rows[0].is_hidden) throw new Error("one TL2 flag should not hide");
@@ -534,9 +534,9 @@ await step("partners and placements: public read of live only, events deduplicat
   if (direct.rows[0].n !== 0) throw new Error("anon read placements directly");
   const fn = await asAnon(`select headline from public.live_placements('rail', 5)`);
   if (fn.rows.length !== 1 || fn.rows[0].headline !== "Cheaper labels") throw new Error(`live_placements returned ${JSON.stringify(fn.rows)}`);
-  await asAnon(`select public.record_placement_event($1, 'impression', '/community', 'hash1')`, [live.rows[0].id]);
-  await asAnon(`select public.record_placement_event($1, 'impression', '/community', 'hash1')`, [live.rows[0].id]);
-  await asAnon(`select public.record_placement_event($1, 'click', '/community', 'hash1')`, [live.rows[0].id]);
+  await db.query(`select public.record_placement_event($1, 'impression', '/community', 'hash1')`, [live.rows[0].id]);
+  await db.query(`select public.record_placement_event($1, 'impression', '/community', 'hash1')`, [live.rows[0].id]);
+  await db.query(`select public.record_placement_event($1, 'click', '/community', 'hash1')`, [live.rows[0].id]);
   const ev = await db.query(`select kind, count(*)::int as n from public.placement_events where placement_id = $1 group by kind order by kind`, [live.rows[0].id]);
   if (ev.rows.map((r) => `${r.kind}:${r.n}`).join() !== "click:1,impression:1") throw new Error(`events ${JSON.stringify(ev.rows)}`);
 });
@@ -653,10 +653,96 @@ await step("anonymous: members cannot set it, mapping is private", async () => {
 });
 
 await step("push subscriptions are private to their owner", async () => {
-  await asUser(ids.member, `insert into public.push_subscriptions (user_id, endpoint, p256dh, auth) values ($1, 'https://push.example.test/abc', 'k', 'a')`, [ids.member]);
+  await asUser(ids.member, `insert into public.push_subscriptions (user_id, endpoint, p256dh, auth) values ($1, 'https://fcm.googleapis.com/fcm/send/abc', 'k', 'a')`, [ids.member]);
   const other = await asUser(ids.regular, `select count(*)::int as n from public.push_subscriptions`);
   if (other.rows[0].n !== 0) throw new Error("subscription visible to another member");
-  await expectError(asUser(ids.member, `insert into public.push_subscriptions (user_id, endpoint, p256dh, auth) values ($1, 'http://insecure.test', 'k', 'a')`, [ids.member]), "push_subscriptions_endpoint_https");
+  await expectError(asUser(ids.member, `insert into public.push_subscriptions (user_id, endpoint, p256dh, auth) values ($1, 'https://attacker.test/hook', 'k', 'a')`, [ids.member]), "push_subscriptions_endpoint_host");
+});
+
+await step("security: members cannot write post HTML", async () => {
+  const t = await asUser(ids.regular, `insert into public.topics (title, category_id, author_id) values ('HTML test', $1, $2) returning id`, [ids.cat_ebay, ids.regular]);
+  const p = await asUser(ids.regular, `insert into public.posts (topic_id, author_id, body_md, body_html) values ($1, $2, 'hi', '<img src=x onerror=alert(1)>') returning id`, [t.rows[0].id, ids.regular]);
+  await asUser(ids.regular, `update public.posts set body_html = '<script>x</script>' where id = $1`, [p.rows[0].id]);
+  const r = await db.query(`select body_html from public.posts where id = $1`, [p.rows[0].id]);
+  if (r.rows[0].body_html !== null) throw new Error("member HTML stored");
+  ids.html_topic = t.rows[0].id;
+});
+
+await step("security: server-owned columns are forced on insert", async () => {
+  const t = await asUser(
+    ids.member,
+    `insert into public.topics (title, category_id, author_id, is_pinned, view_count, created_at, last_post_at) values ('Sneaky pin', $1, $2, true, 99999, '2000-01-01', '2099-01-01') returning is_pinned, view_count, created_at > now() - interval '1 minute' as fresh, last_post_at < now() + interval '1 minute' as sane`,
+    [ids.cat_ebay, ids.member],
+  );
+  const row = t.rows[0];
+  if (row.is_pinned || row.view_count !== 0 || !row.fresh || !row.sane) throw new Error(JSON.stringify(row));
+});
+
+await step("security: new members cannot post links through the API", async () => {
+  await db.query(`update public.profiles set trust_level = 0 where id = $1`, [ids.newbie]);
+  await db.query(`update public.profiles set created_at = now() - interval '2 days' where id = $1`, [ids.newbie]);
+  await expectError(
+    asUser(ids.newbie, `insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'buy at https://scam.test')`, [ids.html_topic, ids.newbie]),
+    ["links_not_allowed", ...DENIED],
+  );
+});
+
+await step("security: trust cannot be farmed", async () => {
+  await asUser(ids.newbie, `select public.record_activity(99999, 99999, 99999, 50)`);
+  const r = await db.query(`select topics_read, posts_read, time_read_secs, likes_given from public.user_stats_daily where user_id = $1 and day = current_date`, [ids.newbie]);
+  const s = r.rows[0];
+  if (s.topics_read > 20 || s.posts_read > 200 || s.time_read_secs > 600 || s.likes_given > 1) throw new Error(JSON.stringify(s));
+  await expectError(asUser(ids.newbie, `insert into public.user_stats_daily (user_id, day, topics_read) values ($1, current_date - 3, 50)`, [ids.newbie]), DENIED);
+  await asUser(ids.regular, `update public.profiles set solution_count = 500, last_seen_at = '2099-01-01' where id = $1`, [ids.regular]);
+  const p = await db.query(`select solution_count, last_seen_at > now() + interval '1 day' as future from public.profiles where id = $1`, [ids.regular]);
+  if (p.rows[0].solution_count === 500 || p.rows[0].future) throw new Error("reputation writable");
+});
+
+await step("security: no self-likes, solutions must be in the topic", async () => {
+  const own = await db.query(`select id from public.posts where author_id = $1 limit 1`, [ids.regular]);
+  await expectError(asUser(ids.regular, `insert into public.likes (user_id, post_id) values ($1, $2)`, [ids.regular, own.rows[0].id]), DENIED);
+  const other = await db.query(`select p.id from public.posts p where p.topic_id <> $1 and p.post_number > 1 limit 1`, [ids.html_topic]);
+  await expectError(
+    asUser(ids.regular, `update public.topics set solution_post_id = $2 where id = $1`, [ids.html_topic, other.rows[0].id]),
+    "solution_not_in_topic",
+  );
+});
+
+await step("security: rate limits and maintenance functions are server-only", async () => {
+  await expectError(asUser(ids.member, `select public.check_rate_limit('reply:' || $1, 1, '1 hour')`, [ids.regular]), DENIED);
+  await expectError(asAnon(`select public.recompute_trust_levels()`), DENIED);
+});
+
+await step("security: private topics cannot be subscribed to or listed", async () => {
+  const t = await db.query(`insert into public.topics (title, category_id, author_id) values ('Secret plans', $1, $2) returning id`, [ids.cat_private, ids.staff]);
+  await expectError(asUser(ids.newbie, `insert into public.topic_subscriptions (user_id, topic_id) values ($1, $2)`, [ids.newbie, t.rows[0].id]), DENIED);
+  const deals = await asUser(ids.newbie, `select count(*)::int as n from public.deal_topics($1, 50)`, [ids.cat_private]);
+  if (deals.rows[0].n !== 0) throw new Error("deal_topics leaked private topics");
+});
+
+await step("security: contact messages are staff-only", async () => {
+  await db.query(`insert into public.contact_messages (kind, email, message) values ('report', 'x@example.test', 'This post contains something illegal')`);
+  const seen = await asUser(ids.member, `select count(*)::int as n from public.contact_messages`);
+  if (seen.rows[0].n !== 0) throw new Error("member saw contact messages");
+  await expectError(asAnon(`insert into public.contact_messages (kind, message) values ('general', 'spam spam spam spam')`), DENIED);
+});
+
+await step("account deletion: posts move to the deleted account, the rest goes", async () => {
+  const u = await db.query(`insert into auth.users (email, raw_user_meta_data) values ('leaver@example.test', '{"username":"leaver"}') returning id`);
+  const d = await db.query(`insert into auth.users (email, raw_user_meta_data) values ('deleted@example.test', '{"username":"deleted_member"}') returning id`);
+  const leaver = u.rows[0].id;
+  const holder = d.rows[0].id;
+  await db.query(`insert into public.site_accounts (key, profile_id) values ('deleted', $1)`, [holder]);
+  const t = await db.query(`insert into public.topics (title, category_id, author_id) values ('Leaving soon', $1, $2) returning id`, [ids.cat_ebay, leaver]);
+  const post = await db.query(`insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'bye') returning id`, [t.rows[0].id, leaver]);
+  await db.query(`insert into public.bookmarks (user_id, post_id) values ($1, $2)`, [leaver, post.rows[0].id]);
+  // What the deleteAccount action does with the service role:
+  await db.query(`update public.topics set author_id = $2 where author_id = $1`, [leaver, holder]);
+  await db.query(`update public.topics set last_poster_id = $2 where last_poster_id = $1`, [leaver, holder]);
+  await db.query(`update public.posts set author_id = $2 where author_id = $1`, [leaver, holder]);
+  await db.query(`delete from auth.users where id = $1`, [leaver]);
+  const left = await db.query(`select (select count(*) from public.profiles where id = $1)::int as p, (select count(*) from public.bookmarks where user_id = $1)::int as b, (select count(*) from public.posts where author_id = $2)::int as moved`, [leaver, holder]);
+  if (left.rows[0].p !== 0 || left.rows[0].b !== 0 || left.rows[0].moved !== 1) throw new Error(JSON.stringify(left.rows[0]));
 });
 
 await step("every public table has RLS enabled", async () => {

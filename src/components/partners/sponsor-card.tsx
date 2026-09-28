@@ -36,7 +36,8 @@ export function SponsorCard({ placement, variant, page }: Props) {
   }, [placement.id, placement.partner.slug, placement.slot, page]);
 
   const href = `/go/${placement.id}`;
-  const label = placement.partner.relationship === "affiliate" ? "Affiliate" : "Sponsored";
+  // Every placement is paid for, so it is always an ad.
+  const label = placement.partner.relationship === "affiliate" ? "Ad · affiliate link" : "Ad";
 
   return (
     <div ref={ref} className={cn("rounded-lg border bg-card", variant === "rail" ? "p-4" : "flex items-center gap-4 px-4 py-3")} aria-label={`${label}: ${placement.partner.name}`}>

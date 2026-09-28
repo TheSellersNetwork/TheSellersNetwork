@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Flag, Heart, Link2, Pencil, Quote, Trash2 } from "lucide-react";
@@ -34,8 +35,14 @@ type Props = {
 const reasons: { value: string; label: string }[] = [
   { value: "selling", label: "Selling or linking to listings" },
   { value: "spam", label: "Spam" },
+  { value: "scam", label: "A scam or fraud" },
   { value: "off_topic", label: "Off topic" },
   { value: "abuse", label: "Abusive" },
+  { value: "harassment", label: "Harassment or threats" },
+  { value: "illegal", label: "Illegal content" },
+  { value: "child_safety", label: "Puts a child at risk" },
+  { value: "defamation", label: "Untrue and damaging about a person or business" },
+  { value: "copyright", label: "Uses someone else's copyright work" },
   { value: "policy_evasion", label: "Advice on evading policy or the law" },
   { value: "other", label: "Something else" },
 ];
@@ -143,7 +150,7 @@ export function PostActions(props: Props) {
       ) : null}
       {props.canFlag ? (
         <Button type="button" variant="ghost" size="sm" onClick={() => setFlagOpen(true)}>
-          <Flag className="size-4" /> Flag
+          <Flag className="size-4" /> Report
         </Button>
       ) : null}
 
@@ -171,8 +178,14 @@ function FlagDialog({ open, onOpenChange, postId }: { open: boolean; onOpenChang
       <DialogContent>
         <form action={action}>
           <DialogHeader>
-            <DialogTitle>Flag this post</DialogTitle>
-            <DialogDescription>Staff review every flag. Flags are private.</DialogDescription>
+            <DialogTitle>Report this post</DialogTitle>
+            <DialogDescription>
+              Staff review every report and nobody else sees who sent it. If it is about you and needs a reply, such as a defamation or copyright complaint, use the{" "}
+              <Link href="/contact" className="underline">
+                contact form
+              </Link>{" "}
+              instead.
+            </DialogDescription>
           </DialogHeader>
           <input type="hidden" name="post_id" value={postId} />
           <fieldset className="my-4 space-y-2">

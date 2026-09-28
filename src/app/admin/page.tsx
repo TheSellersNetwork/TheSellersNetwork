@@ -30,6 +30,12 @@ export default async function AdminPage() {
           </Link>
           <p className="text-sm text-muted-foreground">Directory entries, sponsor slots, impressions and clicks</p>
         </li>
+        <li className="rounded-lg border bg-card p-4">
+          <Link href="/admin/messages" className="font-semibold hover:underline">
+            Messages and reports
+          </Link>
+          <p className="text-sm text-muted-foreground">Contact form, content reports, data requests, complaints, appeals and legal notices</p>
+        </li>
       </ul>
       <section className="mt-10">
         <h2 className="text-lg font-semibold">Ask the team</h2>

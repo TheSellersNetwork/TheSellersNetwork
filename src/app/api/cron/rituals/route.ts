@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
+import { findUserIdByEmail } from "@/lib/supabase/find-user";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -11,9 +13,18 @@ import { rituals, ritualTitle } from "@/lib/rituals";
   regardless of the day, for testing. Templates live in
   content/templates/rituals and are the only thing staff need to edit.
 */
+/* Compares the bearer token in constant time, so its value cannot be guessed from response timing. */
+function cronAuthorised(request: Request): boolean {
+  const secret = process.env.CRON_SECRET;
+  const given = request.headers.get("authorization") ?? "";
+  if (!secret) return false;
+  const a = Buffer.from(given);
+  const b = Buffer.from(`Bearer ${secret}`);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 export async function GET(request: Request) {
-  const auth = request.headers.get("authorization");
-  if (!process.env.CRON_SECRET || auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!cronAuthorised(request)) {
     return NextResponse.json({ message: "Unauthorised" }, { status: 401 });
   }
 
@@ -25,8 +36,8 @@ export async function GET(request: Request) {
   const admin = createAdminClient();
   const authorEmail = process.env.SEED_AUTHOR_EMAIL;
   if (!authorEmail) return NextResponse.json({ message: "SEED_AUTHOR_EMAIL is not set" }, { status: 500 });
-  const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 });
-  const author = users?.users.find((u) => u.email?.toLowerCase() === authorEmail.toLowerCase());
+  const authorId = await findUserIdByEmail(admin, authorEmail);
+  const author = authorId ? { id: authorId } : null;
   if (!author) return NextResponse.json({ message: "Author account missing" }, { status: 500 });
 
   const results: Record<string, string> = {};

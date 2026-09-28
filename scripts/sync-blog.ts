@@ -12,6 +12,7 @@ import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import { createClient } from "@supabase/supabase-js";
+import { findUserByEmail } from "./find-user";
 
 config({ path: ".env.local" });
 
@@ -34,8 +35,7 @@ const categoryForPost = (category: string | null, platforms: string[]): string =
 };
 
 async function main() {
-  const { data: users } = await supabase.auth.admin.listUsers({ perPage: 1000 });
-  const author = users.users.find((u) => u.email?.toLowerCase() === authorEmail!.toLowerCase());
+  const author = await findUserByEmail(supabase, authorEmail!);
   if (!author) throw new Error(`No auth user with email ${authorEmail}`);
 
   const { data: categories } = await supabase.from("categories").select("id, slug");

@@ -1,0 +1,40 @@
+---
+title: "Cookies and storage"
+description: "Every cookie and piece of browser storage The Sellers Network uses, what it is for, and how to change your choice."
+updated: 2026-09-28
+---
+
+We keep this short because we use very little. Analytics is the only thing that needs your permission, and it is off until you say yes. You can change your choice at any time with **Cookie settings** at the bottom of every page.
+
+## Needed to run the site
+
+These are always on, because the site cannot work properly without them.
+
+| Name | What it does | How long |
+|---|---|---|
+| `sb-...-auth-token` | Keeps you signed in (set by Supabase, our sign-in provider) | Until you sign out, refreshed while you use the site |
+| `tsn-consent` | Remembers whether you accepted analytics | 6 months |
+| Cloudflare Turnstile | Checks that sign-ups and contact messages come from a person, not a bot | Only while the check runs |
+
+## Things you ask for
+
+These only exist because you chose something.
+
+| Name | What it does | How long |
+|---|---|---|
+| `tsn-style` | Remembers the forum layout you picked | 1 year |
+| `tsn-theme` (in your browser's storage) | Remembers light or dark mode | Until you clear it |
+| Drafts (in your browser's storage) | Keeps a post you are writing so you do not lose it | Until you post or clear it |
+| Service worker and push subscription | Lets the site send you notifications, only if you turn them on | Until you turn notifications off |
+
+## Analytics, only with your permission
+
+| Name | What it does | How long |
+|---|---|---|
+| PostHog (`ph_...`) | Counts page visits and which features are used, so we can see what helps people | 12 months |
+
+PostHog is hosted in the EU. We do not record your screen, we do not collect your IP address in analytics, and we never use analytics for advertising.
+
+## Changing your mind
+
+Use **Cookie settings** in the footer. If you withdraw consent, analytics stops and what it stored in your browser is cleared. You can also clear cookies in your browser settings, though you will be signed out.

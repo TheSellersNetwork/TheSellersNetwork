@@ -13,6 +13,7 @@ import { trackServer } from "@/lib/analytics/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAnonymousReply, createAnonymousTopic, isAnonymousAuthor } from "@/lib/forum/anonymous";
 import { parsePollInput } from "@/lib/forum/polls";
+import { allowAction } from "@/lib/rate-limit";
 import type { Topic } from "@/lib/db/types";
 
 export type ActionState = { ok: boolean; message: string; redirectTo?: string };
@@ -20,9 +21,7 @@ export type ActionState = { ok: boolean; message: string; redirectTo?: string };
 const bodySchema = z.string().trim().min(1, "Write something first.").max(40000);
 
 async function rateLimited(key: string, limit: number, window: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { data } = await supabase.rpc("check_rate_limit", { p_key: key, p_limit: limit, p_window: window });
-  return data === false;
+  return !(await allowAction(key, limit, window));
 }
 
 /* Members must have a verified email before their first post. */
@@ -42,7 +41,7 @@ export async function createTopic(_prev: ActionState, formData: FormData): Promi
     title: z.string().trim().min(3, "Titles need at least 3 characters.").max(200, "Titles are at most 200 characters."),
     category_id: z.string().uuid("Pick a category."),
     body_md: bodySchema,
-    expires_at: z.string().optional(),
+    expires_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a valid end date.").optional(),
   });
   const parsed = schema.safeParse({
     title: formData.get("title"),
@@ -217,7 +216,7 @@ export async function deletePost(postId: string): Promise<ActionState> {
   const supabase = (await isAnonymousAuthor(postId, user.id)) ? createAdminClient() : await createClient();
   const { data, error } = await supabase
     .from("posts")
-    .update({ is_deleted: true, deleted_by: user.id, deleted_at: new Date().toISOString() })
+    .update({ is_deleted: true, deleted_at: new Date().toISOString() })
     .eq("id", postId)
     .select("topic:topics (slug, short_id)")
     .single();
@@ -230,6 +229,7 @@ export async function deletePost(postId: string): Promise<ActionState> {
 export async function toggleLike(postId: string): Promise<ActionState & { liked?: boolean; count?: number }> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, message: "Sign in to like posts." };
+  if (await rateLimited(`like:${user.id}`, 120, "1 hour")) return { ok: false, message: "Slow down a little." };
   const supabase = await createClient();
 
   const { data: existing } = await supabase.from("likes").select("post_id").eq("user_id", user.id).eq("post_id", postId).maybeSingle();
@@ -249,17 +249,15 @@ export async function toggleLike(postId: string): Promise<ActionState & { liked?
 export async function flagPost(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const schema = z.object({
     post_id: z.string().uuid(),
-    reason: z.enum(["spam", "selling", "off_topic", "abuse", "policy_evasion", "other"]),
+    reason: z.enum(["spam", "selling", "off_topic", "abuse", "policy_evasion", "other", "illegal", "harassment", "defamation", "copyright", "child_safety", "scam"]),
     note: z.string().trim().max(1000).optional(),
   });
   const parsed = schema.safeParse({ post_id: formData.get("post_id"), reason: formData.get("reason"), note: formData.get("note") ?? "" });
   if (!parsed.success) return { ok: false, message: "Pick a reason." };
 
   const user = await getCurrentUser();
-  if (!user) return { ok: false, message: "Sign in to flag posts." };
-  if (user.profile.trust_level < 1 && !user.profile.is_staff) {
-    return { ok: false, message: "Flagging opens once you have read around a little. Until then, reply and let staff know." };
-  }
+  if (!user) return { ok: false, message: "Sign in to report posts, or use the report form." };
+  if (await rateLimited(`flag:${user.id}`, 30, "1 day")) return { ok: false, message: "You have sent a lot of reports today. Use the report form for anything urgent." };
 
   const supabase = await createClient();
   const { error } = await supabase.from("flags").insert({
@@ -278,7 +276,13 @@ export async function flagPost(_prev: ActionState, formData: FormData): Promise<
 export async function markSolved(topicId: string, postId: string | null): Promise<ActionState> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, message: "Sign in first." };
+  if (await rateLimited(`solve:${user.id}`, 20, "1 hour")) return { ok: false, message: "Slow down a little." };
   let supabase = await createClient();
+  if (postId) {
+    // The solution must be a live reply in this topic.
+    const { data: candidate } = await supabase.from("posts").select("id").eq("id", postId).eq("topic_id", topicId).gt("post_number", 1).eq("is_deleted", false).maybeSingle();
+    if (!candidate) return { ok: false, message: "That reply is not in this topic." };
+  }
   // The real author of an anonymous topic marks solutions through the server.
   const { data: opening } = await supabase.from("posts").select("id, is_anonymous").eq("topic_id", topicId).eq("post_number", 1).maybeSingle();
   if (opening?.is_anonymous && (await isAnonymousAuthor(opening.id, user.id))) supabase = createAdminClient();
@@ -328,6 +332,8 @@ export async function markNotificationsRead(ids?: string[]): Promise<void> {
 
 /* Preview for the composer. Runs the same renderer as publishing. */
 export async function previewMarkdown(markdown: string): Promise<string> {
+  const user = await getCurrentUser();
+  if (!user || (await rateLimited(`preview:${user.id}`, 120, "1 hour"))) return "";
   return renderMarkdown(markdown.slice(0, 40000));
 }
 
@@ -347,6 +353,7 @@ export async function recordRead(topicsRead: number, postsRead: number, seconds:
 export async function votePoll(pollId: string, optionId: string): Promise<ActionState> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, message: "Sign in to vote." };
+  if (await rateLimited(`poll:${user.id}`, 60, "1 hour")) return { ok: false, message: "Slow down a little." };
   const supabase = await createClient();
   const { error } = await supabase.from("poll_votes").upsert({ poll_id: pollId, user_id: user.id, option_id: optionId }, { onConflict: "poll_id,user_id" });
   if (error) return { ok: false, message: "That poll is closed." };

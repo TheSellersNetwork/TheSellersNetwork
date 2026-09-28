@@ -4,10 +4,12 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { friendlyError } from "@/lib/errors";
+import { allowAction } from "@/lib/rate-limit";
 
 export async function voteDeal(topicId: string, vote: "valid" | "expired" | null): Promise<{ ok: boolean; message: string }> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, message: "Sign in to vote." };
+  if (!(await allowAction(`deal:${user.id}`, 60, "1 hour"))) return { ok: false, message: "Slow down a little." };
   const supabase = await createClient();
   const { error } = vote
     ? await supabase.from("deal_votes").upsert({ user_id: user.id, topic_id: topicId, vote }, { onConflict: "user_id,topic_id" })

@@ -17,7 +17,7 @@ function getClient(): Resend | null {
   Sends a React Email template. Returns false when Resend is not configured,
   so local development never tries to send and callers can still mark rows.
 */
-export async function sendEmail(args: { to: string; subject: string; react: ReactElement; replyTo?: string }): Promise<boolean> {
+export async function sendEmail(args: { to: string; subject: string; react: ReactElement; replyTo?: string; headers?: Record<string, string> }): Promise<boolean> {
   const resend = getClient();
   if (!resend) {
     if (process.env.NODE_ENV !== "production") {
@@ -31,6 +31,7 @@ export async function sendEmail(args: { to: string; subject: string; react: Reac
     subject: args.subject,
     react: args.react,
     replyTo: args.replyTo,
+    headers: args.headers,
   });
   return !error;
 }

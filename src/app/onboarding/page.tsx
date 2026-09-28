@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { safeNext } from "@/lib/safe-next";
 import { OnboardingForm } from "@/components/auth/onboarding-form";
 import { requireUser } from "@/lib/auth";
 import { urls } from "@/lib/forum/urls";
@@ -8,7 +9,7 @@ export const metadata: Metadata = { title: "Welcome", robots: { index: false } }
 
 export default async function OnboardingPage({ searchParams }: PageProps<"/onboarding">) {
   const sp = await searchParams;
-  const next = typeof sp.next === "string" && sp.next.startsWith("/") ? sp.next : urls.community();
+  const next = safeNext(sp.next, urls.community());
   const user = await requireUser(urls.onboarding());
   if (user.profile.onboarded_at) redirect(next);
 

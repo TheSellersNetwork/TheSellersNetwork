@@ -1,49 +1,64 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { trackServer } from "@/lib/analytics/server";
+import { sendEmail } from "@/lib/email/send";
+import { allowAction, clientIp } from "@/lib/rate-limit";
+import { NewsletterConfirmEmail } from "@/emails/newsletter-confirm-email";
+import { siteConfig } from "@/lib/site";
+import { NEWSLETTER_CONSENT } from "@/lib/newsletter";
 
 export type SignupState = { ok: boolean; message: string };
 
 const schema = z.object({
-  email: z.string().trim().email(),
+  email: z.string().trim().toLowerCase().email().max(254),
   source: z.string().trim().max(200).default("unknown"),
 });
 
 /*
-  Adds an address to the newsletter. The confirmation email is wired in the
-  newsletter task; for now the row is stored as pending. Rate limited per IP through the database.
+  Newsletter sign-up with double opt-in (PECR): the address is stored as
+  pending and only becomes active when its owner clicks the link we send.
+  The reply is the same whether or not the address is already on the list,
+  so the form cannot be used to check who subscribes.
 */
 export async function subscribeToCourse(_prev: SignupState, formData: FormData): Promise<SignupState> {
-  const parsed = schema.safeParse({ email: formData.get("email"), source: formData.get("source") });
+  const parsed = schema.safeParse({ email: formData.get("email"), source: formData.get("source") ?? undefined });
   if (!parsed.success) {
     return { ok: false, message: "That email address does not look right." };
   }
+  const { email, source } = parsed.data;
 
-  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const supabase = await createClient();
-  const { data: allowed } = await supabase.rpc("check_rate_limit", {
-    p_key: `signup:${ip}`,
-    p_limit: 5,
-    p_window: "1 hour",
-  });
-  if (allowed === false) {
-    return { ok: false, message: "Too many attempts. Try again in an hour." };
+  const ip = clientIp(await headers());
+  if (!(await allowAction(`newsletter:${ip}`, 5, "1 hour")) || !(await allowAction(`newsletter-email:${email}`, 3, "1 day"))) {
+    return { ok: false, message: "Too many attempts. Try again later." };
   }
 
+  const done: SignupState = { ok: true, message: "Nearly there. Check your inbox and click the link to confirm." };
+  let admin;
   try {
-    const admin = createAdminClient();
-    const { error } = await admin
-      .from("email_subscribers")
-      .upsert({ email: parsed.data.email.toLowerCase(), source: parsed.data.source }, { onConflict: "email", ignoreDuplicates: true });
-    if (error) throw error;
+    admin = createAdminClient();
   } catch {
     return { ok: false, message: "Something went wrong saving that. Try again in a moment." };
   }
 
-  await trackServer("signup_form_submitted", { source: parsed.data.source }, parsed.data.email.toLowerCase());
-  return { ok: true, message: "You are on the list. Check your inbox to confirm." };
+  const { data: existing } = await admin.from("email_subscribers").select("id, status").eq("email", email).maybeSingle();
+  if (existing?.status === "active") return done;
+
+  const token = randomBytes(24).toString("base64url");
+  const row = { email, source, status: "pending", confirm_token: token, consent_text: NEWSLETTER_CONSENT, unsubscribed_at: null };
+  const { error } = existing
+    ? await admin.from("email_subscribers").update(row).eq("id", existing.id)
+    : await admin.from("email_subscribers").insert(row);
+  if (error) return { ok: false, message: "Something went wrong saving that. Try again in a moment." };
+
+  await sendEmail({
+    to: email,
+    subject: "Confirm your newsletter sign-up",
+    react: NewsletterConfirmEmail({ confirmUrl: `${siteConfig.url}/newsletter/confirm?token=${token}` }),
+  });
+  await trackServer("signup_form_submitted", { source }, email);
+  return done;
 }

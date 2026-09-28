@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { AccountForm } from "@/components/auth/account-form";
 import { requireUser } from "@/lib/auth";
@@ -5,6 +6,7 @@ import { StyleSwitcher } from "@/components/style-switcher";
 import { currentStyle } from "@/lib/style-server";
 import { urls } from "@/lib/forum/urls";
 import { AppCard } from "@/components/app/app-card";
+import { DeleteAccount } from "@/components/auth/delete-account";
 
 export const metadata: Metadata = { title: "Account", robots: { index: false } };
 
@@ -40,13 +42,21 @@ export default async function AccountPage() {
         </div>
       </section>
       <section className="mt-12 rounded-lg border p-4 text-sm">
-        <h2 className="font-semibold">Purchases and bookings</h2>
-        <p className="mt-1 text-muted-foreground">Nothing to show yet.</p>
+        <h2 className="font-semibold">Your data</h2>
+        <p className="mt-1 text-muted-foreground">
+          Download everything we hold about your account as a file: profile, posts, likes, follows, notifications and more. For anything else, see the{" "}
+          <Link href="/privacy" className="underline">
+            privacy policy
+          </Link>
+          .
+        </p>
+        {/* A plain link: this downloads a file from a route handler, so client-side navigation would be wrong. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a href="/account/export" className="mt-3 inline-block rounded-md border px-3 py-1.5 font-medium hover:bg-secondary">
+          Download my data
+        </a>
       </section>
-      <section className="mt-6 rounded-lg border border-destructive/40 p-4 text-sm">
-        <h2 className="font-semibold">Delete your account</h2>
-        <p className="mt-1 text-muted-foreground">Deleting your account anonymises your posts and removes your profile. Email us from the address on your account and we will do it within a week.</p>
-      </section>
+      <DeleteAccount username={p.username} />
     </main>
   );
 }

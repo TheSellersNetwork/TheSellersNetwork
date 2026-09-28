@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { safeNext } from "@/lib/safe-next";
 import { LoginForm } from "@/components/auth/login-form";
 import { getCurrentUser } from "@/lib/auth";
 import { urls } from "@/lib/forum/urls";
@@ -9,7 +10,7 @@ export const metadata: Metadata = { title: "Sign in", robots: { index: false } }
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const sp = await searchParams;
-  const next = typeof sp.next === "string" && sp.next.startsWith("/") ? sp.next : urls.community();
+  const next = safeNext(sp.next, urls.community());
   const user = await getCurrentUser();
   if (user) redirect(next);
 

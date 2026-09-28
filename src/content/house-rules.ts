@@ -21,7 +21,7 @@ export const houseRules = [
     body: "Business accounts are fine if disclosed.",
   },
   {
-    title: "Staff decisions can be appealed once.",
-    body: "By private message, and they are final after that.",
+    title: "Staff decisions can be appealed.",
+    body: "Use the contact form, even if you are suspended. Someone who did not make the decision will review it and explain the outcome.",
   },
 ] as const;

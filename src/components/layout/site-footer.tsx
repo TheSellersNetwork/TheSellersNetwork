@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { urls } from "@/lib/forum/urls";
+import { siteConfig } from "@/lib/site";
+import { CookieSettingsLink } from "@/components/cookie-banner";
 
 const columns = [
   {
@@ -28,6 +30,8 @@ const columns = [
     links: [
       { href: "/partners", label: "Partners" },
       { href: "/about", label: "About" },
+      { href: "/contact", label: "Contact" },
+      { href: "/report", label: "Report content" },
     ],
   },
   {
@@ -35,6 +39,8 @@ const columns = [
     links: [
       { href: "/privacy", label: "Privacy" },
       { href: "/terms", label: "Terms" },
+      { href: "/cookies", label: "Cookies" },
+      { href: "/accessibility", label: "Accessibility" },
     ],
   },
 ];
@@ -64,7 +70,13 @@ export function SiteFooter() {
       </div>
       <div className="border-t">
         <div className="mx-auto max-w-7xl px-4 py-4 text-xs text-muted-foreground sm:px-6">
-          The Sellers Network, {new Date().getFullYear()}.
+          <p>
+            The Sellers Network, {new Date().getFullYear()}.
+            {siteConfig.legal.operator ? ` Run by ${siteConfig.legal.operator}.` : ""}
+            {siteConfig.legal.address ? ` ${siteConfig.legal.address}.` : ""}
+            {siteConfig.legal.companyNumber ? ` Company number ${siteConfig.legal.companyNumber}.` : ""}{" "}
+            <CookieSettingsLink className="underline hover:text-foreground" />
+          </p>
         </div>
       </div>
     </footer>

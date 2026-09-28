@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Mdx, TableOfContents } from "@/components/content/mdx";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
+import { InfoDisclaimer } from "@/components/legal/info-disclaimer";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { extractHeadings } from "@/lib/content/blog";
 import { getGuide, getGuides } from "@/lib/content/guides";
@@ -44,6 +45,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
           <div data-glossary className="prose prose-neutral mt-8 max-w-none measure dark:prose-invert prose-a:text-brand">
             <Mdx source={guide.content} />
           </div>
+          <InfoDisclaimer className="mt-10" />
           <div className="mt-10 border-t pt-6">
             <EmailSignupCard source={urls.guide(guide.slug)} variant="inline" />
             {guide.module && process.env.NEXT_PUBLIC_SHOW_COURSE === "true" ? (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { safeNext } from "@/lib/safe-next";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { OtpInput, maskEmail } from "@/components/auth/otp-input";
 import { createClient } from "@/lib/supabase/client";
@@ -44,7 +45,7 @@ export function VerifyCode({ email, type, next, onBack }: Props) {
       return;
     }
     setStatus("done");
-    router.push(type === "signup" ? `/onboarding?next=${encodeURIComponent(next)}` : next);
+    router.push(type === "signup" ? `/onboarding?next=${encodeURIComponent(safeNext(next))}` : safeNext(next));
     router.refresh();
   }
 

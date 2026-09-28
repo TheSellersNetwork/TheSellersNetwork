@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/send";
 import { sendPush } from "@/lib/push";
+import { emailsFor } from "@/lib/supabase/find-user";
 import { ReplyEmail } from "@/emails/reply-email";
 import { MentionEmail } from "@/emails/mention-email";
 import { SolutionEmail } from "@/emails/solution-email";
@@ -41,12 +42,11 @@ export async function dispatchEmailsForPost(postId: string, only?: "solution"): 
   if (!pending || pending.length === 0) return;
 
   const userIds = Array.from(new Set(pending.map((n) => n.user_id as string)));
-  const [{ data: profiles }, { data: users }] = await Promise.all([
+  const [{ data: profiles }, emails] = await Promise.all([
     admin.from("profiles").select("id, email_on_reply, email_on_mention").in("id", userIds),
-    admin.auth.admin.listUsers({ perPage: 1000 }),
+    emailsFor(admin, userIds),
   ]);
   const prefs = new Map((profiles ?? []).map((p) => [p.id as string, p]));
-  const emails = new Map((users?.users ?? []).map((u) => [u.id, u.email]));
 
   const author = post.author as unknown as { username: string; display_name: string | null } | null;
   const topic = post.topic as unknown as { title: string; slug: string; short_id: string };
@@ -84,7 +84,7 @@ export async function dispatchEmailsForPost(postId: string, only?: "solution"): 
           : n.type === "mention"
             ? `${actorName} mentioned you in "${topic.title}"`
             : `Your reply was marked as the solution`;
-      await sendEmail({ to, subject, react });
+      await sendEmail({ to, subject, react, headers: { "List-Unsubscribe": `<${siteConfig.url}/account>` } });
     }
     await admin.from("notifications").update({ emailed_at: new Date().toISOString() }).eq("id", n.id);
   }

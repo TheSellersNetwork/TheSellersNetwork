@@ -18,6 +18,7 @@ import { readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { parse } from "csv-parse/sync";
 import { createClient } from "@supabase/supabase-js";
+import { findUserByEmail } from "./find-user";
 
 config({ path: ".env.local" });
 
@@ -112,8 +113,7 @@ const launch: Cat[] = [
 ];
 
 async function authorId(): Promise<string> {
-  const { data } = await supabase.auth.admin.listUsers({ perPage: 1000 });
-  const user = data.users.find((u) => u.email?.toLowerCase() === authorEmail!.toLowerCase());
+  const user = await findUserByEmail(supabase, authorEmail!);
   if (!user) throw new Error(`No auth user with email ${authorEmail}. Sign up with it first.`);
   await supabase.from("profiles").update({ is_staff: true, trust_level: 4, onboarded_at: new Date().toISOString() }).eq("id", user.id);
   return user.id;
@@ -187,7 +187,12 @@ async function loadCsv(file: string, fallbackAuthor: string) {
     }
     let author = fallbackAuthor;
     if (row.author_username) {
-      const { data: p } = await supabase.from("profiles").select("id").eq("username", row.author_username.toLowerCase()).maybeSingle();
+      // Only staff accounts can be named: posting in a member's name without their consent would put words in their mouth.
+      const { data: p } = await supabase.from("profiles").select("id, is_staff").eq("username", row.author_username.toLowerCase()).maybeSingle();
+      if (p && !p.is_staff) {
+        console.warn(`Skipping "${row.title}": ${row.author_username} is not a staff account`);
+        continue;
+      }
       if (p) author = p.id;
       else console.warn(`Author ${row.author_username} not found for "${row.title}", using ${authorEmail}`);
     }
@@ -223,9 +228,27 @@ async function ensureAnonymousAccount() {
   console.log("Anonymous member account created.");
 }
 
+/* Shared accounts the site writes as: "deleted" holds posts from members who deleted their account. */
+async function ensureSiteAccount(key: string, username: string, displayName: string) {
+  const { data: existing } = await supabase.from("site_accounts").select("profile_id").eq("key", key).maybeSingle();
+  if (existing) return;
+  const { data, error } = await supabase.auth.admin.createUser({
+    email: `${username.replace(/_/g, "-")}@example.com`,
+    password: randomBytes(32).toString("base64url"),
+    email_confirm: true,
+    user_metadata: { username, display_name: displayName },
+  });
+  if (error || !data.user) throw error ?? new Error(`Could not create the ${key} account.`);
+  await supabase.from("profiles").update({ username, display_name: displayName }).eq("id", data.user.id);
+  const { error: linkError } = await supabase.from("site_accounts").insert({ key, profile_id: data.user.id });
+  if (linkError) throw linkError;
+  console.log(`${displayName} account created.`);
+}
+
 async function main() {
   const author = await authorId();
   await ensureAnonymousAccount();
+  await ensureSiteAccount("deleted", "deleted_member", "Deleted member");
   let position = 0;
   for (const parent of launch) {
     position += 1;

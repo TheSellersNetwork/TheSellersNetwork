@@ -5,7 +5,12 @@ import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 const subscriptionSchema = z.object({
-  endpoint: z.string().url().startsWith("https://").max(1000),
+  // Only real browser push services, so the server never posts to an address a member made up.
+  endpoint: z
+    .string()
+    .url()
+    .max(1000)
+    .regex(/^https:\/\/(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|[a-z0-9.-]+\.notify\.windows\.com|web\.push\.apple\.com)\//),
   keys: z.object({ p256dh: z.string().min(1).max(200), auth: z.string().min(1).max(100) }),
 });
 

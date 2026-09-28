@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { subscribeToCourse } from "@/app/actions/email-signup";
 import { track } from "@/lib/analytics/client";
@@ -53,7 +54,13 @@ export function EmailSignupCard({ source, variant = "card", className }: Props) 
               {state.message}
             </p>
           ) : null}
-          <p className="text-xs text-muted-foreground">No spam. Unsubscribe any time.</p>
+          <p className="text-xs text-muted-foreground">
+            About once a week. We send a link to confirm first, and every email has an unsubscribe link. See our{" "}
+            <Link href="/privacy" className="underline">
+              privacy policy
+            </Link>
+            .
+          </p>
         </form>
       )}
     </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { safeNext } from "@/lib/safe-next";
 
 /*
   Handles the link in confirmation and magic link emails. Supports both the
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
   const tokenHash = url.searchParams.get("token_hash");
   const type = url.searchParams.get("type") as EmailOtpType | null;
   const nextParam = url.searchParams.get("next");
-  const next = nextParam && nextParam.startsWith("/") ? nextParam : "/community";
+  const next = safeNext(nextParam);
 
   const supabase = await createClient();
   let ok = false;

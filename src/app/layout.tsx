@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { Toaster } from "@/components/ui/sonner";
 import { GlossaryTerms } from "@/components/content/glossary-terms";
 import { ServiceWorker } from "@/components/app/service-worker";
+import { CookieBanner } from "@/components/cookie-banner";
 import { siteConfig } from "@/lib/site";
 import { currentStyle } from "@/lib/style-server";
 import "./globals.css";
@@ -68,6 +69,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <Toaster position="bottom-center" />
             <GlossaryTerms />
             <ServiceWorker />
+            <CookieBanner />
           </AnalyticsProvider>
         </ThemeProvider>
       </body>
