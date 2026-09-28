@@ -736,13 +736,27 @@ await step("account deletion: posts move to the deleted account, the rest goes",
   const t = await db.query(`insert into public.topics (title, category_id, author_id) values ('Leaving soon', $1, $2) returning id`, [ids.cat_ebay, leaver]);
   const post = await db.query(`insert into public.posts (topic_id, author_id, body_md) values ($1, $2, 'bye') returning id`, [t.rows[0].id, leaver]);
   await db.query(`insert into public.bookmarks (user_id, post_id) values ($1, $2)`, [leaver, post.rows[0].id]);
-  // What the deleteAccount action does with the service role:
-  await db.query(`update public.topics set author_id = $2 where author_id = $1`, [leaver, holder]);
-  await db.query(`update public.topics set last_poster_id = $2 where last_poster_id = $1`, [leaver, holder]);
-  await db.query(`update public.posts set author_id = $2 where author_id = $1`, [leaver, holder]);
-  await db.query(`delete from auth.users where id = $1`, [leaver]);
+  await expectError(asUser(leaver, `select public.delete_member($1, false)`, [leaver]), DENIED);
+  // What the deleteAccount action does with the service role, in one transaction:
+  await db.query(`select public.delete_member($1, false)`, [leaver]);
   const left = await db.query(`select (select count(*) from public.profiles where id = $1)::int as p, (select count(*) from public.bookmarks where user_id = $1)::int as b, (select count(*) from public.posts where author_id = $2)::int as moved`, [leaver, holder]);
   if (left.rows[0].p !== 0 || left.rows[0].b !== 0 || left.rows[0].moved !== 1) throw new Error(JSON.stringify(left.rows[0]));
+});
+
+await step("consent records cannot be edited by members", async () => {
+  await db.query(`update public.profiles set terms_accepted_at = '2026-01-01', age_confirmed_at = '2026-01-01' where id = $1`, [ids.member]);
+  await asUser(ids.member, `update public.profiles set terms_accepted_at = null, age_confirmed_at = null where id = $1`, [ids.member]);
+  const r = await db.query(`select terms_accepted_at is not null as t, age_confirmed_at is not null as a from public.profiles where id = $1`, [ids.member]);
+  if (!r.rows[0].t || !r.rows[0].a) throw new Error("consent record cleared by member");
+});
+
+await step("the real author cannot like their own anonymous post", async () => {
+  const anonUser = await db.query(`insert into auth.users (email, raw_user_meta_data) values ('anon-acct@example.test', '{"username":"anon_acct"}') returning id`);
+  const t = await db.query(`insert into public.topics (title, category_id, author_id, is_anonymous) values ('Anonymous one', $1, $2, true) returning id`, [ids.cat_ebay, anonUser.rows[0].id]);
+  const p = await db.query(`insert into public.posts (topic_id, author_id, body_md, is_anonymous) values ($1, $2, 'secret', true) returning id`, [t.rows[0].id, anonUser.rows[0].id]);
+  await db.query(`insert into public.anonymous_authors (post_id, user_id) values ($1, $2)`, [p.rows[0].id, ids.member]);
+  await expectError(asUser(ids.member, `insert into public.likes (user_id, post_id) values ($1, $2)`, [ids.member, p.rows[0].id]), DENIED);
+  await asUser(ids.regular, `insert into public.likes (user_id, post_id) values ($1, $2)`, [ids.regular, p.rows[0].id]);
 });
 
 await step("every public table has RLS enabled", async () => {

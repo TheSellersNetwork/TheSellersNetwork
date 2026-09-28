@@ -65,9 +65,14 @@ export default async function MessagesPage({ searchParams }: PageProps<"/admin/m
               {m.url ? (
                 <>
                   {" · "}
-                  <a href={m.url} target="_blank" rel="noopener noreferrer" className="underline">
-                    {m.url}
-                  </a>
+                  {/* Links come from the public, so only plain web addresses are clickable. */}
+                  {/^https?:\/\//i.test(m.url) ? (
+                    <a href={m.url} target="_blank" rel="noopener noreferrer nofollow" className="break-all underline">
+                      {m.url}
+                    </a>
+                  ) : (
+                    <span className="break-all">{m.url}</span>
+                  )}
                 </>
               ) : null}
             </p>

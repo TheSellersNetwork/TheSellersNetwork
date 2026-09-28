@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
+import remarkNoRawHtml from "@/lib/markdown/remark-no-raw-html";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { OperatorDetails } from "@/components/legal/operator-details";
 import { DownloadCard } from "@/components/tools/download-card";
@@ -34,7 +35,7 @@ export function Mdx({ source }: { source: string }) {
     <MDXRemote
       source={source}
       components={components}
-      options={{ mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] } }}
+      options={{ mdxOptions: { remarkPlugins: [remarkGfm, remarkNoRawHtml], rehypePlugins: [rehypeSlug] } }}
     />
   );
 }

@@ -18,7 +18,14 @@ const schema = z.object({
   kind: z.enum(contactKinds),
   name: z.string().trim().max(120).optional(),
   email: z.string().trim().toLowerCase().email("Enter an email address so we can reply.").max(254).optional().or(z.literal("")),
-  url: z.string().trim().max(500).optional(),
+  // Shown to staff as a link, so only ordinary web addresses are accepted.
+  url: z
+    .string()
+    .trim()
+    .max(500)
+    .url("Enter the full link, starting with https://")
+    .refine((u) => /^https?:\/\//i.test(u), "Links must start with https://")
+    .optional(),
   reason: z.string().trim().max(60).optional(),
   message: z.string().trim().min(10, "Tell us a little more (at least 10 characters).").max(5000),
   turnstile_token: z.string().optional(),

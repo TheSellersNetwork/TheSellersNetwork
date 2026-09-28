@@ -1,7 +1,7 @@
 import "server-only";
 import { PostHog } from "posthog-node";
-import { createHash } from "node:crypto";
 import { cookies } from "next/headers";
+import { saltedHash } from "@/lib/hash";
 
 let client: PostHog | null = null;
 
@@ -33,7 +33,8 @@ export async function trackServer(event: ServerEvent, properties: Record<string,
   } catch {
     return;
   }
-  const distinctId = createHash("sha256").update(`${process.env.PLACEMENT_HASH_SALT ?? "tsn"}:${id.toLowerCase()}`).digest("hex").slice(0, 32);
+  const distinctId = saltedHash(id.toLowerCase());
+  if (!distinctId) return;
   try {
     ph.capture({ distinctId, event, properties });
     await ph.flush();

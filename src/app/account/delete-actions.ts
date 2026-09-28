@@ -31,30 +31,12 @@ export async function deleteAccount(_prev: DeleteState, formData: FormData): Pro
   } catch {
     return { ok: false, message: "Deletion is not available right now. Use the contact form and we will do it for you." };
   }
-  const { data: holder } = await admin.from("site_accounts").select("profile_id").eq("key", "deleted").maybeSingle();
-  if (!holder) return { ok: false, message: "Deletion is not available right now. Use the contact form and we will do it for you." };
-  const deletedId = holder.profile_id as string;
-
-  if (removePosts) {
-    await admin.from("posts").update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq("author_id", user.id).eq("is_deleted", false);
-    // Anonymous posts they wrote go too.
-    const { data: anon } = await admin.from("anonymous_authors").select("post_id").eq("user_id", user.id);
-    const ids = (anon ?? []).map((a) => a.post_id as string);
-    if (ids.length) await admin.from("posts").update({ is_deleted: true, deleted_at: new Date().toISOString() }).in("id", ids);
+  // One database transaction moves or removes the posts and deletes the sign-in,
+  // so a failure part-way leaves the account exactly as it was.
+  const { error } = await admin.rpc("delete_member", { p_user: user.id, p_remove_posts: removePosts });
+  if (error) {
+    return { ok: false, message: "Something went wrong and nothing was deleted. Try again, or use the contact form and we will do it for you." };
   }
-
-  const steps = [
-    admin.from("topics").update({ author_id: deletedId }).eq("author_id", user.id),
-    admin.from("topics").update({ last_poster_id: deletedId }).eq("last_poster_id", user.id),
-    admin.from("posts").update({ author_id: deletedId }).eq("author_id", user.id),
-  ];
-  for (const step of steps) {
-    const { error } = await step;
-    if (error) return { ok: false, message: "Something went wrong. Nothing has been deleted yet; try again or use the contact form." };
-  }
-
-  const { error } = await admin.auth.admin.deleteUser(user.id);
-  if (error) return { ok: false, message: "Something went wrong deleting the sign-in. Use the contact form and we will finish it for you." };
 
   const supabase = await createClient();
   await supabase.auth.signOut();

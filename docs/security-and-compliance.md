@@ -33,6 +33,17 @@ Application:
 
 Legal and privacy pages and flows: privacy policy, terms, cookies, about (with funding and pen-name disclosure), accessibility statement, contact form, public report form, staff inbox with a 3-year record, self-serve data download and account deletion, 18+ and terms checkboxes at sign-up, double opt-in newsletter with one-click unsubscribe, "Ad" labels, standard "not advice" notes, daily data clean-up.
 
+## Fixed after the second audit (28 September 2026)
+
+- MDX content (guides and the auto-published change posts) can no longer inject HTML: raw tags, imports and exports are stripped at render (`src/lib/markdown/remark-no-raw-html.ts`), and `npm run changes:check` rejects raw HTML, non-https sources and unsafe link schemes before anything is published.
+- Newsletter confirm and unsubscribe need a button press; opening the link (as email scanners do) changes nothing. One-click unsubscribe from mail apps still works by POST.
+- Account deletion runs in one database transaction (`delete_member`, migration 20260928002100).
+- Contact form links must be http(s), and the staff inbox only links those.
+- Consent records (terms accepted, age confirmed) cannot be edited by members.
+- The real author of an anonymous post cannot like it.
+- No email addresses in rate-limit keys; all hashes use a secret salt, and production refuses to hash without one (`PLACEMENT_HASH_SALT`).
+- Animated GIF uploads are capped at 50 frames.
+
 ## Still open in code (low risk, noted for later)
 
 - Profile rows are readable through the API in full, including suspension reason and email preferences. Fix by moving private columns to a separate table.
@@ -48,6 +59,7 @@ Legal and privacy pages and flows: privacy policy, terms, cookies, about (with f
 4. Name the person responsible for illegal content safety and handling complaints, and check the staff inbox (`/admin/messages`) at least every two days.
 5. Accept each provider's data processing terms (Supabase, Vercel, Resend, PostHog, Cloudflare) and confirm the Supabase project region.
 6. In the Supabase dashboard: turn on Auth CAPTCHA (Turnstile), set OTP expiry to 10 minutes or less, and check the auth rate limits.
-7. Rotate the Supabase secret key that was shared in chat, and update `.env.local` and Vercel.
-8. Have a solicitor read `/terms` and `/privacy` before launch.
-9. Know the breach process: report a personal data breach to the ICO within 72 hours: https://ico.org.uk/for-organisations/report-a-breach/
+7. Set `PLACEMENT_HASH_SALT` in Vercel (any random string of 16+ characters; a copy is in `.env.local`). Without it, analytics and sponsor counting switch themselves off in production.
+8. Rotate the Supabase secret key that was shared in chat, and update `.env.local` and Vercel.
+9. Have a solicitor read `/terms` and `/privacy` before launch.
+10. Know the breach process: report a personal data breach to the ICO within 72 hours: https://ico.org.uk/for-organisations/report-a-breach/

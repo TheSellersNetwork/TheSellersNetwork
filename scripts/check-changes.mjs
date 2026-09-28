@@ -65,6 +65,14 @@ for (const file of files) {
   }
   const unknown = [...content.matchAll(/<([A-Z]\w*)/g)].map((m) => m[1]).filter((n) => !["PerUnitCalculator", "PercentCalculator"].includes(n));
   if (unknown.length) fail(file, `unknown components: ${[...new Set(unknown)].join(", ")}`);
+  // Raw HTML is stripped when rendering, but a post that contains it was written wrongly or tampered with.
+  const outsideCode = content.replace(/```[\s\S]*?```/g, "").replace(/`[^`]*`/g, "");
+  if (/<[a-z][a-z0-9-]*[\s/>]/.test(outsideCode)) fail(file, "raw HTML is not allowed; use markdown");
+  if (/^\s*(import|export)\s/m.test(outsideCode)) fail(file, "imports and exports are not allowed");
+  for (const s of data.sources ?? []) if (!/^https:\/\//.test(String(s?.url ?? ""))) fail(file, `source links must be https: ${s?.url}`);
+  for (const m of content.matchAll(/\]\(([^)\s]+)/g)) {
+    if (!/^(https:\/\/|\/|#|mailto:)/.test(m[1])) fail(file, `link must be https, a site path or an anchor: ${m[1]}`);
+  }
 }
 
 console.log(problems === 0 ? `All ${files.length} change pages pass.` : `\n${problems} problem(s) in ${files.length} change pages.`);

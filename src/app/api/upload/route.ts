@@ -33,7 +33,8 @@ export async function POST(request: Request) {
   let output: Buffer;
   try {
     const animated = file.type === "image/gif";
-    output = await sharp(Buffer.from(await file.arrayBuffer()), { animated, limitInputPixels: 40_000_000 })
+    // The pixel limit applies per frame, so animated GIFs also get a frame cap to keep decoding cheap.
+    output = await sharp(Buffer.from(await file.arrayBuffer()), { animated, pages: animated ? 50 : 1, limitInputPixels: 40_000_000 })
       .rotate()
       .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
       .webp({ quality: 82 })

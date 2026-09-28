@@ -10,6 +10,7 @@ import { allowAction, clientIp } from "@/lib/rate-limit";
 import { NewsletterConfirmEmail } from "@/emails/newsletter-confirm-email";
 import { siteConfig } from "@/lib/site";
 import { NEWSLETTER_CONSENT } from "@/lib/newsletter";
+import { saltedHash } from "@/lib/hash";
 
 export type SignupState = { ok: boolean; message: string };
 
@@ -32,7 +33,9 @@ export async function subscribeToCourse(_prev: SignupState, formData: FormData):
   const { email, source } = parsed.data;
 
   const ip = clientIp(await headers());
-  if (!(await allowAction(`newsletter:${ip}`, 5, "1 hour")) || !(await allowAction(`newsletter-email:${email}`, 3, "1 day"))) {
+  // The per-address limit is keyed on a salted hash: rate_limits must hold no email addresses.
+  const emailKey = saltedHash(email, 24) ?? "unsalted";
+  if (!(await allowAction(`newsletter:${ip}`, 5, "1 hour")) || !(await allowAction(`newsletter-email:${emailKey}`, 3, "1 day"))) {
     return { ok: false, message: "Too many attempts. Try again later." };
   }
 
