@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ForumShell } from "@/components/layout/forum-shell";
 import { Plus, Search } from "lucide-react";
 import { PickupCard } from "@/components/pickups/pickup-card";
 import { getPickups, getPickupTotals } from "@/lib/pickups-queries";
@@ -9,7 +10,7 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Pickups",
   description: "What UK resellers are finding at car boots, charity shops and clearance, what they paid, and what it sold for.",
-  alternates: { canonical: "/pickups" },
+  alternates: { canonical: "/community/pickups" },
 };
 export const dynamic = "force-dynamic";
 
@@ -17,10 +18,10 @@ function href(sp: Record<string, string | undefined>, change: Record<string, str
   const q = new URLSearchParams();
   for (const [k, v] of Object.entries({ ...sp, ...change })) if (v) q.set(k, v);
   const s = q.toString();
-  return s ? `/pickups?${s}` : "/pickups";
+  return s ? `/community/pickups?${s}` : "/community/pickups";
 }
 
-export default async function PickupsPage({ searchParams }: PageProps<"/pickups">) {
+export default async function PickupsPage({ searchParams }: PageProps<"/community/pickups">) {
   const raw = await searchParams;
   const sp = {
     category: typeof raw.category === "string" && raw.category in pickupCategories ? raw.category : undefined,
@@ -31,10 +32,15 @@ export default async function PickupsPage({ searchParams }: PageProps<"/pickups"
   const [pickups, totals] = await Promise.all([getPickups({ category: sp.category, source: sp.source, sold: sp.sold === "1", brand: sp.brand }), getPickupTotals()]);
 
   return (
-    <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+    <ForumShell source="/community/pickups" activeNav="pickups">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Pickups</h1>
+          <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
+            <Link href="/community" className="hover:underline">
+              Community
+            </Link>
+          </nav>
+          <h1 className="mt-1 text-3xl font-semibold tracking-tight">Pickups</h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
             What members are finding, what they paid, where, and what it sold for. Add the sold price when it goes and everyone learns what is worth picking up.
           </p>
@@ -45,10 +51,10 @@ export default async function PickupsPage({ searchParams }: PageProps<"/pickups"
           ) : null}
         </div>
         <div className="flex gap-2">
-          <Link href="/pickups/bolo" className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-secondary">
+          <Link href="/community/pickups/bolo" className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-secondary">
             <Search className="size-4" aria-hidden="true" /> BOLO list
           </Link>
-          <Link href="/pickups/new" className="inline-flex items-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-brand-deep">
+          <Link href="/community/pickups/new" className="inline-flex items-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-brand-deep">
             <Plus className="size-4" aria-hidden="true" /> Post a pickup
           </Link>
         </div>
@@ -84,17 +90,17 @@ export default async function PickupsPage({ searchParams }: PageProps<"/pickups"
         <div className="mt-10 rounded-xl border border-dashed p-10 text-center">
           <p className="font-medium">No pickups here yet.</p>
           <p className="mt-1 text-sm text-muted-foreground">Been to a car boot or charity shop lately? Share what you found and what you paid.</p>
-          <Link href="/pickups/new" className="mt-4 inline-block rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-deep">
+          <Link href="/community/pickups/new" className="mt-4 inline-block rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-deep">
             Post the first one
           </Link>
         </div>
       ) : (
-        <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {pickups.map((p) => (
             <PickupCard key={p.id} p={p} />
           ))}
         </ul>
       )}
-    </main>
+    </ForumShell>
   );
 }

@@ -22,7 +22,7 @@ export function PickupCard({ p }: { p: Pickup }) {
       </div>
       <div className="flex flex-1 flex-col p-3">
         <h2 className="line-clamp-2 text-sm font-semibold leading-snug">
-          <Link href={`/pickups/${p.id}`} className="after:absolute after:inset-0">
+          <Link href={`/community/pickups/${p.id}`} className="after:absolute after:inset-0">
             {p.brand ? `${p.brand}: ` : ""}
             {p.title}
           </Link>

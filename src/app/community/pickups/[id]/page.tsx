@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { ForumShell } from "@/components/layout/forum-shell";
 import { notFound } from "next/navigation";
 import { MapPin, Package } from "lucide-react";
 import { DeletePickup, MarkSold, NiceFind } from "@/components/pickups/pickup-actions";
@@ -13,15 +14,15 @@ import { siteConfig } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: PageProps<"/pickups/[id]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/community/pickups/[id]">): Promise<Metadata> {
   const { id } = await params;
   const p = await getPickup(id);
   if (!p) return {};
   const title = `${p.brand ? `${p.brand} ` : ""}${p.title} for ${gbp(p.paid)}`;
-  return { title, description: `Picked up at a ${pickupSources[p.source_type].toLowerCase()} for ${gbp(p.paid)}.`, alternates: { canonical: `/pickups/${p.id}` } };
+  return { title, description: `Picked up at a ${pickupSources[p.source_type].toLowerCase()} for ${gbp(p.paid)}.`, alternates: { canonical: `/community/pickups/${p.id}` } };
 }
 
-export default async function PickupPage({ params }: PageProps<"/pickups/[id]">) {
+export default async function PickupPage({ params }: PageProps<"/community/pickups/[id]">) {
   const { id } = await params;
   const viewer = await getCurrentUser();
   const p = await getPickup(id, viewer?.id);
@@ -31,9 +32,13 @@ export default async function PickupPage({ params }: PageProps<"/pickups/[id]">)
   const reportUrl = `/report?url=${encodeURIComponent(`${siteConfig.url}/pickups/${p.id}`)}`;
 
   return (
-    <main id="main" className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
+    <ForumShell source="/community/pickups" activeNav="pickups">
       <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-        <Link href="/pickups" className="hover:underline">
+        <Link href="/community" className="hover:underline">
+          Community
+        </Link>
+        {" / "}
+        <Link href="/community/pickups" className="hover:underline">
           Pickups
         </Link>
       </nav>
@@ -58,7 +63,7 @@ export default async function PickupPage({ params }: PageProps<"/pickups/[id]">)
               {pickupSources[p.source_type]}
               {p.area ? `, ${p.area}` : ""}
             </span>
-            <Link href={`/pickups?category=${p.category}`} className="hover:underline">
+            <Link href={`/community/pickups?category=${p.category}`} className="hover:underline">
               {pickupCategories[p.category]}
             </Link>
           </p>
@@ -105,7 +110,7 @@ export default async function PickupPage({ params }: PageProps<"/pickups/[id]">)
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <NiceFind id={p.id} liked={!!p.liked_by_me} count={p.like_count} signedIn={!!viewer} own={own} />
             {p.brand ? (
-              <Link href={`/pickups?brand=${encodeURIComponent(p.brand)}`} className="text-sm underline">
+              <Link href={`/community/pickups?brand=${encodeURIComponent(p.brand)}`} className="text-sm underline">
                 More {p.brand} pickups
               </Link>
             ) : null}
@@ -124,6 +129,6 @@ export default async function PickupPage({ params }: PageProps<"/pickups/[id]">)
           ) : null}
         </div>
       </div>
-    </main>
+    </ForumShell>
   );
 }

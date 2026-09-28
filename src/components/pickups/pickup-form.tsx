@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import Image from "next/image";
 import { Camera, X } from "lucide-react";
-import { createPickup, type PickupState } from "@/app/pickups/actions";
+import { createPickup, type PickupState } from "@/app/community/pickups/actions";
 import { resizeImage } from "@/lib/images/resize";
 import { pickupCategories, pickupSources } from "@/lib/pickups";
 import { Button } from "@/components/ui/button";

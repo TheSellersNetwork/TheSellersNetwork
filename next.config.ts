@@ -37,6 +37,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.supabase.co" },
     ],
   },
+  // Pickups live inside the community section.
+  redirects: async () => [
+    { source: "/pickups", destination: "/community/pickups", permanent: true },
+    { source: "/pickups/:path*", destination: "/community/pickups/:path*", permanent: true },
+  ],
   headers: async () => [
     {
       source: "/(.*)",

@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ForumShell } from "@/components/layout/forum-shell";
 import { PickupForm } from "@/components/pickups/pickup-form";
 import { requireOnboardedUser } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Post a pickup", robots: { index: false } };
 
 export default async function NewPickupPage() {
-  const user = await requireOnboardedUser("/pickups/new");
+  const user = await requireOnboardedUser("/community/pickups/new");
   return (
-    <main id="main" className="mx-auto w-full max-w-2xl flex-1 px-4 py-10 sm:px-6">
+    <ForumShell source="/community/pickups/new" activeNav="pickups">
       <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-        <Link href="/pickups" className="hover:underline">
+        <Link href="/community" className="hover:underline">
+          Community
+        </Link>
+        {" / "}
+        <Link href="/community/pickups" className="hover:underline">
           Pickups
         </Link>
       </nav>
@@ -20,6 +25,6 @@ export default async function NewPickupPage() {
       <div className="mt-6">
         <PickupForm />
       </div>
-    </main>
+    </ForumShell>
   );
 }

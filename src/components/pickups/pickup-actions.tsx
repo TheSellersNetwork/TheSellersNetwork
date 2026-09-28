@@ -3,7 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
-import { deletePickup, markPickupSold, togglePickupLike, type PickupState } from "@/app/pickups/actions";
+import { deletePickup, markPickupSold, togglePickupLike, type PickupState } from "@/app/community/pickups/actions";
 import { pickupPlatforms } from "@/lib/pickups";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

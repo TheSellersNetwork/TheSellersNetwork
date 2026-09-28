@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ForumShell } from "@/components/layout/forum-shell";
 import { getBoloBrands } from "@/lib/pickups-queries";
 import { gbp, pickupCategories, pickupSources, type PickupCategory, type PickupSource } from "@/lib/pickups";
 
 export const metadata: Metadata = {
   title: "BOLO: be on the lookout",
   description: "Brands UK resellers have picked up and sold, with typical buy and sell prices from members' real pickups.",
-  alternates: { canonical: "/pickups/bolo" },
+  alternates: { canonical: "/community/pickups/bolo" },
 };
 export const dynamic = "force-dynamic";
 
@@ -17,9 +18,13 @@ export const dynamic = "force-dynamic";
 export default async function BoloPage() {
   const brands = await getBoloBrands();
   return (
-    <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6">
+    <ForumShell source="/community/pickups/bolo" activeNav="pickups">
       <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-        <Link href="/pickups" className="hover:underline">
+        <Link href="/community" className="hover:underline">
+          Community
+        </Link>
+        {" / "}
+        <Link href="/community/pickups" className="hover:underline">
           Pickups
         </Link>
       </nav>
@@ -35,7 +40,7 @@ export default async function BoloPage() {
         <div className="mt-10 rounded-xl border border-dashed p-10 text-center">
           <p className="font-medium">The list builds itself as members add sold prices.</p>
           <p className="mt-1 text-sm text-muted-foreground">Post your pickups, and when they sell, add the price. Once three pickups of a brand have sold, it shows here.</p>
-          <Link href="/pickups/new" className="mt-4 inline-block rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-deep">
+          <Link href="/community/pickups/new" className="mt-4 inline-block rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-deep">
             Post a pickup
           </Link>
         </div>
@@ -56,7 +61,7 @@ export default async function BoloPage() {
               {brands.map((b) => (
                 <tr key={b.brand}>
                   <td className="p-3 font-medium">
-                    <Link href={`/pickups?brand=${encodeURIComponent(b.brand)}`} className="hover:underline">
+                    <Link href={`/community/pickups?brand=${encodeURIComponent(b.brand)}`} className="hover:underline">
                       {b.brand}
                     </Link>
                     <span className="block text-xs text-muted-foreground">{pickupCategories[b.top_category as PickupCategory] ?? b.top_category}</span>
@@ -74,6 +79,6 @@ export default async function BoloPage() {
           </table>
         </div>
       )}
-    </main>
+    </ForumShell>
   );
 }

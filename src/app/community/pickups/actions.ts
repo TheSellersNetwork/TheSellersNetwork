@@ -33,7 +33,7 @@ const schema = z.object({
 });
 
 export async function createPickup(_prev: PickupState, formData: FormData): Promise<PickupState> {
-  const user = await requireOnboardedUser("/pickups/new");
+  const user = await requireOnboardedUser("/community/pickups/new");
   if (!user.emailConfirmed) return { ok: false, message: "Confirm your email address first." };
   const parsed = schema.safeParse(Object.fromEntries(["title", "brand", "category", "source_type", "area", "paid", "expected", "note", "photo_url"].map((k) => [k, formData.get(k) ?? undefined])));
   if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message };
@@ -58,8 +58,8 @@ export async function createPickup(_prev: PickupState, formData: FormData): Prom
     .select("id")
     .single();
   if (error || !data) return { ok: false, message: friendlyError(error) };
-  revalidatePath("/pickups");
-  redirect(`/pickups/${data.id}`);
+  revalidatePath("/community/pickups");
+  redirect(`/community/pickups/${data.id}`);
 }
 
 const soldSchema = z.object({
@@ -81,8 +81,8 @@ export async function markPickupSold(_prev: PickupState, formData: FormData): Pr
     .eq("id", parsed.data.id)
     .eq("user_id", user.id);
   if (error) return { ok: false, message: friendlyError(error) };
-  revalidatePath(`/pickups/${parsed.data.id}`);
-  revalidatePath("/pickups");
+  revalidatePath(`/community/pickups/${parsed.data.id}`);
+  revalidatePath("/community/pickups");
   return { ok: true, message: "Nice. Sold price saved." };
 }
 
@@ -91,8 +91,8 @@ export async function deletePickup(id: string): Promise<void> {
   if (!user || !/^[0-9a-f-]{36}$/.test(id)) return;
   const supabase = await createClient();
   await supabase.from("pickups").delete().eq("id", id);
-  revalidatePath("/pickups");
-  redirect("/pickups");
+  revalidatePath("/community/pickups");
+  redirect("/community/pickups");
 }
 
 export async function togglePickupLike(id: string): Promise<{ ok: boolean; liked?: boolean; count?: number; message?: string }> {
