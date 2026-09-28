@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { renderMarkdown } from "@/lib/markdown/render";
-import { rituals, ritualTitle } from "@/lib/rituals";
+import { rituals, ritualDue, ritualTitle } from "@/lib/rituals";
 
 /*
   Posts today's ritual thread, if there is one. Runs every morning from
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
   const force = new URL(request.url).searchParams.get("force");
   const today = new Date();
-  const due = rituals.filter((r) => (force ? r.id === force : r.weekday === today.getUTCDay()));
+  const due = rituals.filter((r) => (force ? r.id === force : ritualDue(r, today)));
   if (due.length === 0) return NextResponse.json({ message: "Nothing due today" });
 
   const admin = createAdminClient();

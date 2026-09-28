@@ -17,6 +17,8 @@ export type BlogMeta = {
   published: string | null;
   updated: string | null;
   discussion_topic_id: string | null;
+  /* Pen-name byline (see src/lib/content/authors.ts), or null for the site itself. */
+  author: string | null;
 };
 
 export type BlogPost = BlogMeta & { content: string };
@@ -35,6 +37,7 @@ function toMeta(file: string, data: Record<string, unknown>): BlogMeta {
     published: data.published ? new Date(String(data.published)).toISOString() : null,
     updated: data.updated ? new Date(String(data.updated)).toISOString() : null,
     discussion_topic_id: data.discussion_topic_id ? String(data.discussion_topic_id) : null,
+    author: data.author ? String(data.author) : null,
   };
 }
 

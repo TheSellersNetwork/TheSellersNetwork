@@ -1,0 +1,149 @@
+---
+title: "Repricing on Amazon without a race to the bottom"
+excerpt: "How to work out a price floor from your real costs, how Amazon's featured offer decides who sells, when following the lowest price loses you money, and how to set up Amazon's free Automate Pricing tool so it competes without undercutting you into a loss."
+categories: [amazon-fba-and-fbm]
+order: 55
+published: 2026-09-28
+---
+
+This is for Amazon sellers on shared listings who either reprice by hand and feel they are always chasing, or have switched on a repricer and watched a price slide down to nothing. After reading you will be able to work out a floor price for each product from your own costs, decide when to match a competitor and when to ignore one, and set up Amazon's own free repricing tool with rules that protect your margin.
+
+[Seller feedback and the Buy Box](/guides/amazon-seller-feedback-and-buy-box#the-buy-box) explains how the featured offer is chosen; this guide is about pricing within it. Tool limits come from Amazon's help pages, linked where used. Nothing here is tax or financial advice.
+
+## Why races to the bottom happen
+
+A race to the bottom needs two sellers, each with a rule that says "beat the lowest price by 1p". Every time one moves, the other follows, until one of them hits a floor or runs out of stock. Neither sells much more than before, because the featured offer was rotating between them anyway. Both sell for less.
+
+The rest of the listing follows, because other sellers' rules see the new low price. By the end, the price that customers were happy to pay has been replaced by a price that nobody chose. And it is slow to come back up: Amazon's [fair pricing policy](https://sellercentral.amazon.co.uk/help/hub/reference/external/G5TUVJKZHUVMN77V?locale=en-GB) says an offer priced significantly higher than recent prices can lose the Buy Box, so once the recent price is low, raising yours is harder.
+
+The way out has three parts: a floor worked out before you list, a rule that competes for the featured offer rather than the lowest price, and the discipline to leave some competitors alone.
+
+## Step one: your floor
+
+The floor is the lowest price at which a sale still earns what you need. Every product gets one, and it is worked out from costs, not from the listing.
+
+### What goes into it
+
+| Cost | Where to find it |
+| --- | --- |
+| What you paid for the unit | Your receipt or invoice |
+| Inbound postage and prep, per unit | Your own records |
+| Referral fee (a percentage of the total sale price, with a minimum) | Amazon's [fee pages](https://sell.amazon.co.uk/pricing); the per-item minimum referral fee is £0.25 |
+| FBA fulfilment fee for the size tier | The [rate card or revenue calculator](https://sell.amazon.co.uk/pricing), or your Fee Preview report |
+| The 1.5% fuel and logistics surcharge on the fulfilment fee | [Our note on the surcharge](/blog/amazon-fba-fuel-logistics-surcharge) |
+| Festive peak fee, 15 October to 14 January | [Q4 on Amazon](/guides/amazon-q4-peak-season#the-festive-peak-fulfilment-fee) |
+| VAT on Amazon's fees if you are not VAT registered | Amazon quotes its fees excluding VAT; see [VAT invoices and business accounts](/guides/amazon-vat-invoices-and-business-accounts) |
+| An allowance for storage while it waits to sell | Monthly storage rate times volume times expected months |
+| An allowance for returns | Your return rate for the product or category |
+| The minimum profit you are willing to sell for | Your decision |
+
+The last line is the one people leave out, and it is the difference between a floor and a break-even. Selling at break-even ties up cash, time and capacity for no return.
+
+### The sum
+
+If you are not VAT registered, and the referral fee is a percentage r of the sale price:
+
+floor price = (unit cost + other per unit costs + FBA fee with surcharge and VAT + minimum profit) divided by (1 minus r times 1.2)
+
+The "times 1.2" adds VAT to the referral fee. If you are VAT registered the calculation is different, because you account for VAT on the sale and reclaim it on fees; use the revenue calculator or your accounting software's figures rather than this formula.
+
+### A worked example
+
+For illustration only: a product bought for £6.00, standard parcel up to 400 g, in a category with a 15% referral fee, sold by a seller who is not VAT registered and wants at least £1.50 a unit after allowances of 30p for storage and returns.
+
+- FBA fee: £3.01 on the [2026 UK rates](https://sellercentral.amazon.co.uk/help/hub/reference/external/GJ7N4DN3ZZBK4UC7?locale=en-GB) outside peak, plus 1.5% surcharge, about £3.06, plus VAT: about £3.67.
+- Costs to cover: £6.00 + £0.30 + £3.67 + £1.50 = £11.47.
+- Divided by (1 minus 0.15 times 1.2), which is 0.82: a floor of about £13.99.
+
+From 15 October the peak fee adds about 11p before VAT to that tier, which lifts the floor by roughly 16p. Recalculate floors for Q4.
+
+Check your own category's referral rate on Amazon's fee page. Rates differ by category and some have price bands.
+
+## Step two: what you are competing for
+
+Amazon's [featured offer eligibility page](https://sellercentral.amazon.co.uk/gp/help/external/G200418100) lists what decides the Buy Box: the landed price (item plus delivery) against similar offers, delivery speed and cost, your performance metrics, stock availability, and time on the platform. Price is one input, not the only one.
+
+Among eligible offers that are close, the box rotates. Two FBA offers at the same price with clean metrics tend to share it; an offer a little higher still gets some. Three consequences for pricing:
+
+- **Being 1p lower than everyone does not win the box all day.** It usually gets you a slightly larger share.
+- **The lowest price on the listing is often not the featured price.** A merchant fulfilled offer with a week's delivery may be cheapest and never featured.
+- **The featured price is the one to compete with.** Matching it is usually enough to enter the rotation if your offer is FBA and your metrics are good.
+
+## Step three: when not to follow
+
+Following a lower price is right when the competitor will be there for weeks, has plenty of stock, and is a serious FBA offer. It is wrong in these cases:
+
+| Situation | Better response |
+| --- | --- |
+| The cheaper offer is merchant fulfilled with slow delivery | Ignore it. It is probably not featured. |
+| The cheaper seller has one or two units | Wait. They will sell out in days. |
+| The cheaper offer is below your floor | Hold at your floor or above. Sell later or elsewhere. |
+| Amazon is on the listing below what you can buy it for | Do not chase. Wait for Amazon to go out of stock, or move on. |
+| A new seller has just undercut by a few pence | Wait a day before reacting. Many undercuts are automatic and brief. |
+| You have plenty of time before storage costs bite | Hold a slightly higher price and accept a smaller share. |
+| It is Q4 and the listing is running out of stock | Hold or raise gently. Demand is there. |
+
+The question to ask is not "am I the cheapest" but "will I sell my units at a profit within the time I planned". A smaller share of sales at a good price can beat a larger share at a bad one, especially with only a few units.
+
+The exception is slow stock heading for the [aged inventory surcharge](/guides/amazon-inventory-health#aged-inventory-surcharge) or a Q4 storage bill. There, selling faster at a lower price, still above your floor, is correct.
+
+## Amazon's free repricer: Automate Pricing
+
+### What it is
+
+Automate Pricing is in Seller Central under Pricing. Amazon's [FAQ](https://sellercentral.amazon.co.uk/help/hub/reference/external/G202015620?locale=en-GB) says it is included in the Professional selling plan at no extra charge. It changes your price automatically in response to the featured offer, the lowest price or your sales, within a minimum and maximum you set.
+
+### The rule types
+
+From Amazon's [create a pricing rule page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201995750?locale=en-GB):
+
+- **Competitive Buy Box**: match, beat or stay above the featured offer price.
+- **Competitive Lowest Price**: match, beat or stay above the lowest price.
+- **Sales-based**: change price according to units sold.
+
+For "beat" and "stay above" you set the amount, at least £0.10 or 1%, and at most 90%. Filters narrow what you compare against: for example only FBA offers, or only sellers with a feedback rating within 5% of yours. Amazon also offers a ready-made [Competitive Price Rule](https://sellercentral.amazon.co.uk/help/hub/reference/external/GT23CNJUTWXGLK7A?locale=en-GB) that matches the featured offer price.
+
+### Minimum and maximum prices
+
+Your minimum and maximum are the safety rails, and Amazon applies them everywhere, not only inside the rule. The [validation page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G202024630?locale=en-GB) and the [suppression page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G202129000?locale=en-GB) set out the limits:
+
+- Your minimum must be above the minimum referral fee for the category.
+- Your maximum must be less than six times the ASIN's recent sales price or £200, whichever is higher.
+- If you set a price manually outside your own minimum or maximum, Amazon suppresses the offer as a potential price error. Fix it under Pricing, Fix Price Alerts.
+- If you do not set a maximum, Amazon keeps your price from going significantly above recent prices.
+
+Set the minimum to the floor you worked out above. Not a round number below it, and not "the lowest I have seen someone else go".
+
+### Timing and limits
+
+The FAQ says price changes from an existing rule usually go through in under 15 minutes, and a new or edited rule can take up to an hour to reprice every SKU. Amazon's [price update policy](https://sellercentral.amazon.co.uk/help/hub/reference/external/G3VA4VWKFMR9R48M?locale=en-GB) limits how many manual and file-based price changes you can make in a day, and says changes made by Automate Pricing do not count towards that limit.
+
+### A setup we recommend
+
+For most resellers on shared FBA listings:
+
+1. **One rule: Competitive Buy Box, match.** Not beat. Matching the featured price enters the rotation without starting a war.
+2. **Filter to FBA offers.** A slow merchant fulfilled offer should not set your price.
+3. **Minimum price: your floor.** Every SKU, before it is added to the rule.
+4. **Maximum price: a sensible ceiling.** Around the upper end of where the Buy Box has sat over 90 days on a [price history chart](/guides/amazon-reading-price-history-charts), so the rule can follow the price up when others sell out.
+5. **Review floors monthly and before 15 October.** Fees change; floors must follow.
+
+Use "beat" only for stock you need to move, and by the smallest amount the tool allows. Paid third-party repricers offer more complex strategies. Whatever you use, the same two numbers decide whether it helps you or hurts you: the floor and the thing it is told to compete with.
+
+## Doing it by hand
+
+Under about ten products, repricing by hand once or twice a day works and teaches you how your listings behave. The same rules apply: know the floor, look at the featured price rather than the lowest, and give undercutters a day before reacting.
+
+## What goes wrong
+
+- **No floor, or a floor that is break-even.** The tool sells at cost and reports success.
+- **"Beat the lowest by 1p".** Starts the race, and competes with offers nobody buys.
+- **A floor set once and never updated.** Fee changes, the fuel surcharge and the peak fee all move it.
+- **Chasing a seller with two units.** They were gone in a day. The low price stays on the chart.
+- **Undercutting Amazon when Amazon is below your cost.** You win the box and lose money on every sale.
+- **Manual price changes outside your min and max.** The offer is suppressed until you fix it.
+- **Ignoring VAT on fees.** If you are not VAT registered, every fee is 20% more than the fee table shows.
+
+Pricing questions, with the listing and your floor, go in [FBA and FBM](/community/c/amazon-fba-and-fbm); tool setup questions go in [Tools and automation](/community/c/tools-and-automation).
+
+<Signup source="/guides/amazon-repricing-without-a-race-to-the-bottom" />

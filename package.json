@@ -21,7 +21,8 @@
     "downloads:build": "tsx scripts/build-downloads.ts",
     "icons:build": "node scripts/build-icons.mjs",
     "changes:sync": "tsx scripts/sync-changes.ts",
-    "changes:check": "node scripts/check-changes.mjs"
+    "changes:check": "node scripts/check-changes.mjs",
+    "guides:check": "node scripts/check-guides.mjs"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.6.1",

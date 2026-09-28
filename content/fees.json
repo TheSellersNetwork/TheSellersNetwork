@@ -1,0 +1,145 @@
+{
+  "checked": "2026-09-28",
+  "vatRate": 20,
+  "ebayPrivate": {
+    "source": "https://www.ebay.co.uk/help/selling/fees-credits-invoices/selling-fees?id=4822",
+    "internationalPercent": 3,
+    "freeListings": 300,
+    "extraListingFee": 0.35,
+    "shopFreeListings": 400,
+    "shopMonthly": 19.99
+  },
+  "ebayBusiness": {
+    "source": "https://www.ebay.co.uk/help/selling/fees-credits-invoices/business-selling-fees?id=4809",
+    "perOrderOver10": 0.4,
+    "perOrder10OrUnder": 0.3,
+    "regulatoryPercent": 0.35,
+    "feesExcludeVat": true,
+    "categories": [
+      { "id": "most", "name": "Most categories", "percent": 12.9 },
+      { "id": "clothing", "name": "Clothes, shoes and accessories", "percent": 11.9 },
+      { "id": "trainers", "name": "Trainers", "percent": 11.9, "wholeSaleThreshold": 100, "percentAtThreshold": 7 },
+      { "id": "handbags", "name": "Women's bags and handbags", "percent": 12.9, "wholeSaleThreshold": 800, "percentAtThreshold": 7 },
+      { "id": "collectables", "name": "Collectables", "percent": 10.9 },
+      { "id": "toys", "name": "Toys and games", "percent": 10.9 },
+      { "id": "books", "name": "Books, comics and magazines", "percent": 9.9 },
+      { "id": "phones-accessories", "name": "Mobile phones and communication", "percent": 9.9 },
+      { "id": "smartphones", "name": "Mobile and smart phones", "percent": 6.9, "tierThreshold": 1000, "percentAbove": 3 },
+      { "id": "jewellery", "name": "Jewellery and watches", "percent": 14.9, "tierThreshold": 1000, "percentAbove": 4 },
+      { "id": "home", "name": "Home, furniture and DIY", "percent": 11.9, "tierThreshold": 500, "percentAbove": 7.9 }
+    ]
+  },
+  "ebayLive": {
+    "source": "https://www.ebay.co.uk/help/selling/ebay-live/ebay-live-selling-fees?id=5870",
+    "commissionPercent": 6,
+    "commissionPercentReduced": 4,
+    "commissionCap": 100,
+    "processingPercent": 2.42,
+    "processingFixed": 0.3,
+    "feesExcludeVat": true
+  },
+  "vinted": {
+    "source": "https://www.vinted.co.uk/how_it_works",
+    "rulesSource": "https://www.vinted.co.uk/help/4/1120-commercial-selling",
+    "sellerPercent": 0,
+    "buyerProtectionPercent": 5,
+    "buyerProtectionFixed": 0.7,
+    "buyerProtectionNote": "Vinted's How it works page says 5% plus £0.70; its Help Centre says usually 3% to 8% plus £0.30 to £0.80. The buyer pays it."
+  },
+  "depop": {
+    "source": "https://depophelp.zendesk.com/hc/en-gb/articles/360001791127-Seller-fees-and-charges",
+    "sellingPercent": 0,
+    "processingPercent": 2.9,
+    "processingFixed": 0.3,
+    "boostPercent": 12
+  },
+  "etsy": {
+    "source": "https://www.etsy.com/uk/legal/fees/",
+    "listingFeeUsd": 0.2,
+    "transactionPercent": 6.5,
+    "processingPercent": 4,
+    "processingFixed": 0.2,
+    "regulatoryPercent": 0.48,
+    "offsiteAdsPercent": 15,
+    "note": "Etsy's fees page shows an update dated 5 October 2026: recheck after then."
+  },
+  "tiktokShop": {
+    "source": "https://seller-uk.tiktok.com/university/essay?knowledge_id=7753824408913665&default_language=en-GB",
+    "commissionPercent": 9,
+    "includesVat": true
+  },
+  "whatnot": {
+    "source": "https://help.whatnot.com/hc/en-us/articles/4847069165965-Whatnot-seller-fees",
+    "commissionPercent": 6.67,
+    "commissionPercentCoins": 4,
+    "processingPercent": 2.42,
+    "processingFixed": 0.25,
+    "feesExcludeVat": true,
+    "note": "Standard tier for sellers with under £10,000 of sales in four weeks; busier sellers pay less."
+  },
+  "amazon": {
+    "source": "https://sellercentral.amazon.co.uk/help/hub/reference/external/H78LW99F4XF3Z38",
+    "pricingSource": "https://sell.amazon.co.uk/pricing",
+    "rateCard": "https://m.media-amazon.com/images/G/02/sell/images/260630-FBA-Rate-Card-EN1.pdf",
+    "individualPerItem": 0.75,
+    "professionalMonthly": 25,
+    "digitalServicesPercent": 2,
+    "fuelSurchargePercent": 1.5,
+    "feesExcludeVat": true,
+    "lowPriceFbaThreshold": 20,
+    "storagePerCubicFoot": { "janSep": 0.76, "octDec": 1.51 },
+    "referral": [
+      { "id": "clothing", "name": "Clothing and accessories", "bands": [{ "upTo": 15, "percent": 5 }, { "upTo": 20, "percent": 10 }, { "upTo": null, "percent": 15 }], "wholePrice": true, "minimum": 0.25 },
+      { "id": "footwear", "name": "Footwear", "percent": 15, "minimum": 0.25 },
+      { "id": "books", "name": "Books", "percent": 15, "closingFeeUnder5": 0.5, "closingFee5Plus": 1.0 },
+      { "id": "toys", "name": "Toys and games", "percent": 15, "minimum": 0.25 },
+      { "id": "electronics", "name": "Consumer electronics", "percent": 7, "minimum": 0.25 },
+      { "id": "jewellery", "name": "Jewellery", "percent": 20, "tierThreshold": 225, "percentAbove": 5, "minimum": 0.25 },
+      { "id": "watches", "name": "Watches", "percent": 15, "tierThreshold": 225, "percentAbove": 5, "minimum": 0.25 },
+      { "id": "home", "name": "Home", "bands": [{ "upTo": 20, "percent": 8 }, { "upTo": null, "percent": 15 }], "wholePrice": true, "minimum": 0.25 },
+      { "id": "games", "name": "Video games and accessories", "percent": 15 },
+      { "id": "other", "name": "Everything else", "percent": 15, "minimum": 0.25 }
+    ],
+    "fbaExamples": [
+      { "tier": "Light envelope, up to 20g", "fee": 1.83 },
+      { "tier": "Light envelope, up to 100g", "fee": 2.08 },
+      { "tier": "Standard envelope, up to 210g", "fee": 2.1 },
+      { "tier": "Standard envelope, up to 460g", "fee": 2.16 },
+      { "tier": "Large envelope, up to 960g", "fee": 2.72 },
+      { "tier": "Extra-large envelope, up to 960g", "fee": 2.94 },
+      { "tier": "Small parcel, up to 150g", "fee": 2.91 },
+      { "tier": "Small parcel, up to 400g", "fee": 3.0 },
+      { "tier": "Small parcel, up to 900g", "fee": 3.04 },
+      { "tier": "Small parcel, up to 1.9kg", "fee": 3.25 }
+    ]
+  },
+  "hmrc": {
+    "mileageFirst10000": 0.55,
+    "mileageAfter": 0.25,
+    "mileageSource": "https://www.gov.uk/government/publications/rates-and-allowances-travel-mileage-and-fuel-allowances/travel-mileage-and-fuel-rates-and-allowances",
+    "nationalLivingWage": 12.71,
+    "wageSource": "https://www.gov.uk/national-minimum-wage-rates"
+  },
+  "postage": {
+    "royalMailSource": "https://www.royalmail.com/sites/royalmail.com/files/2026-09/online-price-guide-october-2026-v1-ta.pdf",
+    "royalMailFrom": "2026-10-05",
+    "evriSource": "https://www.evri.com/our-services/our-prices",
+    "evriNote": "Evri's page showed sale prices on 28 September 2026; drop-off to a home address, Standard service.",
+    "prices": [
+      { "carrier": "Royal Mail", "service": "2nd Class Large Letter", "format": "rm-large-letter", "maxKg": 0.1, "price": 1.55 },
+      { "carrier": "Royal Mail", "service": "2nd Class Large Letter", "format": "rm-large-letter", "maxKg": 0.75, "price": 2.7 },
+      { "carrier": "Royal Mail", "service": "1st Class Large Letter", "format": "rm-large-letter", "maxKg": 0.1, "price": 3.2 },
+      { "carrier": "Royal Mail", "service": "Tracked 48 Small Parcel", "format": "rm-small-parcel", "maxKg": 2, "price": 3.75 },
+      { "carrier": "Royal Mail", "service": "2nd Class Small Parcel", "format": "rm-small-parcel", "maxKg": 2, "price": 4.4 },
+      { "carrier": "Royal Mail", "service": "Tracked 24 Small Parcel", "format": "rm-small-parcel", "maxKg": 2, "price": 4.8 },
+      { "carrier": "Royal Mail", "service": "1st Class Small Parcel", "format": "rm-small-parcel", "maxKg": 2, "price": 5.7 },
+      { "carrier": "Royal Mail", "service": "Tracked 48 Medium Parcel", "format": "rm-medium-parcel", "maxKg": 2, "price": 5.7 },
+      { "carrier": "Evri", "service": "Postable", "format": "evri-postable", "maxKg": 1, "price": 2.7 },
+      { "carrier": "Evri", "service": "Small Parcel", "format": "evri-small", "maxKg": 1, "price": 3.04 },
+      { "carrier": "Evri", "service": "Small Parcel", "format": "evri-small", "maxKg": 2, "price": 3.52 },
+      { "carrier": "Evri", "service": "Parcel", "format": "evri-parcel", "maxKg": 1, "price": 3.29 },
+      { "carrier": "Evri", "service": "Parcel", "format": "evri-parcel", "maxKg": 2, "price": 4.79 },
+      { "carrier": "Evri", "service": "Parcel", "format": "evri-parcel", "maxKg": 5, "price": 6.59 }
+    ]
+  }
+}

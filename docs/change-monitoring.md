@@ -60,13 +60,14 @@ last month.
 4. **Update to an existing post:** edit that post (new dates, a delay, a figure
    confirmed, a deal completed). Add a line to its "Key dates" table and, if the
    status changed, the frontmatter. Do not rewrite what is still true.
-5. Run `npm run changes:check`, `npm run typecheck` and `npm run build`. Fix
+5. **Fees file:** if a change alters a figure in `content/fees.json` (the file every fee calculator reads), update that figure, its `source` if the page moved, and the top-level `checked` date. Only official figures, as everywhere else. Run `npx vitest run src/lib/tools/fees` afterwards.
+6. Run `npm run changes:check`, `npm run typecheck` and `npm run build`. Fix
    anything that fails. Never publish a post that fails a check.
-6. Run `npm run changes:sync` to open the forum thread and poll for new posts.
+7. Run `npm run changes:sync` to open the forum thread and poll for new posts.
    It writes `discussion:` into the file.
-7. Add today's entry to the log: sources checked, what was published or
+8. Add today's entry to the log: sources checked, what was published or
    updated, what is waiting, anything that could not be reached.
-8. Commit with a message listing the posts, and push to `main`.
+9. Commit with a message listing the posts, and push to `main`.
 
 If nothing changed, still add a one-line log entry and commit it, so a gap in
 the log means the task did not run.
@@ -77,5 +78,5 @@ the log means the task did not run.
 - Never guess a number, date or rule. Leave it out and say where to check.
 - No personal names beyond the two bylines, no named tools, no affiliate links.
 - UK English, no em dashes, no exclamation marks.
-- Never edit anything outside `content/changes` and the log, apart from fixing a
-  build error your post caused.
+- Never edit anything outside `content/changes`, `content/fees.json` and the log,
+  apart from fixing a build error your post caused.

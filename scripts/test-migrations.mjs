@@ -759,6 +759,35 @@ await step("the real author cannot like their own anonymous post", async () => {
   await asUser(ids.regular, `insert into public.likes (user_id, post_id) values ($1, $2)`, [ids.regular, p.rows[0].id]);
 });
 
+await step("pickups: own edits only, no counters, BOLO needs three sales", async () => {
+  const add = (user, brand, paid, sold) =>
+    asUser(
+      user,
+      `insert into public.pickups (user_id, title, brand, category, source_type, paid, sold_price, sold_platform, like_count) values ($1, 'Jacket', $2, 'clothing', 'car_boot', $3, $4, $5, 999) returning id, like_count`,
+      [user, brand, paid, sold, sold === null ? null : "ebay"],
+    );
+  const first = await add(ids.member, "barbour", 5, 60);
+  if (first.rows[0].like_count !== 0) throw new Error("like_count set by member");
+  await add(ids.member, "Barbour", 8, 45);
+  await add(ids.regular, "BARBOUR ", 4, null);
+  let bolo = await asAnon(`select brand from public.bolo_brands(365, 3)`);
+  if (bolo.rows.length !== 0) throw new Error("BOLO shown with fewer than 3 sales");
+  await add(ids.regular, "barbour", 6, 50);
+  bolo = await asAnon(`select brand, pickups::int, sold::int, median_paid from public.bolo_brands(365, 3)`);
+  if (bolo.rows[0]?.brand !== "Barbour" || bolo.rows[0].pickups !== 4 || bolo.rows[0].sold !== 3) throw new Error(JSON.stringify(bolo.rows));
+  await asUser(ids.regular, `update public.pickups set paid = 1 where id = $1`, [first.rows[0].id]);
+  const unchanged = await db.query(`select paid from public.pickups where id = $1`, [first.rows[0].id]);
+  if (Number(unchanged.rows[0].paid) !== 5) throw new Error("another member edited a pickup");
+  await expectError(asUser(ids.member, `insert into public.pickup_likes (user_id, pickup_id) values ($1, $2)`, [ids.member, first.rows[0].id]), DENIED);
+  await asUser(ids.regular, `insert into public.pickup_likes (user_id, pickup_id) values ($1, $2)`, [ids.regular, first.rows[0].id]);
+  const liked = await db.query(`select like_count from public.pickups where id = $1`, [first.rows[0].id]);
+  if (liked.rows[0].like_count !== 1) throw new Error("like not counted");
+  await expectError(
+    asUser(ids.member, `insert into public.pickups (user_id, title, category, source_type, paid, note) values ($1, 'Spam', 'other', 'other', 1, 'buy at https://x.test')`, [ids.member]),
+    "pickups_no_links",
+  );
+});
+
 await step("every public table has RLS enabled", async () => {
   const r = await db.query(`
     select c.relname from pg_class c

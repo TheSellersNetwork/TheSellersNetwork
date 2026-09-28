@@ -13,6 +13,7 @@ const nav = [
   { href: urls.community(), label: "Community" },
   { href: urls.blog(), label: "Blog" },
   { href: urls.guides(), label: "Guides" },
+  { href: "/pickups", label: "Pickups" },
   { href: "/tools", label: "Tools" },
   { href: "/partners", label: "Partners" },
 ];

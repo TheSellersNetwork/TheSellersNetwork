@@ -38,7 +38,7 @@ const kinds: { id: string; label: string; help: string; needsUrl?: boolean }[] =
 
 const reportReasons = ["Illegal content", "Child safety", "Scam or fraud", "Harassment or threats", "Hate", "Terrorism", "Self-harm", "Personal information shared without consent", "Something else"];
 
-export function ContactForm({ initialKind = "general", signedIn, turnstileSiteKey }: { initialKind?: string; signedIn: boolean; turnstileSiteKey?: string }) {
+export function ContactForm({ initialKind = "general", initialUrl, signedIn, turnstileSiteKey }: { initialKind?: string; initialUrl?: string; signedIn: boolean; turnstileSiteKey?: string }) {
   const [kind, setKind] = useState(initialKind);
   const [token, setToken] = useState("");
   const [state, action, pending] = useActionState<ContactState, FormData>(sendContact, { ok: false, message: "" });
@@ -80,7 +80,7 @@ export function ContactForm({ initialKind = "general", signedIn, turnstileSiteKe
 
       <div className="space-y-1.5">
         <Label htmlFor="url">Link to the post or page{current.needsUrl ? "" : " (optional)"}</Label>
-        <Input id="url" name="url" type="url" required={current.needsUrl} placeholder="https://..." />
+        <Input id="url" name="url" type="url" required={current.needsUrl} placeholder="https://..." defaultValue={initialUrl} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

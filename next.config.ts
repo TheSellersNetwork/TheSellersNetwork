@@ -18,7 +18,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${supabase}`,
   "font-src 'self' data:",
-  `connect-src 'self' ${supabase} ${supabaseWs} ${posthog} https://eu-assets.i.posthog.com https://challenges.cloudflare.com`,
+  `connect-src 'self' ${supabase} ${supabaseWs} ${posthog} https://eu-assets.i.posthog.com https://challenges.cloudflare.com https://openlibrary.org`,
   "frame-src https://challenges.cloudflare.com",
   "worker-src 'self'",
   "manifest-src 'self'",

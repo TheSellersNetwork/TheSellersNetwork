@@ -1,0 +1,170 @@
+---
+title: "Amazon Business pricing for resellers: business prices, quantity tiers and the fee discounts"
+excerpt: "What Amazon Business looks like from the seller side, how business prices and quantity discount tiers work, what the business order fee discounts actually pay, and whether an arbitrage seller should switch any of it on."
+categories: [amazon-fba-and-fbm]
+order: 50
+published: 2026-09-28
+---
+
+For Professional sellers on Amazon UK who keep seeing "business price" in Manage All Inventory and want to know whether it is worth touching. After reading you will know who sees a business price, how to set one with quantity tiers without losing money on a typo, what the fee discounts for business orders are and when they apply, and a clear recommendation for an arbitrage or wholesale seller. It assumes you already sell through FBA; the basics are in [the working manual](/guides/how-to-start-amazon-fba-uk).
+
+Every rule and figure below comes from Amazon's own help pages and links to them. Amazon changes business programme details without much notice, so open the linked page before you rely on a number.
+
+## What Amazon Business is from the seller side
+
+Amazon Business is the buying side of Amazon for verified organisations: companies, schools, public bodies and sole traders buying for work. Amazon's [Amazon Business FAQ](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201750810?locale=en-GB) says these customers have completed a business registration and been verified, and that your FBA stock can fulfil their orders like any other.
+
+The part most sellers miss is that you are already selling to them. Amazon's [invoice defect rate page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G44QSYRCU27EW4UK?locale=en-GB) says your offers are shown to business and consumer customers from the day you start selling. Whether or not you touch any business setting, some of your orders are business orders, and those come with an invoice obligation (covered below).
+
+What you can choose is whether to offer those buyers anything different. Amazon's [Amazon Business selling page](https://sell.amazon.co.uk/programmes/amazon-business) says any registered seller can receive business orders, and sellers on the Professional plan can switch on business prices, quantity discounts and VAT invoicing tools at no extra charge. The Professional plan itself is £25 a month excluding VAT on Amazon's [pricing page](https://sell.amazon.co.uk/pricing).
+
+## Who sees a business price
+
+Only registered Amazon Business customers. Amazon's [business pricing FAQ](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201824530?locale=en-GB) sets out the rules:
+
+- Your standard price is shown to everyone. The business price sits alongside it and is shown only to verified business buyers.
+- If you set no business price, business buyers simply pay your standard price.
+- A business price cannot be higher than your standard price. If you submit one that is, business buyers are shown the standard price instead.
+- To see your own business prices as a buyer would, you need a free Amazon Business buyer account.
+
+If you already buy stock on a separate business account, as [the Amazon to Amazon guide](/guides/amazon-to-amazon-arbitrage#buying-through-a-separate-amazon-business-account) describes, that is the account to check your offers from. Never check them from the login you use for Seller Central.
+
+## Setting a business price and quantity tiers
+
+### The two parts
+
+Amazon's [business prices and quantity discounts page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201740300?locale=en-GB) defines them:
+
+- **Business price.** A single price for business buyers, whatever quantity they buy.
+- **Quantity discount.** Tiers that apply when a business buyer orders at least a set number of units.
+
+You must set a business price before you can add quantity tiers. The business price can equal your standard price; Amazon's [business pricing rule page](https://sellercentral.amazon.co.uk/help/hub/reference/external/GD29LN5JBS94EL4L?locale=en-GB) says you can enter 0% to do exactly that. This matters for the recommendation later.
+
+### Doing it by hand
+
+Amazon's [Manage Inventory instructions](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201958240?locale=en-GB): Inventory, Manage All Inventory, then in the pricing column click Set next to Business price (if the column is missing, add it under Preferences). Enter the business price, then under Quantity discounts choose one model and add thresholds.
+
+### Percent off or fixed price
+
+This is where most mistakes start, so read the definitions carefully.
+
+| Model | What you enter | What the buyer pays | What happens when your price moves |
+| --- | --- | --- | --- |
+| % off | A minimum quantity and a percentage | That percentage off the **business price**, not the standard price | Tiers follow the business price automatically |
+| Fixed price | A minimum quantity and a price per unit | That per unit price | Nothing. The tier stays at the figure you typed |
+
+Both definitions are from the [Manage Inventory page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201958240?locale=en-GB) and the [pricing FAQ](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201824530?locale=en-GB), which also points out that a fixed price is a price per unit, not an amount off.
+
+**Recommendation: use percent off.** Arbitrage prices move weekly. A fixed tier typed at £20 is still there when the price climbs to £28. Percent tiers move with the business price.
+
+### Rules the tiers must follow
+
+From Amazon's [pricing rule page](https://sellercentral.amazon.co.uk/help/hub/reference/external/GD29LN5JBS94EL4L?locale=en-GB) and [B2B pricing errors page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201812760?locale=en-GB):
+
+- Automated business pricing rules allow up to five quantity tiers.
+- Each tier must have a higher quantity and a bigger discount than the one before. Tiers that get dearer as the quantity rises are rejected.
+- A discount over 50% triggers a warning but is still accepted. Amazon says the warning exists to catch mistakes, so treat it as a question, not a formality.
+- A business or quantity price below your minimum price is rejected when uploaded, and a price that a rule pushes below your minimum can get the SKU deactivated.
+
+Also from Amazon's [pricing FAQ](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201824530?locale=en-GB): promotions are calculated on the business price, so a percentage promotion stacks on top of your business discount. Deals and sale prices are separate prices, not calculated from it.
+
+### Letting a rule do it
+
+Pricing, Automate Pricing offers three business rules: a SKU-level **Business Price and Quantity Discount** rule that keeps the business price a set percentage below your standard price as it changes, a **Business Catalogue** rule that applies one percentage to everything, and a **Business Competitive Featured Offer** rule (below). Each needs a minimum price on every SKU; Amazon's [rule page](https://sellercentral.amazon.co.uk/help/hub/reference/external/GD29LN5JBS94EL4L?locale=en-GB) shows a £20 minimum with 10% off at 5 units giving that tier a floor of £18. If you reprice your standard price, the SKU-level rule keeps the business price following it.
+
+## Business-only offers
+
+A [business-only offer](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201740310?locale=en-GB) has a business price and no standard price, so consumers cannot buy it. Amazon's examples are products with channel restrictions from the manufacturer, and products that need professional handling or installation.
+
+It is created by feed: delete the existing offer, then upload a new one with the standard price blank. Amazon warns that deleting the offer can strand FBA stock. For an arbitrage seller this is almost never the right tool, because it hides your stock from most buyers on the listing.
+
+## The separate business featured offer
+
+Business buyers and consumers can see different featured offers on the same listing. Amazon's [pricing rules FAQ](https://sellercentral.amazon.co.uk/help/hub/reference/external/GEL9SQEG8XPZWDSM?locale=en-GB) describes the two automated rules as working independently, one aiming for the featured offer on Amazon and the other for the featured offer on Amazon Business, at each quantity tier.
+
+So a seller with a business price can hold the business featured offer while someone else holds the consumer one. How the consumer featured offer is chosen is in [the feedback and Buy Box guide](/guides/amazon-seller-feedback-and-buy-box#the-buy-box); Amazon does not publish a separate list of factors for the business one.
+
+Two details from the same FAQ. The Business Competitive Featured Offer rule only ever lowers prices; it will not raise them when competitors do. And if your offers already win with business prices and tiers, switching to that rule removes your quantity discounts, so Amazon itself suggests the SKU-level rule instead.
+
+## Invoices: the part you cannot opt out of
+
+Every Amazon Business order needs a VAT invoice, or a receipt if you are not VAT registered, within one working day of dispatch, whether or not you set a business price. What an invoice must show, and how Amazon's VAT Calculation Service produces them for you, is covered in [the VAT guide](/guides/amazon-vat-invoices-and-business-accounts#invoices-for-amazon-business-customers). Read that section rather than a summary here.
+
+The metric side, from Amazon's [invoice defect rate page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G44QSYRCU27EW4UK?locale=en-GB):
+
+- You must keep the invoice defect rate below 5% or your account may be deactivated.
+- It is measured on orders placed in a seven day period starting two weeks ago, counting Monday to Friday as working days regardless of bank holidays, and separately for each European store.
+- Orders where Amazon's VAT Calculation Service generates the invoice count as 0% defects.
+- Sellers exempt from VAT registration in both the UK and the EU can declare that and let Amazon generate receipts.
+- An invoice sent by buyer message or put in the parcel does not count.
+
+More business orders means more invoices, so set up automatic invoices or receipts first. This is general information about VAT, not tax or financial advice; take VAT decisions to an accountant.
+
+## The fee position
+
+The reports of fee discounts on business orders are true. Amazon runs two, and both depend on a business discount of at least 3% off your standard price.
+
+### FBA fulfilment fee discount on multi-unit orders
+
+From Amazon's [FBA multi-unit fulfilment fee discount page](https://sellercentral.amazon.co.uk/help/hub/reference/external/GMZ5WFTZHCM4Q4C5?locale=en-GB):
+
+- Professional sellers using FBA, on orders from Amazon Business customers only.
+- Your business price, quantity discount or the two combined must be at least 3% off the standard price, **for the quantity ordered**. Amazon's example: a 3% discount at 10 or more units qualifies an order of 12, not an order of 5.
+- The discount is per unit, applied automatically, and scales with how many of that product are in the order. The table starts at 2 to 4 units.
+- Envelope sizes, small parcel and standard parcel only; oversize is not on the list.
+
+Selected UK figures from that page at the time of writing:
+
+| Size tier | 2 to 4 units | 5 to 9 | 10 to 24 | 25+ |
+| --- | --- | --- | --- | --- |
+| Light and standard envelope | £0.24 | £0.35 | £0.41 | £0.47 |
+| Large and extra-large envelope | £0.34 | £0.46 | £0.52 | £0.55 |
+| Small parcel, and standard parcel to 900 g | £0.39 | £0.50 | £0.55 | £0.61 |
+| Standard parcel over 900 g to 11.9 kg | £0.41 | £0.52 | £0.57 | £0.63 |
+
+The discount shows in Reports, Payments, Transaction view, as "Discount on FBA per unit Pick & Pack fee". Amazon's [announcement](https://sellercentral.amazon.co.uk/seller-forums/discussions/t/5d73288f-b128-419f-97dc-8b90c747ee7e) dates it from 24 September 2025.
+
+### Referral fee discount on bulk orders
+
+From Amazon's [bulk order fee discount page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G2G7KPB963EMPEYD?locale=en-GB): on business orders where one product's order value (price times quantity) is over £1,000, with the same 3% condition, the normal referral rate applies to the first £1,000 and a lower rate to the portion above it. For most categories that is 12% from £1,000.01 to £5,000, stepping down to 5% above £100,000; some categories are excluded. The page has the full table and a worked example.
+
+A typical arbitrage seller will rarely reach that threshold.
+
+### What is not discounted
+
+The business features themselves cost nothing extra, and Amazon's [FAQ](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201750810?locale=en-GB) confirms the normal FBA fee schedule applies to business orders otherwise. There is no FBA fee discount on a single-unit business order, and nothing in the pages above touches storage or any other fee.
+
+## Is it worth switching on for an arbitrage seller
+
+The honest arithmetic: a 3% discount costs you 3% of the price on every business order it applies to. The FBA discount pays back a fixed amount per unit on multi-unit orders only. On a £20 small parcel item, 3% is £0.60 against a £0.39 saving at 2 to 4 units, so you are behind. Around £8 for a light envelope and £13 for a small parcel is roughly where 3% equals the smallest fee saving. The discount also reduces your referral fee slightly, but not enough to change the answer.
+
+So the fee discount is not a reason to discount. The reasons to consider it are winning the business featured offer and selling several units at once.
+
+| Your situation | Business pricing | Why |
+| --- | --- | --- |
+| Mostly one-off units, varied stock, tight margins | Off | Few business buyers want one of a clearance line, and a discount is a price cut you do not need |
+| Office, cleaning, catering, stationery, tools, consumables in depth | On, tiered | These are what business buyers order in multiples, and tiers can win the business featured offer |
+| Cheap envelope-size items you hold 10+ of | On, tiered from 2 units | The fee discount covers most or all of a 3% cut at these prices |
+| Wholesale or replenishable lines | On, with a SKU-level rule | Stable supply and stock depth are what the programme rewards |
+| Not yet set up for invoices | Off until you are | More business orders with no invoice set up is a defect rate problem |
+
+### The setup we recommend
+
+For eligible SKUs: business price equal to standard price (0%), and one percent-off tier at 3% from 2 units. Single-unit business buyers pay the normal price, so you lose nothing on them. Multi-unit business orders get 3% off and qualify for the FBA discount. Add a deeper tier (say 5% at 10 units) only if your margin covers it at your minimum price. Put the SKUs in a SKU-level Business Price and Quantity Discount rule so the tiers follow your repricer, and check the order report's price designation column, described on Amazon's [pricing types page](https://sellercentral.amazon.co.uk/help/hub/reference/external/G202141420?locale=en-GB), to see which tier each business order used.
+
+Amazon's [pricing FAQ](https://sellercentral.amazon.co.uk/help/hub/reference/external/G201824530?locale=en-GB) says a discount of at least 2% makes a savings figure and strike-through price more likely to show to business buyers, so 3% also clears that bar.
+
+## What goes wrong
+
+- **A fixed-price tier left behind.** The standard price rose, the fixed tier did not, and a business buyer took twenty at last month's price. Use percent off.
+- **Percent off the wrong base.** Tier percentages are off the business price. A 5% business price with a 5% tier is not 5% off standard; work out the final price per unit before saving.
+- **A decimal slip.** £1.99 per unit typed for £19.90. Unless it breaks a minimum price you have set, nothing stops it. Check every fixed tier against your minimum price and the 50% warning.
+- **Minimum price conflicts.** A rule pushes a business price under your minimum and the SKU is deactivated, or a manual upload is rejected. Set minimums with room below them.
+- **Business price above standard after repricing.** A manual business price that no longer sits below a falling standard price is simply ignored. A SKU-level rule avoids it.
+- **Discount below 3% for the quantity ordered.** A 3% tier at 10 units does nothing for a 5 unit order's fees.
+- **Invoice defect rate climbing.** More business orders, no automatic invoices or receipts, and the rate passes 5%. Set invoicing up first.
+- **Deleting an offer to make it business-only.** Strands the FBA stock behind it.
+
+Questions about business pricing, tiers or the fee discounts go in [FBA and FBM](/community/c/amazon-fba-and-fbm).
+
+<Signup source="/guides/amazon-business-pricing-for-resellers" />

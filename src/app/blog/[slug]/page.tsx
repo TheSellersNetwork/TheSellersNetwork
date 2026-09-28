@@ -15,6 +15,8 @@ import { urls } from "@/lib/forum/urls";
 import { siteConfig } from "@/lib/site";
 import { getChange } from "@/lib/content/changes";
 import { ChangeArticle } from "@/components/changes/change-article";
+import { getAuthor } from "@/lib/content/authors";
+import { InfoDisclaimer } from "@/components/legal/info-disclaimer";
 
 /* Rendered per request: change posts show the signed-in member's poll vote and the live discussion. */
 export const dynamic = "force-dynamic";
@@ -47,6 +49,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
   if (change) return <ChangeArticle change={change} />;
   const post = await getBlogPost(slug);
   if (!post) notFound();
+  const byline = post.author ? getAuthor(post.author) : null;
 
   /* The discussion thread is created by scripts/sync-blog.ts and stored in blog_posts. */
   const supabase = await createClient();
@@ -64,7 +67,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
           url={urls.blogPost(post.slug)}
           datePublished={post.published}
           dateModified={post.updated ?? undefined}
-          author={{ name: siteConfig.name, url: `${siteConfig.url}/about` }}
+          author={{ name: byline ? byline.name : siteConfig.name, url: `${siteConfig.url}/about` }}
           image={post.cover ?? undefined}
         />
       ) : null}
@@ -81,10 +84,10 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
             <h1 className="mt-3 font-serif text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{post.title}</h1>
             <p className="mt-3 max-w-prose text-lg text-muted-foreground">{post.excerpt}</p>
             <div className="mt-5 flex items-center gap-3 border-y py-3 text-sm">
-              <span className="grid size-9 place-items-center rounded-full bg-secondary font-medium">SN</span>
+              <span className="grid size-9 place-items-center rounded-full bg-secondary font-medium">{byline ? byline.initials : "SN"}</span>
               <div>
-                <Link href="/about" className="font-medium hover:underline">
-                  {siteConfig.name}
+                <Link href={byline ? "/about#who-writes-what" : "/about"} className="font-medium hover:underline">
+                  {byline ? `By ${byline.name}` : siteConfig.name}
                 </Link>
                 <div className="text-xs text-muted-foreground">
                   {post.published ? format(new Date(post.published), "d MMMM yyyy", { locale: enGB }) : "Draft"} · {readingTime(post.content)} min read
@@ -95,6 +98,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
           <div className="prose prose-neutral mt-8 max-w-none measure dark:prose-invert prose-headings:font-sans prose-a:text-brand">
             <Mdx source={post.content} />
           </div>
+          <InfoDisclaimer className="mt-10" />
           <div className="mt-10 flex flex-wrap items-center gap-3 border-t pt-6">
             {thread ? (
               <Button asChild>

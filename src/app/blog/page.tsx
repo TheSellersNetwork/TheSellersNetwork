@@ -82,16 +82,15 @@ export default async function BlogPage({ searchParams }: PageProps<"/blog">) {
       };
     }),
     ...posts.map((p) => ({
+      ...(p.author ? { author: getAuthor(p.author).name, initials: getAuthor(p.author).initials } : {}),
       slug: p.slug,
       title: p.title,
       excerpt: p.excerpt,
       date: p.published ? p.published.slice(0, 10) : null,
       kind: "article" as const,
       platforms: p.platforms as string[],
-      author: "The Sellers Network",
-      initials: "SN",
       replies: 0,
-    })),
+    })).map((i) => ({ author: "The Sellers Network", initials: "SN", ...i })),
   ]
     .filter((i) => type === "all" || (type === "changes" ? i.kind === "change" : i.kind === "article"))
     .filter((i) => !platform || i.platforms.some((p) => (platform.match as readonly string[]).includes(p)))
