@@ -8,18 +8,28 @@ import { Mdx, TableOfContents } from "@/components/content/mdx";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
-import { extractHeadings, getBlogPost, getBlogPosts } from "@/lib/content/blog";
+import { extractHeadings, getBlogPost } from "@/lib/content/blog";
 import { createClient } from "@/lib/supabase/server";
 import { readingTime } from "@/lib/format";
 import { urls } from "@/lib/forum/urls";
 import { siteConfig } from "@/lib/site";
+import { getChange } from "@/lib/content/changes";
+import { ChangeArticle } from "@/components/changes/change-article";
 
-export async function generateStaticParams() {
-  return (await getBlogPosts()).map((p) => ({ slug: p.slug }));
-}
+/* Rendered per request: change posts show the signed-in member's poll vote and the live discussion. */
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): Promise<Metadata> {
   const { slug } = await params;
+  const change = await getChange(slug);
+  if (change) {
+    return {
+      title: change.title,
+      description: change.summary,
+      alternates: { canonical: urls.blogPost(change.slug) },
+      openGraph: { title: change.title, description: change.summary, type: "article", publishedTime: change.announced ?? change.date },
+    };
+  }
   const post = await getBlogPost(slug);
   if (!post) return {};
   return {
@@ -32,6 +42,9 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
 
 export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
+  // Fee and policy change breakdowns live in content/changes and have their own layout.
+  const change = await getChange(slug);
+  if (change) return <ChangeArticle change={change} />;
   const post = await getBlogPost(slug);
   if (!post) notFound();
 

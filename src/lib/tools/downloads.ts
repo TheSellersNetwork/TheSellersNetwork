@@ -39,7 +39,7 @@ export const downloads: DownloadFile[] = [
 export const tools = [
   { href: "/tools/parcel-size", title: "Parcel size checker", description: "Enter the size and weight. See which Royal Mail, Evri and Parcelforce services take it.", icon: "package" },
   { href: "/tools/tax-dates", title: "Tax dates and thresholds", description: "Self Assessment deadlines, platform reporting and the numbers that matter, from GOV.UK.", icon: "calendar" },
-  { href: "/tools/policy-changes", title: "Fee and policy changes", description: "What changed on eBay, Amazon, Vinted, Royal Mail and HMRC, with a link to each announcement.", icon: "history" },
+  { href: "/blog?type=changes", title: "Fee and policy changes", description: "Every change on eBay, Amazon, Vinted, Royal Mail and HMRC, broken down in plain English with what to do.", icon: "history" },
   { href: "/tools/downloads", title: "Free spreadsheets", description: "Bookkeeping, stock tracker and sourcing log. Excel, Numbers or Google Sheets.", icon: "sheet" },
   { href: "/tools/glossary", title: "Seller glossary", description: "FBA, BSR, VeRO, INR and the rest, in plain words.", icon: "book" },
 ] as const;

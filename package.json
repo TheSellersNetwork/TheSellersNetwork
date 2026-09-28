@@ -19,7 +19,9 @@
     "roundup": "tsx scripts/roundup.ts",
     "ask-the-team:digest": "tsx scripts/ask-the-team-digest.ts",
     "downloads:build": "tsx scripts/build-downloads.ts",
-    "icons:build": "node scripts/build-icons.mjs"
+    "icons:build": "node scripts/build-icons.mjs",
+    "changes:sync": "tsx scripts/sync-changes.ts",
+    "changes:check": "node scripts/check-changes.mjs"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.6.1",

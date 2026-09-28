@@ -3,7 +3,8 @@ import Link from "next/link";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { getIssues } from "@/lib/forum/home-queries";
 import { longDate } from "@/lib/format";
-import { getPolicyChanges, platformLabels } from "@/lib/tools/changes";
+import { getChanges } from "@/lib/content/changes";
+import { platformLabels } from "@/lib/tools/changes";
 
 export const metadata: Metadata = {
   title: "Newsletter",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default async function NewsletterPage() {
   const issues = await getIssues();
-  const changes = getPolicyChanges().slice(0, 3);
+  const changes = (await getChanges()).slice(0, 3);
   return (
     <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight">Newsletter</h1>
@@ -26,19 +27,19 @@ export default async function NewsletterPage() {
           <h2 id="changes-heading" className="text-lg font-semibold">
             Latest fee and policy changes
           </h2>
-          <Link href="/tools/policy-changes" className="text-sm underline">
+          <Link href="/blog?type=changes" className="text-sm underline">
             See them all
           </Link>
         </div>
         <ul className="mt-3 space-y-3">
           {changes.map((c) => (
-            <li key={`${c.date}-${c.title}`} className="rounded-lg border bg-card p-4">
+            <li key={c.slug} className="rounded-lg border bg-card p-4">
               <p className="text-xs text-muted-foreground">
                 {longDate(`${c.date}T12:00:00Z`).split(" at")[0]} · {platformLabels[c.platform]}
               </p>
-              <a href={c.url} target="_blank" rel="noopener" className="font-semibold hover:underline">
+              <Link href={`/blog/${c.slug}`} className="font-semibold hover:underline">
                 {c.title}
-              </a>
+              </Link>
               <p className="mt-1 text-sm text-muted-foreground">{c.summary}</p>
             </li>
           ))}

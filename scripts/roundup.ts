@@ -6,7 +6,8 @@
 */
 
 import { config } from "dotenv";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import matter from "gray-matter";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
@@ -37,9 +38,16 @@ async function main() {
   const discussedLines = ((discussed ?? []) as unknown as Row[]).map((t) => `- [${t.title}](/community/t/${t.slug}/${t.short_id}), ${t.reply_count} replies`);
 
   // New entries in the fee and policy tracker from the last fortnight.
-  const changes = JSON.parse(readFileSync(path.join(process.cwd(), "content", "policy-changes.json"), "utf8")) as { date: string; title: string; summary: string; url: string }[];
+  const changesDir = path.join(process.cwd(), "content", "changes");
+  const changes = readdirSync(changesDir)
+    .filter((f) => f.endsWith(".mdx") && !f.startsWith("_"))
+    .map((f) => {
+      const { data } = matter(readFileSync(path.join(changesDir, f), "utf8"));
+      const date = data.date instanceof Date ? data.date.toISOString().slice(0, 10) : String(data.date);
+      return { slug: f.replace(/\.mdx$/, ""), date, title: String(data.title), summary: String(data.summary) };
+    });
   const fortnight = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const changeLines = changes.filter((c) => c.date >= fortnight).map((c) => `- [${c.title}](${c.url}). ${c.summary}`);
+  const changeLines = changes.filter((c) => c.date >= fortnight).map((c) => `- [${c.title}](/blog/${c.slug}). ${c.summary}`);
 
   const template = readFileSync(path.join(process.cwd(), "content", "blog", "_roundup-template.mdx"), "utf8");
   const fill = (src: string, marker: string, lines: string[]) =>
