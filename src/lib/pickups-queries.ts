@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { Pickup } from "@/lib/pickups";
+import { rankByMultiple, ukMonthStart, type Pickup } from "@/lib/pickups";
 
 const SELECT = "*, author:profiles!pickups_user_id_fkey (username, display_name, avatar_url)";
 
@@ -12,7 +12,9 @@ export async function getPickups(filters: PickupFilters, limit = 48): Promise<Pi
   if (filters.category) q = q.eq("category", filters.category);
   if (filters.source) q = q.eq("source_type", filters.source);
   if (filters.sold) q = q.not("sold_price", "is", null);
-  if (filters.brand) q = q.ilike("brand", filters.brand.replace(/[%_]/g, ""));
+  // Part of the name is enough ("levi" finds "Levi's"). Wildcards typed in are ignored.
+  const brand = filters.brand?.replace(/[%_*\\]/g, "").trim();
+  if (brand) q = q.ilike("brand", `%${brand}%`);
   const { data } = await q;
   return (data ?? []) as unknown as Pickup[];
 }
@@ -55,4 +57,31 @@ export async function getPickupTotals(): Promise<{ count: number; sold: number }
     supabase.from("pickups").select("id", { count: "exact", head: true }).eq("is_hidden", false).not("sold_price", "is", null),
   ]);
   return { count: all.count ?? 0, sold: sold.count ?? 0 };
+}
+
+/* Fewer than this many sold this month and the "what sold this month" strip stays hidden. */
+export const SOLD_MONTH_MIN = 3;
+
+/* This calendar month's sold pickups with the highest multiples. Empty unless at least SOLD_MONTH_MIN have sold. */
+export async function getSoldThisMonth(limit = 8): Promise<Pickup[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pickups")
+    .select(SELECT)
+    .eq("is_hidden", false)
+    .not("sold_price", "is", null)
+    .gte("sold_at", ukMonthStart())
+    .gt("paid", 0)
+    .order("sold_at", { ascending: false })
+    .limit(500);
+  const rows = (data ?? []) as unknown as Pickup[];
+  if (rows.length < SOLD_MONTH_MIN) return [];
+  return rankByMultiple(rows, limit);
+}
+
+/* One member's pickups, newest first, for their profile. */
+export async function getPickupsForUser(userId: string, limit = 24): Promise<Pickup[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("pickups").select(SELECT).eq("user_id", userId).eq("is_hidden", false).order("created_at", { ascending: false }).limit(limit);
+  return (data ?? []) as unknown as Pickup[];
 }

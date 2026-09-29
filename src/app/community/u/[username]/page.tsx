@@ -15,6 +15,12 @@ import { displayName, isFoundingMember, longDate, plural, timeAgo, trustLabel } 
 import { excerpt } from "@/lib/markdown/render";
 import { urls } from "@/lib/forum/urls";
 import { siteConfig } from "@/lib/site";
+import { ActivityCalendar } from "@/components/profile/activity-calendar";
+import { BadgeChips, ProfileBadges } from "@/components/profile/badges";
+import { PickupMasonry } from "@/components/pickups/pickup-masonry";
+import { getActivityEvents, getProfileBadges } from "@/lib/badges-queries";
+import { buildActivity } from "@/lib/badges-activity";
+import { getPickupsForUser } from "@/lib/pickups-queries";
 
 export async function generateMetadata({ params }: PageProps<"/community/u/[username]">): Promise<Metadata> {
   const { username } = await params;
@@ -23,6 +29,9 @@ export async function generateMetadata({ params }: PageProps<"/community/u/[user
   return { title: `${displayName(profile)} (@${profile.username})`, robots: { index: false, follow: true } };
 }
 
+const ACTIVITY_WEEKS = 52;
+const PICKUPS_SHOWN = 12;
+
 /* Profiles are noindexed per the brief. */
 export default async function ProfilePage({ params }: PageProps<"/community/u/[username]">) {
   const { username } = await params;
@@ -30,7 +39,16 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
   // The shared anonymous account has no public profile; listing its posts would only help guess who wrote them.
   if (!profile || profile.id === (await getAnonymousAccountId())) notFound();
 
-  const [activity, viewer, streak, kits] = await Promise.all([getProfileActivity(profile.id), getCurrentUser(), getStreak(profile.id), getKitsForUser(profile.id)]);
+  const [activity, viewer, streak, kits, earned, events, pickups] = await Promise.all([
+    getProfileActivity(profile.id),
+    getCurrentUser(),
+    getStreak(profile.id),
+    getKitsForUser(profile.id),
+    getProfileBadges(profile.id),
+    getActivityEvents(profile.id, ACTIVITY_WEEKS),
+    getPickupsForUser(profile.id, PICKUPS_SHOWN + 1),
+  ]);
+  const calendar = buildActivity(events, new Date(), ACTIVITY_WEEKS);
   const publicKits = kits.filter((k) => k.is_public || viewer?.id === profile.id);
   const isOwn = viewer?.id === profile.id;
   const marketplaces = siteConfig.marketplaces.filter((m) => (profile.marketplaces as string[]).includes(m.id));
@@ -53,6 +71,7 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
             ))}
           </div>
           <FlairChips flair={profile.flair} limit={6} className="mt-2 block" />
+          <BadgeChips ids={earned.filter((b) => b !== "founding" && b !== "team")} className="mt-2" />
           {profile.bio ? <p className="mt-3 max-w-prose whitespace-pre-line text-sm">{profile.bio}</p> : null}
           <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground">
             <div>
@@ -90,6 +109,48 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
           </Link>
         </aside>
       ) : null}
+
+      <section aria-labelledby="activity-heading" className="mt-8">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="activity-heading" className="text-lg font-semibold">
+            Activity
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {calendar.total === 0
+              ? "Nothing posted in the last year."
+              : `${plural(calendar.total, "topic, reply or pickup", "topics, replies and pickups")} in the last year, active in ${plural(calendar.activeWeeks, "week")}`}
+          </p>
+        </div>
+        <ActivityCalendar activity={calendar} />
+      </section>
+
+      <ProfileBadges ids={earned} own={isOwn} />
+
+      <section aria-labelledby="pickups-heading" className="mt-8">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="pickups-heading" className="text-lg font-semibold">
+            Pickups
+          </h2>
+          {pickups.length > PICKUPS_SHOWN ? <p className="text-sm text-muted-foreground">Latest {PICKUPS_SHOWN}</p> : null}
+        </div>
+        {pickups.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {isOwn ? (
+              <>
+                No pickups yet.{" "}
+                <Link href="/community/pickups/new" className="text-brand underline underline-offset-2 hover:text-brand-deep">
+                  Share what you found
+                </Link>
+                .
+              </>
+            ) : (
+              "No pickups yet."
+            )}
+          </p>
+        ) : (
+          <PickupMasonry pickups={pickups.slice(0, PICKUPS_SHOWN)} showAuthor={false} label={`Pickups by ${displayName(profile)}`} heading="h3" />
+        )}
+      </section>
 
       {publicKits.length > 0 ? (
         <section className="mt-8">

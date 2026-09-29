@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ForumShell } from "@/components/layout/forum-shell";
 import { Plus, Search } from "lucide-react";
-import { PickupCard } from "@/components/pickups/pickup-card";
+import { PickupMasonry } from "@/components/pickups/pickup-masonry";
+import { PickupFilters } from "@/components/pickups/pickup-filters";
+import { SoldThisMonth } from "@/components/pickups/sold-this-month";
 import { getPickups, getPickupTotals } from "@/lib/pickups-queries";
 import { pickupCategories, pickupSources } from "@/lib/pickups";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Pickups",
@@ -14,21 +15,15 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-function href(sp: Record<string, string | undefined>, change: Record<string, string | undefined>) {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries({ ...sp, ...change })) if (v) q.set(k, v);
-  const s = q.toString();
-  return s ? `/community/pickups?${s}` : "/community/pickups";
-}
-
 export default async function PickupsPage({ searchParams }: PageProps<"/community/pickups">) {
   const raw = await searchParams;
   const sp = {
     category: typeof raw.category === "string" && raw.category in pickupCategories ? raw.category : undefined,
     source: typeof raw.source === "string" && raw.source in pickupSources ? raw.source : undefined,
     sold: raw.sold === "1" ? "1" : undefined,
-    brand: typeof raw.brand === "string" ? raw.brand.slice(0, 60) : undefined,
+    brand: typeof raw.brand === "string" && raw.brand.trim() ? raw.brand.trim().slice(0, 60) : undefined,
   };
+  const filtered = !!(sp.category || sp.source || sp.sold || sp.brand);
   const [pickups, totals] = await Promise.all([getPickups({ category: sp.category, source: sp.source, sold: sp.sold === "1", brand: sp.brand }), getPickupTotals()]);
 
   return (
@@ -51,55 +46,44 @@ export default async function PickupsPage({ searchParams }: PageProps<"/communit
           ) : null}
         </div>
         <div className="flex gap-2">
-          <Link href="/community/pickups/bolo" className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-secondary">
+          <Link href="/community/pickups/bolo" className="inline-flex min-h-11 items-center gap-2 rounded-md border px-3 py-2 text-sm sm:min-h-0 font-medium hover:bg-secondary">
             <Search className="size-4" aria-hidden="true" /> BOLO list
           </Link>
-          <Link href="/community/pickups/new" className="inline-flex items-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-brand-deep">
+          <Link href="/community/pickups/new" className="inline-flex min-h-11 items-center gap-2 rounded-md bg-brand px-3 py-2 sm:min-h-0 text-sm font-medium text-primary-foreground hover:bg-brand-deep">
             <Plus className="size-4" aria-hidden="true" /> Post a pickup
           </Link>
         </div>
       </div>
 
-      <nav aria-label="Filter" className="mt-6 flex flex-wrap gap-1.5">
-        <Link href={href(sp, { sold: sp.sold ? undefined : "1" })} aria-current={sp.sold ? "page" : undefined} className={cn("rounded-full border px-3 py-1 text-sm", sp.sold ? "border-brand bg-brand/15" : "hover:bg-secondary")}>
-          Sold only
-        </Link>
-        {Object.entries(pickupSources).map(([id, label]) => (
-          <Link key={id} href={href(sp, { source: sp.source === id ? undefined : id })} aria-current={sp.source === id ? "page" : undefined} className={cn("rounded-full border px-3 py-1 text-sm", sp.source === id ? "border-brand bg-brand/15" : "hover:bg-secondary")}>
-            {label}
-          </Link>
-        ))}
-      </nav>
-      <nav aria-label="Category" className="mt-2 flex flex-wrap gap-1">
-        {Object.entries(pickupCategories).map(([id, label]) => (
-          <Link key={id} href={href(sp, { category: sp.category === id ? undefined : id })} aria-current={sp.category === id ? "page" : undefined} className={cn("rounded-full border px-2.5 py-0.5 text-xs", sp.category === id ? "border-brand bg-brand/15" : "hover:bg-secondary")}>
-            {label}
-          </Link>
-        ))}
-      </nav>
-      {sp.brand ? (
-        <p className="mt-3 text-sm">
-          Showing brand <strong>{sp.brand}</strong>.{" "}
-          <Link href={href(sp, { brand: undefined })} className="underline">
-            Clear
-          </Link>
-        </p>
-      ) : null}
+      <SoldThisMonth />
+
+      {totals.count > 0 ? <PickupFilters sp={sp} /> : null}
 
       {pickups.length === 0 ? (
-        <div className="mt-10 rounded-xl border border-dashed p-10 text-center">
-          <p className="font-medium">No pickups here yet.</p>
-          <p className="mt-1 text-sm text-muted-foreground">Been to a car boot or charity shop lately? Share what you found and what you paid.</p>
-          <Link href="/community/pickups/new" className="mt-4 inline-block rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-deep">
-            Post the first one
-          </Link>
-        </div>
+        filtered ? (
+          <div className="mt-8 rounded-xl border border-dashed p-8 text-center">
+            <p className="font-medium">No pickups match these filters.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Try fewer filters, or a shorter brand name.</p>
+            <Link href="/community/pickups" className="mt-4 inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-medium hover:bg-secondary sm:min-h-9">
+              Show all pickups
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-8 rounded-xl border border-dashed p-10 text-center">
+            <p className="font-medium">No pickups here yet.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Been to a car boot or charity shop lately? Share what you found and what you paid.</p>
+            <Link href="/community/pickups/new" className="mt-4 inline-flex min-h-11 items-center rounded-md bg-brand px-4 text-sm font-medium text-primary-foreground hover:bg-brand-deep sm:min-h-9">
+              Post the first one
+            </Link>
+          </div>
+        )
       ) : (
-        <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {pickups.map((p) => (
-            <PickupCard key={p.id} p={p} />
-          ))}
-        </ul>
+        <>
+          <p className="sr-only" aria-live="polite">
+            {pickups.length} {pickups.length === 1 ? "pickup" : "pickups"} shown
+          </p>
+          <PickupMasonry pickups={pickups} className="mt-4" />
+        </>
       )}
     </ForumShell>
   );
