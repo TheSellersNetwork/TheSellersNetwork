@@ -73,6 +73,21 @@ export const getRecentTopics = cache(async (limit = 8): Promise<RecentTopic[]> =
   return (data ?? []) as unknown as RecentTopic[];
 });
 
+/* Newest topics nobody has replied to yet, for "Can you answer this?" on the home page. Pinned staff posts are left out. */
+export const getUnansweredTopics = cache(async (limit = 5): Promise<RecentTopic[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("topics")
+    .select(`id, title, slug, short_id, created_at, reply_count, author:profiles!topics_author_id_fkey (${PROFILE_SUMMARY})`)
+    .is("deleted_at", null)
+    .eq("is_unlisted", false)
+    .eq("reply_count", 0)
+    .eq("is_pinned", false)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []) as unknown as RecentTopic[];
+});
+
 export type PopularTag = { slug: string; name: string; topic_count: number };
 
 export const getPopularTags = cache(async (limit = 6): Promise<PopularTag[]> => {

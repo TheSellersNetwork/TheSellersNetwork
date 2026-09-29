@@ -23,7 +23,7 @@ export async function SiteHeader() {
   const unread = user ? await getUnreadNotificationCount(user.id) : 0;
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="sticky top-0 z-40 border-b bg-background">
       {user ? <Heartbeat /> : null}
       <div className="mx-auto flex h-(--header-height) max-w-7xl items-center gap-4 px-4 sm:px-6">
         <MobileNav items={nav} />
