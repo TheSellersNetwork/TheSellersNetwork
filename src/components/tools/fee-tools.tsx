@@ -634,7 +634,7 @@ export function PostageFinder() {
           prices
         </a>
         ). {feeData.postage.evriNote} Platform labels (eBay, Vinted) are often cheaper. Checked {checked}.{" "}
-        <Link href="/tools/parcel-size" className="underline">
+        <Link href="/tools/postage?tab=size" className="underline">
           Parcel size checker
         </Link>
         .

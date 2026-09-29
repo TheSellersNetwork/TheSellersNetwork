@@ -6,7 +6,7 @@ You are writing guides for The Sellers Network, a free UK forum for online resel
 
 1. `docs/guide-style.md`: voice, facts, shape, frontmatter. Mandatory.
 2. One existing guide as a model of density and tone, for example `content/guides/stale-stock.mdx` or `content/guides/amazon-inventory-health.mdx`.
-3. Skim the titles in `content/guides/` and `content/changes/` so you link to them instead of repeating them. Guides live at `/guides/<slug>`, change breakdowns at `/blog/<slug>`, tools at `/tools/...` (parcel size checker `/tools/parcel-size`, tax dates `/tools/tax-dates`, spreadsheets `/tools/downloads`).
+3. Skim the titles in `content/guides/` and `content/changes/` so you link to them instead of repeating them. Guides live at `/guides/<slug>`, change breakdowns at `/blog/<slug>`, tools at `/tools/...` (parcel size checker `/tools/postage?tab=size`, tax dates `/tools/tax`, spreadsheets `/tools/downloads`).
 
 ## Rules that do not bend
 

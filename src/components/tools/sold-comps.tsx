@@ -314,7 +314,7 @@ function KeepHelper({ q1, median, q3 }: { q1: number; median: number; q3: number
       </div>
       <p className="text-xs text-muted-foreground">
         Profit takes off what you paid and your postage cost. To compare every platform at one price, use{" "}
-        <Link href="/tools/where-to-sell" className="underline">
+        <Link href="/tools/calculator" className="underline">
           where should I sell this
         </Link>
         . Fees checked on {new Date(`${feeData.checked}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}. Not financial advice.

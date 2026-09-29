@@ -48,6 +48,31 @@ const nextConfig: NextConfig = {
     { source: "/pickups/:path*", destination: "/community/pickups/:path*", permanent: true },
     // Search engines look for /sitemap.xml; the index of our split sitemaps lives at /sitemap-index.xml.
     { source: "/sitemap.xml", destination: "/sitemap-index.xml", permanent: false },
+    // The 33 single tools were gathered into 12 pages. Old addresses go to the page and tab that now holds each tool.
+    ...[
+      ["/tools/where-to-sell", "/tools/calculator"],
+      ["/tools/fees/:platform", "/tools/calculator/:platform"],
+      ["/tools/fba-calculator", "/tools/calculator/amazon-fba"],
+      ["/tools/offer-calculator", "/tools/calculator#lowest-offer"],
+      ["/tools/ebay-shop", "/tools/calculator/ebay#ebay-shop"],
+      ["/tools/show-planner", "/tools/calculator/whatnot#show-planner"],
+      ["/tools/postage-finder", "/tools/postage"],
+      ["/tools/parcel-size", "/tools/postage?tab=size"],
+      ["/tools/worth-my-time", "/tools/worth-it"],
+      ["/tools/trip-cost", "/tools/worth-it?tab=trip"],
+      ["/tools/tax-dates", "/tools/tax"],
+      ["/tools/reporting-check", "/tools/tax?tab=reporting"],
+      ["/tools/vat", "/tools/tax?tab=vat"],
+      ["/tools/profit-report", "/tools/sales-reports"],
+      ["/tools/amazon-settlement", "/tools/sales-reports?tab=amazon-settlement"],
+      ["/tools/amazon-reimbursements", "/tools/amazon-claims"],
+      ["/tools/claims-deadline", "/tools/amazon-claims?tab=deadline"],
+      ["/tools/sold-comps", "/tools/pricing"],
+      ["/tools/stock-ageing", "/tools/pricing?tab=markdowns"],
+      ["/tools/bulk-price", "/tools/pricing?tab=bulk"],
+      ["/tools/repricer-floors", "/tools/pricing?tab=amazon-floors"],
+      ["/tools/isbn", "/tools/pricing?tab=books"],
+    ].map(([source, destination]) => ({ source, destination, permanent: true })),
   ],
   headers: async () => [
     {

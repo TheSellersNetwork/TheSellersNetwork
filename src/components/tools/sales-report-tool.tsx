@@ -194,7 +194,7 @@ export function SalesReportTool() {
               </table>
               <p className="mt-2 text-xs text-muted-foreground">
                 Trading income over £1,000 in a tax year usually needs telling to HMRC. See{" "}
-                <Link href="/tools/tax-dates" className="underline">
+                <Link href="/tools/tax" className="underline">
                   tax dates and thresholds
                 </Link>
                 . Not tax advice.

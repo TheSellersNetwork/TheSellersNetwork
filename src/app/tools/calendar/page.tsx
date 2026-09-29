@@ -36,8 +36,8 @@ export default async function CalendarPage() {
           <a href="https://www.gov.uk/bank-holidays" target="_blank" rel="noopener" className="underline">
             GOV.UK
           </a>
-          , tax dates from HMRC&rsquo;s published deadlines (see <Link href="/tools/tax-dates" className="underline">tax dates and thresholds</Link>), and fee and policy changes from our{" "}
-          <Link href="/tools/policy-changes" className="underline">
+          , tax dates from HMRC&rsquo;s published deadlines (see <Link href="/tools/tax" className="underline">tax dates and thresholds</Link>), and fee and policy changes from our{" "}
+          <Link href="/blog?type=changes" className="underline">
             change tracker
           </Link>
           .
