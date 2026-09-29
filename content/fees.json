@@ -1,5 +1,5 @@
 {
-  "checked": "2026-09-28",
+  "checked": "2026-09-29",
   "vatRate": 20,
   "ebayPrivate": {
     "source": "https://www.ebay.co.uk/help/selling/fees-credits-invoices/selling-fees?id=4822",
@@ -16,17 +16,21 @@
     "regulatoryPercent": 0.35,
     "feesExcludeVat": true,
     "categories": [
-      { "id": "most", "name": "Most categories", "percent": 12.9 },
+      { "id": "general", "name": "Antiques, art, baby, collectables, garden, health and beauty, sporting goods, toys", "percent": 10.9 },
+      { "id": "media", "name": "Books, films, music, video games, computers, cameras, sound and vision", "percent": 9.9 },
       { "id": "clothing", "name": "Clothes, shoes and accessories", "percent": 11.9 },
       { "id": "trainers", "name": "Trainers", "percent": 11.9, "wholeSaleThreshold": 100, "percentAtThreshold": 7 },
-      { "id": "handbags", "name": "Women's bags and handbags", "percent": 12.9, "wholeSaleThreshold": 800, "percentAtThreshold": 7 },
-      { "id": "collectables", "name": "Collectables", "percent": 10.9 },
-      { "id": "toys", "name": "Toys and games", "percent": 10.9 },
-      { "id": "books", "name": "Books, comics and magazines", "percent": 9.9 },
+      { "id": "handbags", "name": "Women's bags and handbags", "percent": 12.9, "tierThreshold": 800, "percentAbove": 7 },
       { "id": "phones-accessories", "name": "Mobile phones and communication", "percent": 9.9 },
       { "id": "smartphones", "name": "Mobile and smart phones", "percent": 6.9, "tierThreshold": 1000, "percentAbove": 3 },
+      { "id": "consoles", "name": "Video game consoles", "percent": 6.9, "tierThreshold": 400, "percentAbove": 2 },
       { "id": "jewellery", "name": "Jewellery and watches", "percent": 14.9, "tierThreshold": 1000, "percentAbove": 4 },
-      { "id": "home", "name": "Home, furniture and DIY", "percent": 11.9, "tierThreshold": 500, "percentAbove": 7.9 }
+      { "id": "watches", "name": "Watches, parts and accessories", "percent": 12.9, "tierThreshold": 750, "percentAbove": 3 },
+      { "id": "home", "name": "Home, furniture and DIY", "percent": 11.9, "tierThreshold": 500, "percentAbove": 7.9 },
+      { "id": "coins", "name": "Coins", "percent": 10.9, "tierThreshold": 450, "percentAbove": 3 },
+      { "id": "vehicle", "name": "Vehicle parts and accessories", "percent": 9.5, "tierThreshold": 750, "percentAbove": 3 },
+      { "id": "business", "name": "Business, office and industrial", "percent": 12.5 },
+      { "id": "other", "name": "Everything else, crafts, pet supplies, wholesale and job lots", "percent": 12.9 }
     ]
   },
   "ebayLive": {

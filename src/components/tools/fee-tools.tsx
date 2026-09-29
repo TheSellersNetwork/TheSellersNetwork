@@ -69,7 +69,7 @@ function useSaleInputs(defaults?: Partial<Record<string, string>>) {
   const [postageCharged, setPostageCharged] = useState(defaults?.postageCharged ?? "3.50");
   const [postageCost, setPostageCost] = useState(defaults?.postageCost ?? "3.20");
   const [itemCost, setItemCost] = useState(defaults?.itemCost ?? "5");
-  const [ebayCategory, setEbayCategory] = useState("most");
+  const [ebayCategory, setEbayCategory] = useState("general");
   const [vatOnFees, setVatOnFees] = useState(true);
   const sale: Sale = { price: num(price), postageCharged: num(postageCharged), postageCost: num(postageCost), itemCost: num(itemCost), ebayCategory, vatOnFees };
   const fields = (
@@ -170,7 +170,7 @@ export function WhereToSell() {
 /* ---- One platform, in detail ---- */
 export function PlatformCalculator({ platform }: { platform: PlatformId }) {
   const { sale, fields } = useSaleInputs(platform === "vinted" ? { postageCharged: "0" } : undefined);
-  const [ebayCategory, setEbayCategory] = useState("most");
+  const [ebayCategory, setEbayCategory] = useState("general");
   const [amazonCategory, setAmazonCategory] = useState("other");
   const [promoted, setPromoted] = useState("");
   const [boost, setBoost] = useState(false);

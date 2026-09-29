@@ -20,6 +20,16 @@ describe("fee engine", () => {
     expect(r.lines[0].amount).toBeCloseTo(8.4, 2);
   });
 
+  it("defaults eBay business sales to the 10.9% general group, matching eBay's live table", () => {
+    const r = calculate("ebay_business", { price: 100, postageCharged: 0, postageCost: 0, itemCost: 0, vatOnFees: false });
+    expect(r.lines[0].amount).toBeCloseTo(10.9, 2);
+  });
+
+  it("tiers women's handbags at 12.9% up to £800 and 7% above", () => {
+    const r = calculate("ebay_business", { price: 1000, postageCharged: 0, postageCost: 0, itemCost: 0, ebayCategory: "handbags", vatOnFees: false });
+    expect(r.lines[0].amount).toBeCloseTo(800 * 0.129 + 200 * 0.07, 2);
+  });
+
   it("adds VAT on fees when asked", () => {
     const withVat = calculate("ebay_business", { ...sale, vatOnFees: true });
     const without = calculate("ebay_business", sale);
