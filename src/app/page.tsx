@@ -33,12 +33,12 @@ export const metadata: Metadata = {
 
 /* Start here: the first guides to read for each platform, in order. Slugs are files in content/guides. */
 const startPlan = [
-  { id: "ebay", label: "eBay", forum: "ebay", tool: { href: "/tools/fees/ebay", label: "eBay fee calculator" }, guides: ["pricing-from-sold-comps", "ebay-titles-item-specifics-and-search", "promoted-listings", "avoiding-vero-and-suspensions"] },
-  { id: "amazon", label: "Amazon", forum: "amazon", tool: { href: "/tools/fba-calculator", label: "FBA profit calculator" }, guides: ["how-to-start-amazon-fba-uk", "amazon-ungating-uk", "amazon-where-the-money-leaks", "amazon-lost-and-damaged-stock-claims"] },
-  { id: "vinted", label: "Vinted", forum: "vinted", tool: { href: "/tools/fees/vinted", label: "Vinted fee calculator" }, guides: ["vinted-pro-and-selling-as-a-business", "vinted-postage-options", "vinted-bundles-and-discounts", "vinted-fake-or-not-as-described-claims"] },
-  { id: "tiktok", label: "TikTok Shop", forum: "tiktok-shop", tool: { href: "/tools/fees/tiktok-shop", label: "TikTok Shop fee calculator" }, guides: ["tiktok-shop-getting-started-uk", "tiktok-shop-first-live", "tiktok-shop-shipping-and-returns", "tiktok-shop-account-health-and-restricted-products"] },
-  { id: "whatnot", label: "Whatnot", forum: "whatnot", tool: { href: "/tools/show-planner", label: "Live show planner" }, guides: ["whatnot-first-show", "live-auctions-and-starting-bids", "live-selling-kit-and-schedule", "packing-orders-after-a-show"] },
-  { id: "sourcing", label: "Car boots and charity shops", forum: null, tool: { href: "/tools/trip-cost", label: "Sourcing trip cost" }, guides: ["car-boot-sales-for-resellers", "charity-shop-sourcing", "spotting-fakes-before-you-buy", "returns-pallets-and-liquidation-stock"] },
+  { id: "ebay", label: "eBay", forum: "ebay", tool: { href: "/tools/calculator/ebay", label: "eBay fee calculator" }, guides: ["pricing-from-sold-comps", "ebay-titles-item-specifics-and-search", "promoted-listings", "avoiding-vero-and-suspensions"] },
+  { id: "amazon", label: "Amazon", forum: "amazon", tool: { href: "/tools/calculator/amazon-fba", label: "FBA profit calculator" }, guides: ["how-to-start-amazon-fba-uk", "amazon-ungating-uk", "amazon-where-the-money-leaks", "amazon-lost-and-damaged-stock-claims"] },
+  { id: "vinted", label: "Vinted", forum: "vinted", tool: { href: "/tools/calculator/vinted", label: "Vinted fee calculator" }, guides: ["vinted-pro-and-selling-as-a-business", "vinted-postage-options", "vinted-bundles-and-discounts", "vinted-fake-or-not-as-described-claims"] },
+  { id: "tiktok", label: "TikTok Shop", forum: "tiktok-shop", tool: { href: "/tools/calculator/tiktok-shop", label: "TikTok Shop fee calculator" }, guides: ["tiktok-shop-getting-started-uk", "tiktok-shop-first-live", "tiktok-shop-shipping-and-returns", "tiktok-shop-account-health-and-restricted-products"] },
+  { id: "whatnot", label: "Whatnot", forum: "whatnot", tool: { href: "/tools/calculator/whatnot#show-planner", label: "Live show planner" }, guides: ["whatnot-first-show", "live-auctions-and-starting-bids", "live-selling-kit-and-schedule", "packing-orders-after-a-show"] },
+  { id: "sourcing", label: "Car boots and charity shops", forum: null, tool: { href: "/tools/worth-it?tab=trip", label: "Sourcing trip cost" }, guides: ["car-boot-sales-for-resellers", "charity-shop-sourcing", "spotting-fakes-before-you-buy", "returns-pallets-and-liquidation-stock"] },
 ];
 
 /* What is here, in the words members use. A plain list, not a row of icon cards. */
