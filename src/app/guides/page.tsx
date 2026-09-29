@@ -47,9 +47,14 @@ export default async function GuidesPage() {
             <h2 id="paths-heading" className="text-lg font-semibold tracking-tight">
               New to this? Follow a path
             </h2>
-            <Link href="/guides/paths" className="inline-flex min-h-11 items-center text-sm text-brand underline-offset-4 hover:underline sm:min-h-0">
-              All beginner paths
-            </Link>
+            <div className="flex flex-wrap gap-x-4">
+              <Link href="/guides/paths" className="inline-flex min-h-11 items-center text-sm text-brand underline-offset-4 hover:underline sm:min-h-0">
+                All beginner paths
+              </Link>
+              <Link href="/guides/series" className="inline-flex min-h-11 items-center text-sm text-brand underline-offset-4 hover:underline sm:min-h-0">
+                Series in reading order
+              </Link>
+            </div>
           </div>
           <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {paths.map((p) => (

@@ -1,0 +1,83 @@
+{
+  "series": [
+    {
+      "slug": "amazon-fba-from-zero",
+      "title": "Amazon FBA from zero",
+      "description": "Setting up, the fees on a sale, finding stock, prep and your first shipment into Amazon's warehouses, in order.",
+      "parts": [
+        "guide:how-to-start-amazon-fba-uk",
+        "blog:every-amazon-fee-on-one-sale",
+        "guide:amazon-seller-central-settings-that-matter",
+        "guide:amazon-ungating-uk",
+        "guide:amazon-retail-arbitrage-uk",
+        "guide:amazon-online-arbitrage",
+        "guide:amazon-reading-price-history-charts",
+        "guide:amazon-prep-equipment-and-prep-centres",
+        "guide:amazon-adding-products-and-creating-shipments",
+        "guide:amazon-account-health"
+      ]
+    },
+    {
+      "slug": "selling-on-vinted-properly",
+      "title": "Selling on Vinted properly",
+      "description": "Postage, bundles, bumps, relisting, getting paid, claims and when Vinted Pro applies.",
+      "parts": [
+        "guide:vinted-postage-options",
+        "guide:vinted-bundles-and-discounts",
+        "guide:vinted-bumps-and-spotlight",
+        "guide:vinted-relisting-and-automation-rules",
+        "guide:vinted-payments-and-balance",
+        "guide:vinted-fake-or-not-as-described-claims",
+        "blog:vinted-item-verification-explained",
+        "guide:vinted-pro-and-selling-as-a-business"
+      ]
+    },
+    {
+      "slug": "ebay-business-basics",
+      "title": "eBay business basics",
+      "description": "Business seller status, shop subscriptions, search, offers, promoted listings, seller levels, payment holds and staying clear of VeRO.",
+      "parts": [
+        "blog:when-ebay-says-you-are-a-business-seller",
+        "guide:ebay-shop-subscription-worth-it",
+        "guide:ebay-titles-item-specifics-and-search",
+        "guide:best-offer-strategy",
+        "guide:offers-to-watchers",
+        "guide:promoted-listings",
+        "blog:ebay-seller-levels-and-below-standard",
+        "guide:ebay-payment-holds",
+        "guide:avoiding-vero-and-suspensions"
+      ]
+    },
+    {
+      "slug": "money-and-tax-for-resellers",
+      "title": "Money and tax for resellers",
+      "description": "What HMRC sees, keeping records, when each platform pays you, filing a return, bank accounts, card payments and insurance.",
+      "parts": [
+        "blog:hmrc-and-your-vinted-sales-what-is-true",
+        "guide:bookkeeping-and-tax-for-resellers",
+        "blog:when-each-platform-pays-you",
+        "blog:bookkeeping-and-tax-software-compared",
+        "blog:filing-self-assessment-options-compared",
+        "blog:business-bank-accounts-for-resellers-compared",
+        "guide:taking-card-payments-compared",
+        "blog:business-insurance-for-resellers-compared"
+      ]
+    },
+    {
+      "slug": "live-selling",
+      "title": "Live selling",
+      "description": "Fees across the live apps, kit and scheduling, your first show on each platform, auctions, giveaways and packing up afterwards.",
+      "parts": [
+        "guide:live-selling-fees-compared",
+        "guide:live-selling-kit-and-schedule",
+        "guide:whatnot-first-show",
+        "guide:ebay-live-how-to-get-in",
+        "guide:tiktok-shop-first-live",
+        "guide:selling-through-instagram-and-facebook-lives",
+        "guide:live-auctions-and-starting-bids",
+        "guide:giveaways-and-the-law",
+        "guide:packing-orders-after-a-show"
+      ]
+    }
+  ]
+}

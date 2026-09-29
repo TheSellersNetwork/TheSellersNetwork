@@ -11,11 +11,21 @@ import { urls } from "@/lib/forum/urls";
 import { siteConfig } from "@/lib/site";
 import { KeyFacts } from "@/components/content/key-facts";
 import { ReadingProgress } from "@/components/content/reading-progress";
-import { PathBanner } from "@/components/content/path-banner";
+import { ReadingNav, SeriesPrevNext } from "@/components/content/reading-nav";
+import { GuideChangelog } from "@/components/content/guide-changelog";
+import { PrintButton } from "@/components/content/print-button";
+import { PrintMeta } from "@/components/content/print-meta";
+import { RelatedThreads } from "@/components/content/related-threads";
+import { formatDay, lastUpdated } from "@/lib/content/guide-changes";
+import { publishedUkDate } from "@/lib/content/schedule";
+import { getSeries } from "@/lib/content/series";
 import { ArticleEndTracker } from "@/components/content/path-progress";
 import { extractShortVersion } from "@/lib/content/article-extras";
 import { getPaths } from "@/lib/content/paths";
 import { pathMemberships, stepKey } from "@/lib/content/paths-core";
+
+/* Regenerated at most every five minutes so "Recent questions about this" stays fresh. */
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   return (await getGuides()).map((g) => ({ slug: g.slug }));
@@ -34,9 +44,11 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
   if (!guide) notFound();
   const headings = extractHeadings(guide.content);
   const keyFacts = extractShortVersion(guide.content);
-  const paths = await getPaths();
+  const [paths, series] = await Promise.all([getPaths(), getSeries()]);
   const key = stepKey("guide", guide.slug);
   const inPath = pathMemberships(paths, key).length > 0;
+  const publishedDay = guide.published ? publishedUkDate(guide.published) : null;
+  const updatedDay = lastUpdated(guide.changes, guide.published);
 
   return (
     <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
@@ -47,20 +59,32 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
       <ReadingProgress targetId="article-body" />
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
         <article id="article-body">
-          <PathBanner paths={paths} stepKey={key} />
-          <p className="text-sm text-muted-foreground">
+          <ReadingNav series={series} paths={paths} stepKey={key} />
+          <p className="text-sm text-muted-foreground print:hidden">
             <Link href={urls.guides()} className="hover:underline">
               Guides
             </Link>
           </p>
+          <PrintMeta path={urls.guide(guide.slug)} published={publishedDay ? formatDay(publishedDay) : null} updated={updatedDay ? formatDay(updatedDay) : null} />
           <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{guide.title}</h1>
           <p className="mt-3 max-w-prose text-lg text-muted-foreground">{guide.excerpt}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+            {updatedDay ? (
+              <a href="#what-changed" className="underline-offset-2 hover:underline" data-testid="guide-updated">
+                Updated <time dateTime={updatedDay}>{formatDay(updatedDay)}</time>
+              </a>
+            ) : null}
+            <PrintButton />
+          </div>
           <div data-glossary className="prose prose-neutral mt-8 max-w-none measure dark:prose-invert prose-a:text-brand">
             <Mdx source={guide.content} anchors />
           </div>
           {inPath ? <ArticleEndTracker stepKey={key} /> : null}
+          <SeriesPrevNext series={series} stepKey={key} />
+          <GuideChangelog changes={guide.changes} />
+          <RelatedThreads categories={guide.categories} />
           <InfoDisclaimer className="mt-10" />
-          <div className="mt-10 border-t pt-6">
+          <div className="mt-10 border-t pt-6 print:hidden">
             <EmailSignupCard source={urls.guide(guide.slug)} variant="inline" />
             {guide.module && process.env.NEXT_PUBLIC_SHOW_COURSE === "true" ? (
               <p className="mt-4 text-sm text-muted-foreground">
@@ -72,7 +96,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             ) : null}
           </div>
         </article>
-        <aside className="space-y-6 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:max-h-[calc(100vh-var(--header-height)-3rem)] lg:self-start lg:overflow-y-auto">
+        <aside className="space-y-6 print:hidden lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:max-h-[calc(100vh-var(--header-height)-3rem)] lg:self-start lg:overflow-y-auto">
           <KeyFacts bullets={keyFacts} />
           <TableOfContents headings={headings} />
         </aside>

@@ -5,11 +5,14 @@ import remarkRehype from "remark-rehype";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
 import type { Root, Element, Text } from "hast";
+import rehypeGlossary from "@/lib/markdown/rehype-glossary";
 
 /*
   Markdown to sanitised HTML for posts. Runs on the server only; the result
   is cached in posts.body_html. Mentions become profile links, external links
   get nofollow and open in the same tab, images are constrained to https.
+  Glossary terms are marked after sanitising (see rehype-glossary.ts), so the
+  allow-list above still lets no member-written abbr or title through.
 */
 
 const schema = {
@@ -107,8 +110,18 @@ const processor = unified()
   .use(rehypeForum)
   .use(rehypeStringify);
 
-export async function renderMarkdown(markdown: string): Promise<string> {
-  const file = await processor.process(markdown);
+const glossaryProcessor = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkRehype)
+  .use(rehypeSanitize, schema)
+  .use(rehypeForum)
+  .use(rehypeGlossary)
+  .use(rehypeStringify);
+
+/* Posts get glossary terms marked by default; pass { glossary: false } for plain HTML (emails, for example). */
+export async function renderMarkdown(markdown: string, options: { glossary?: boolean } = {}): Promise<string> {
+  const file = await (options.glossary === false ? processor : glossaryProcessor).process(markdown);
   return String(file);
 }
 

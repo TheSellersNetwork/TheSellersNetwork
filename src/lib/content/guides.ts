@@ -3,6 +3,7 @@ import { cache } from "react";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
+import { parseGuideChanges, type GuideChange } from "@/lib/content/guide-changes";
 
 export type GuideMeta = {
   slug: string;
@@ -14,7 +15,8 @@ export type GuideMeta = {
   order: number;
 };
 
-export type Guide = GuideMeta & { content: string };
+/* `changes` is the optional changelog in the frontmatter, newest first. */
+export type Guide = GuideMeta & { content: string; changes: GuideChange[] };
 
 const dir = path.join(process.cwd(), "content", "guides");
 
@@ -58,6 +60,7 @@ export async function getGuide(slug: string): Promise<Guide | null> {
       published: data.published ? String(data.published) : null,
       order: Number(data.order ?? 999),
       content,
+      changes: parseGuideChanges(data.changes),
     };
   } catch {
     return null;

@@ -33,7 +33,7 @@ export function DebateCard({
 }) {
   const opensOn = published && !isLive(published) ? publishedUkDate(published) : null;
   return (
-    <section aria-label="Where do you stand?" className="not-prose my-10 rounded-xl border-2 border-brand/40 bg-card p-5">
+    <section aria-label="Where do you stand?" className="not-prose my-10 rounded-xl border-2 border-brand/40 bg-card p-5 print:hidden">
       {showHeading ? (
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
           <Scale className="size-5 text-brand" aria-hidden="true" /> Where do you stand?

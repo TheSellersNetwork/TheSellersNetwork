@@ -17,7 +17,15 @@ const { pattern, lookup } = glossaryPatterns();
 function markContainer(container: HTMLElement) {
   if (container.dataset.glossaryDone) return;
   container.dataset.glossaryDone = "1";
+  // Forum posts arrive with terms already marked on the server: count those as used, and drop
+  // their title so the browser's own tooltip does not appear on top of ours.
   const used = new Set<string>();
+  container.querySelectorAll<HTMLElement>("abbr.gloss[data-term]").forEach((el) => {
+    const entry = glossaryEntry(el.dataset.term);
+    if (entry) used.add(entry.term);
+    el.removeAttribute("title");
+    el.tabIndex = 0;
+  });
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       for (let el = node.parentElement; el && el !== container; el = el.parentElement) {
