@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { UserAvatar } from "@/components/forum/user-avatar";
+import { ProfileName } from "@/components/forum/profile-name";
 import { getTopAnswerers } from "@/lib/forum/queries";
-import { displayName } from "@/lib/format";
-import { urls } from "@/lib/forum/urls";
 
 /* Right rail card: the members with the most accepted answers this month. */
 export async function TopAnswerers() {
@@ -15,9 +13,9 @@ export async function TopAnswerers() {
         {answerers.map((a) => (
           <li key={a.id} className="flex items-center gap-2">
             <UserAvatar profile={a} size="sm" />
-            <Link href={urls.profile(a.username)} className="min-w-0 flex-1 truncate font-medium hover:underline">
-              {displayName(a)}
-            </Link>
+            <span className="min-w-0 flex-1 truncate">
+              <ProfileName profile={a} className="font-medium hover:underline" />
+            </span>
             <span className="text-xs text-muted-foreground">
               {a.solutions} {a.solutions === 1 ? "solution" : "solutions"}
             </span>

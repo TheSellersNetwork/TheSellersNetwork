@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { UserAvatar } from "@/components/forum/user-avatar";
+import { ProfileName } from "@/components/forum/profile-name";
 import { getOnlineMembers } from "@/lib/forum/live-queries";
-import { displayName } from "@/lib/format";
-import { urls } from "@/lib/forum/urls";
 
 /* Right rail: who is here right now, the way a Discord member list shows it. */
 export async function OnlineMembers() {
@@ -18,9 +16,9 @@ export async function OnlineMembers() {
         {members.map((m) => (
           <li key={m.id} className="flex items-center gap-2">
             <UserAvatar profile={m} size="sm" online />
-            <Link href={urls.profile(m.username)} className="min-w-0 flex-1 truncate hover:underline">
-              {displayName(m)}
-            </Link>
+            <span className="min-w-0 flex-1 truncate">
+              <ProfileName profile={m} className="hover:underline" />
+            </span>
           </li>
         ))}
       </ul>

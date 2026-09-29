@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ProfileHoverCard } from "@/components/forum/profile-hover-card";
 import { displayName, initials } from "@/lib/format";
 import { urls } from "@/lib/forum/urls";
 import type { ProfileSummary } from "@/lib/db/types";
@@ -12,6 +13,8 @@ type Props = {
   className?: string;
   /* Shows a green presence dot. */
   online?: boolean;
+  /* Linked avatars show a profile card on hover, focus or tap. Off where the card would repeat the page. */
+  card?: boolean;
 };
 
 const sizes = {
@@ -23,7 +26,7 @@ const sizes = {
 };
 
 /* Initials on a neutral background until an avatar is uploaded. */
-export function UserAvatar({ profile, size = "md", link = true, className, online }: Props) {
+export function UserAvatar({ profile, size = "md", link = true, className, online, card = true }: Props) {
   const avatar = (
     <Avatar className={cn(sizes[size], online && "overflow-visible", className)}>
       {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
@@ -34,9 +37,15 @@ export function UserAvatar({ profile, size = "md", link = true, className, onlin
     </Avatar>
   );
   if (!link || !profile) return avatar;
-  return (
+  const linked = (
     <Link href={urls.profile(profile.username)} aria-label={displayName(profile)} className="shrink-0 rounded-full">
       {avatar}
     </Link>
+  );
+  if (!card) return linked;
+  return (
+    <ProfileHoverCard username={profile.username} trigger="avatar">
+      {linked}
+    </ProfileHoverCard>
   );
 }

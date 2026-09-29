@@ -12,6 +12,7 @@ import type {
   TopicRow,
   TopPeriod,
 } from "@/lib/db/types";
+import { topicPreview, type TopicPreview } from "@/lib/forum/previews";
 
 const PROFILE_SUMMARY = "id, username, display_name, avatar_url, trust_level, is_staff, solution_count, flair, created_at";
 
@@ -23,14 +24,27 @@ const TOPIC_SELECT = `
   topic_tags (tag:tags (id, slug, name))
 `;
 
-type RawTopic = Omit<TopicRow, "tags"> & { topic_tags?: { tag: TopicRow["tags"][number] | null }[] };
+/*
+  Topic lists also embed the opening post's Markdown, filtered to post 1 in
+  the same request, so each row can show an excerpt and a thumbnail without a
+  query per topic. Only the short preview reaches the page.
+*/
+const TOPIC_LIST_SELECT = `${TOPIC_SELECT},
+  opening:posts!posts_topic_id_fkey (body_md)
+`;
 
-function shapeTopic(raw: RawTopic): TopicRow {
-  const { topic_tags, ...rest } = raw;
-  return {
+type RawTopic = Omit<TopicRow, "tags"> & { topic_tags?: { tag: TopicRow["tags"][number] | null }[]; opening?: { body_md: string }[] | null };
+
+export type TopicListRow = TopicRow & { preview?: TopicPreview | null };
+
+function shapeTopic(raw: RawTopic): TopicListRow {
+  const { topic_tags, opening, ...rest } = raw;
+  const shaped: TopicListRow = {
     ...rest,
     tags: (topic_tags ?? []).map((t) => t.tag).filter((t): t is TopicRow["tags"][number] => !!t),
   };
+  if (opening !== undefined) shaped.preview = topicPreview(opening?.[0]?.body_md);
+  return shaped;
 }
 
 /* Cursor pagination: an opaque string carrying the sort value and row id. */
@@ -84,7 +98,7 @@ export type TopicListParams = {
   includePinnedFirst?: boolean;
 };
 
-export type TopicPage = { topics: TopicRow[]; nextCursor: string | null };
+export type TopicPage = { topics: TopicListRow[]; nextCursor: string | null };
 
 function periodStart(period: TopPeriod): string | null {
   const now = Date.now();
@@ -115,9 +129,13 @@ export async function getTopics(params: TopicListParams = {}): Promise<TopicPage
 
   let query = supabase
     .from("topics")
-    .select(TOPIC_SELECT)
+    .select(TOPIC_LIST_SELECT)
     .is("deleted_at", null)
     .eq("is_unlisted", false)
+    .eq("opening.post_number", 1)
+    .eq("opening.is_deleted", false)
+    .eq("opening.is_hidden", false)
+    .limit(1, { referencedTable: "opening" })
     .limit(limit + 1);
 
   if (categoryIds && categoryIds.length > 0) {
