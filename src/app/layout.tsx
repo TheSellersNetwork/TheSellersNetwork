@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnalyticsProvider } from "@/components/analytics-provider";
@@ -52,6 +53,15 @@ export const viewport: Viewport = { themeColor: "#0b1220", viewportFit: "cover" 
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const style = await currentStyle();
+  // The embeddable calculator (/embed/*, see src/proxy.ts): the page alone, in the theme the embedding site asked for.
+  const embed = (await headers()).get("x-tsn-embed");
+  if (embed) {
+    return (
+      <html lang="en-GB" data-brand={siteConfig.brand} data-style={style} className={`${inter.variable} ${sourceSerif.variable}${embed === "dark" ? " dark" : ""}`}>
+        <body>{children}</body>
+      </html>
+    );
+  }
   return (
     <html
       lang="en-GB"

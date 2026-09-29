@@ -9,13 +9,16 @@ import { sharedQuery, type SharedInputs } from "@/lib/og/calculator-share";
 /*
   "Copy link to this result": puts the calculator's inputs in the address bar
   and copies it, so whoever opens the link sees the same figures and the share
-  card shows the same result.
+  card shows the same result. `extraQuery` adds options only some calculators
+  have (?promo=5); `query` replaces the whole query for calculators with their
+  own inputs (Amazon FBA, compare two items).
 */
-export function ShareResultLink({ inputs }: { inputs: SharedInputs }) {
+export function ShareResultLink({ inputs, extraQuery, query }: { inputs?: SharedInputs; extraQuery?: string; query?: string }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
-    const url = `${window.location.origin}${window.location.pathname}?${sharedQuery(inputs)}${window.location.hash}`;
+    const q = query ?? [inputs ? sharedQuery(inputs) : "", extraQuery ?? ""].filter(Boolean).join("&");
+    const url = `${window.location.origin}${window.location.pathname}${q ? `?${q}` : ""}${window.location.hash}`;
     // Keep the address bar in step, so the link can also be copied from there.
     window.history.replaceState(window.history.state, "", url);
     try {

@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { sharedFieldValues, type SharedInputs } from "@/lib/og/calculator-share";
 import { ShareResultLink } from "@/components/tools/share-result-link";
+import { SaveCalculation, type SavingState } from "@/components/tools/calculator/save-calculation";
+import { extrasQuery, fbaDefaults, fbaQuery, noExtras, type FbaInputs, type PlatformExtras } from "@/components/tools/calculator/model";
 
 const gbp = (n: number | null | undefined) => (n === null || n === undefined || !Number.isFinite(n) ? "" : n.toLocaleString("en-GB", { style: "currency", currency: "GBP" }));
 const num = (s: string) => Number(s.replace(/[£,\s%]/g, "")) || 0;
@@ -106,7 +108,7 @@ function useSaleInputs(defaults?: Partial<Record<string, string>>, shared?: Shar
 }
 
 /* ---- Where should I sell this? ---- */
-export function WhereToSell({ shared }: { shared?: SharedInputs }) {
+export function WhereToSell({ shared, saving }: { shared?: SharedInputs; saving?: SavingState }) {
   const { sale, fields, extras } = useSaleInputs(undefined, shared);
   const [open, setOpen] = useState<PlatformId | null>(null);
   // Buying to resell makes you a business seller on eBay, so the private-seller rate is only shown when asked for.
@@ -119,6 +121,7 @@ export function WhereToSell({ shared }: { shared?: SharedInputs }) {
         .sort((a, b) => b.r.profit - a.r.profit),
     [sale.price, sale.postageCharged, sale.postageCost, sale.itemCost, sale.ebayCategory, sale.vatOnFees, ownThings], // eslint-disable-line react-hooks/exhaustive-deps
   );
+  const whereInputs: SharedInputs = { price: sale.price, postage: sale.postageCharged, postageCost: sale.postageCost, cost: sale.itemCost, category: sale.ebayCategory === "general" ? null : (sale.ebayCategory ?? null), noVat: !sale.vatOnFees };
 
   return (
     <div className="space-y-6">
@@ -166,9 +169,10 @@ export function WhereToSell({ shared }: { shared?: SharedInputs }) {
         </ol>
       ) : null}
       {sale.price > 0 ? (
-        <ShareResultLink
-          inputs={{ price: sale.price, postage: sale.postageCharged, postageCost: sale.postageCost, cost: sale.itemCost, category: sale.ebayCategory === "general" ? null : (sale.ebayCategory ?? null), noVat: !sale.vatOnFees }}
-        />
+        <div className="flex flex-wrap items-start gap-2">
+          <ShareResultLink inputs={whereInputs} />
+          <SaveCalculation kind="all" inputs={{ ...whereInputs, ...noExtras }} saving={saving} />
+        </div>
       ) : null}
       <p className="text-xs text-muted-foreground">Fees are only part of it: where your buyers are, how fast things sell and how much work each sale takes matter just as much. Amazon FBA has its own calculator.</p>
       <Checked />
@@ -177,21 +181,30 @@ export function WhereToSell({ shared }: { shared?: SharedInputs }) {
 }
 
 /* ---- One platform, in detail ---- */
-export function PlatformCalculator({ platform, shared }: { platform: PlatformId; shared?: SharedInputs }) {
+export function PlatformCalculator({ platform, shared, extras = noExtras, saving }: { platform: PlatformId; shared?: SharedInputs; extras?: PlatformExtras; saving?: SavingState }) {
   const { sale, fields } = useSaleInputs(platform === "vinted" ? { postageCharged: "0" } : undefined, shared);
   const [ebayCategory, setEbayCategory] = useState((platform === "ebay_business" && shared?.category) || "general");
   const [amazonCategory, setAmazonCategory] = useState((platform === "amazon_fbm" && shared?.category) || "other");
-  const [promoted, setPromoted] = useState("");
-  const [boost, setBoost] = useState(false);
-  const [offsite, setOffsite] = useState(false);
-  const [reduced, setReduced] = useState(false);
-  const [individual, setIndividual] = useState(false);
+  const [promoted, setPromoted] = useState(extras.promoted ? String(extras.promoted) : "");
+  const [boost, setBoost] = useState(extras.boost);
+  const [offsite, setOffsite] = useState(extras.offsite);
+  const [reduced, setReduced] = useState(extras.reduced);
+  const [individual, setIndividual] = useState(extras.individual);
   const [vatOnFees, setVatOnFees] = useState(!shared?.noVat);
   const [target, setTarget] = useState("5");
   const full: Sale = { ...sale, ebayCategory, amazonCategory, promotedPercent: num(promoted), depopBoost: boost, etsyOffsiteAds: offsite, reducedRate: reduced, amazonIndividual: individual, vatOnFees };
   const r = calculate(platform, full);
   const min = minimumPrice(platform, full, num(target));
   const meta = platforms.find((p) => p.id === platform)!;
+  const shareInputs: SharedInputs = {
+    price: sale.price,
+    postage: sale.postageCharged,
+    postageCost: sale.postageCost,
+    cost: sale.itemCost,
+    category: platform === "ebay_business" && ebayCategory !== "general" ? ebayCategory : platform === "amazon_fbm" && amazonCategory !== "other" ? amazonCategory : null,
+    noVat: !vatOnFees,
+  };
+  const chosenExtras: PlatformExtras = { promoted: Math.min(100, Math.max(0, num(promoted))), boost, offsite, reduced, individual };
 
   return (
     <div className="space-y-6">
@@ -264,16 +277,10 @@ export function PlatformCalculator({ platform, shared }: { platform: PlatformId;
               {n}
             </p>
           ))}
-          <ShareResultLink
-            inputs={{
-              price: sale.price,
-              postage: sale.postageCharged,
-              postageCost: sale.postageCost,
-              cost: sale.itemCost,
-              category: platform === "ebay_business" && ebayCategory !== "general" ? ebayCategory : platform === "amazon_fbm" && amazonCategory !== "other" ? amazonCategory : null,
-              noVat: !vatOnFees,
-            }}
-          />
+          <div className="flex flex-wrap items-start gap-2">
+            <ShareResultLink inputs={shareInputs} extraQuery={extrasQuery(platform, chosenExtras)} />
+            <SaveCalculation kind={platform} inputs={{ ...shareInputs, ...chosenExtras }} saving={saving} />
+          </div>
         </>
       ) : null}
 
@@ -364,16 +371,18 @@ export function OfferCalculator() {
 }
 
 /* ---- Amazon FBA ---- */
-export function FbaCalculator() {
-  const [price, setPrice] = useState("15");
-  const [cost, setCost] = useState("6");
-  const [inbound, setInbound] = useState("0.30");
-  const [prep, setPrep] = useState("0.20");
-  const [fulfil, setFulfil] = useState(String(feeData.amazon.fbaExamples[7].fee));
-  const [category, setCategory] = useState("toys");
-  const [months, setMonths] = useState("2");
-  const [cubic, setCubic] = useState("0.05");
-  const [peak, setPeak] = useState(false);
+export function FbaCalculator({ initial, saving }: { initial?: FbaInputs; saving?: SavingState }) {
+  const start = initial ?? fbaDefaults;
+  const money = (n: number) => (initial ? String(n) : n.toFixed(2));
+  const [price, setPrice] = useState(String(start.price));
+  const [cost, setCost] = useState(String(start.cost));
+  const [inbound, setInbound] = useState(money(start.inbound));
+  const [prep, setPrep] = useState(money(start.prep));
+  const [fulfil, setFulfil] = useState(String(start.fulfil));
+  const [category, setCategory] = useState(start.category);
+  const [months, setMonths] = useState(String(start.months));
+  const [cubic, setCubic] = useState(String(start.cubic));
+  const [peak, setPeak] = useState(start.peak);
   const [roiTarget, setRoiTarget] = useState("30");
   const f = fbaFees(num(price), num(fulfil), category, num(months), num(cubic), peak);
   const payout = num(price) - f.total;
@@ -381,6 +390,7 @@ export function FbaCalculator() {
   const roi = num(cost) ? (profit / num(cost)) * 100 : 0;
   // Highest buy price for the target ROI: profit = payout - extras - buy >= ROI * buy
   const maxBuy = (payout - num(inbound) - num(prep)) / (1 + num(roiTarget) / 100);
+  const fbaInputs: FbaInputs = { price: num(price), cost: num(cost), inbound: num(inbound), prep: num(prep), fulfil: num(fulfil), category, months: num(months), cubic: num(cubic), peak };
 
   return (
     <div className="space-y-6">
@@ -448,6 +458,12 @@ export function FbaCalculator() {
         </a>
         .
       </p>
+      {fbaInputs.price > 0 ? (
+        <div className="flex flex-wrap items-start gap-2">
+          <ShareResultLink query={fbaQuery(fbaInputs)} />
+          <SaveCalculation kind="amazon_fba" inputs={fbaInputs} saving={saving} />
+        </div>
+      ) : null}
       <Checked />
     </div>
   );

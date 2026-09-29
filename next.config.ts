@@ -24,7 +24,8 @@ const csp = [
   `img-src 'self' data: blob: ${supabase}`,
   "font-src 'self' data:",
   `connect-src 'self' ${supabase} ${supabaseWs} ${posthog} https://eu-assets.i.posthog.com https://challenges.cloudflare.com https://openlibrary.org`,
-  "frame-src https://challenges.cloudflare.com",
+  // 'self' so /tools/calculator/embed can preview the embeddable calculator.
+  "frame-src 'self' https://challenges.cloudflare.com",
   "worker-src 'self'",
   "manifest-src 'self'",
   "form-action 'self'",
@@ -33,6 +34,20 @@ const csp = [
   "frame-ancestors 'none'",
   ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
+
+/*
+  The embeddable calculator (/embed/*) is made to sit in other sites' iframes,
+  so it alone may be framed by anyone: frame-ancestors * and no
+  X-Frame-Options. Every other route keeps frame-ancestors 'none' and DENY.
+*/
+const embedCsp = csp.replace("frame-ancestors 'none'", "frame-ancestors *");
+const baseHeaders = [
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+];
 
 const nextConfig: NextConfig = {
   pageExtensions: ["ts", "tsx", "md", "mdx"],
@@ -76,16 +91,13 @@ const nextConfig: NextConfig = {
   ],
   headers: async () => [
     {
-      source: "/(.*)",
-      headers: [
-        { key: "Content-Security-Policy", value: csp },
-        { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-        { key: "X-Content-Type-Options", value: "nosniff" },
-        { key: "X-Frame-Options", value: "DENY" },
-        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()" },
-        { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-      ],
+      // Everything except /embed and /embed/...
+      source: "/((?!embed(?:/|$)).*)",
+      headers: [{ key: "Content-Security-Policy", value: csp }, { key: "X-Frame-Options", value: "DENY" }, ...baseHeaders],
+    },
+    {
+      source: "/embed/:path*",
+      headers: [{ key: "Content-Security-Policy", value: embedCsp }, ...baseHeaders],
     },
     {
       /*
