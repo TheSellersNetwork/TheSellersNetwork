@@ -129,8 +129,9 @@ test.describe("chromium only", () => {
     await fill(page, "Brand", "Barbour");
     await fill(page, "What it is", "Wax jacket");
     await fill(page, "Size", "Size L");
-    await expect(page.getByText("Barbour Wax jacket", { exact: false }).first()).toBeVisible();
-    await expect(page.getByText(/characters\. eBay allows up to 80/)).toBeVisible();
+    await expect(page.locator("#lb-ebay-title")).toHaveValue("Barbour Wax jacket Size L");
+    await expect(page.locator("#lb-ebay-title-count")).toHaveText(/^25 of 80 characters/);
+    await expect(page.locator("#lb-etsy-title-count")).toHaveText(/of 140 characters/);
     expect(errors).toEqual([]);
   });
 
@@ -178,6 +179,52 @@ test.describe("chromium only", () => {
     await page.getByRole("button", { name: /Download new prices/ }).click();
     expect((await download).suggestedFilename()).toBe("new-prices.csv");
     expect(errors).toEqual([]);
+  });
+
+  test("sold comps: pasted prices give a median and what you keep", async ({ page }) => {
+    const errors = await open(page, "/tools/sold-comps");
+    await page.getByLabel("Paste the sold prices you found").fill(["Sold £20.00", "Sold £24.00 + £3.20 postage", "Sold £22", "Sold £90"].join("\n"));
+    await expect(page.getByText("Median (middle price)")).toBeVisible();
+    await expect(page.getByText("£23.00").first()).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("repricer floors: pasted SKUs give a floor price table", async ({ page }) => {
+    const errors = await open(page, "/tools/repricer-floors");
+    await page.getByLabel("Or paste or type them here, with a header row").fill(["sku,cost", "TEST-1,5", "TEST-2,8.50"].join("\n"));
+    await expect(page.getByText("TEST-2").first()).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("Amazon settlement summariser reads a settlement file", async ({ page }) => {
+    const errors = await open(page, "/tools/amazon-settlement");
+    const tsv = [
+      "settlement-id	settlement-start-date	settlement-end-date	deposit-date	total-amount	currency	transaction-type	order-id	amount-type	amount-description	amount	posted-date",
+      "111	2026-09-01	2026-09-14	2026-09-16	15.50	GBP						",
+      "111						Order	026-0000000-0000001	ItemPrice	Principal	20.00	2026-09-03",
+      "111						Order	026-0000000-0000001	ItemFees	Commission	-3.00	2026-09-03",
+      "111						Order	026-0000000-0000001	ItemFees	FBAPerUnitFulfillmentFee	-1.50	2026-09-03",
+    ].join("\n");
+    await page.locator('input[type="file"]').first().setInputFiles({ name: "settlement.txt", mimeType: "text/plain", buffer: Buffer.from(tsv) });
+    await expect(page.getByText("£20.00").first()).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("new tool pages open without errors", async ({ page }) => {
+    for (const path of ["/tools/amazon-reimbursements", "/tools/background-remover", "/tools/calendar", "/tools/listing-builder"]) {
+      const errors = await open(page, path);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      expect(errors, path).toEqual([]);
+    }
+  });
+
+  test("reseller calendar exports a valid iCalendar file", async ({ request }) => {
+    const res = await request.get("/tools/calendar/calendar.ics?categories=tax");
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("text/calendar");
+    const body = await res.text();
+    expect(body.startsWith("BEGIN:VCALENDAR")).toBe(true);
+    expect(body).toContain("BEGIN:VEVENT");
   });
 
   test("profit report reads a sales CSV", async ({ page }) => {
