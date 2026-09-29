@@ -3,7 +3,8 @@ import { ExternalLink, MessageCircle, MessagesSquare } from "lucide-react";
 import { Mdx } from "@/components/content/mdx";
 import { ImpactBadge, PlatformChip, StatusBadge } from "@/components/changes/change-badges";
 import { InfoDisclaimer } from "@/components/legal/info-disclaimer";
-import { PollCard } from "@/components/forum/poll-card";
+import { DebatePoll } from "@/components/content/debate-poll";
+import { ReadingProgress } from "@/components/content/reading-progress";
 import { UserAvatar } from "@/components/forum/user-avatar";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
@@ -90,10 +91,11 @@ export async function ChangeArticle({ change }: { change: Change }) {
         ) : null}
       </header>
 
+      <ReadingProgress targetId="article-body" />
       <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <article>
+        <article id="article-body">
           <div data-glossary className="prose prose-neutral max-w-none measure dark:prose-invert prose-a:text-brand">
-            <Mdx source={change.content} />
+            <Mdx source={change.content} anchors />
           </div>
 
           <section aria-labelledby="talk-heading" className="mt-12 rounded-xl border-2 border-brand/40 bg-card p-5">
@@ -190,7 +192,7 @@ export async function ChangeArticle({ change }: { change: Change }) {
             </a>
           </section>
 
-          {discussion?.poll ? <PollCard poll={discussion.poll} signedIn={!!viewer} returnTo={url} /> : null}
+          {discussion?.poll ? <DebatePoll poll={discussion.poll} signedIn={!!viewer} returnTo={url} headingLevel={2} /> : null}
 
           {relatedGuides.length > 0 ? (
             <section aria-labelledby="guides-heading" className="rounded-xl border bg-card p-4 text-sm">

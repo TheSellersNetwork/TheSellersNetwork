@@ -22,6 +22,13 @@ import { isScheduled, publishedUkDate } from "@/lib/content/schedule";
 import { getPoll } from "@/lib/forum/polls";
 import { getCurrentUser } from "@/lib/auth";
 import { formatChangeDate } from "@/lib/tools/changes";
+import { KeyFacts } from "@/components/content/key-facts";
+import { ReadingProgress } from "@/components/content/reading-progress";
+import { PathBanner } from "@/components/content/path-banner";
+import { ArticleEndTracker } from "@/components/content/path-progress";
+import { extractShortVersion } from "@/lib/content/article-extras";
+import { getPaths } from "@/lib/content/paths";
+import { pathMemberships, stepKey } from "@/lib/content/paths-core";
 
 /*
   Rendered per request: change and debate posts show the signed-in member's
@@ -73,6 +80,10 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
   const sourcesAt = post.debate ? post.content.search(/^## Sources\s*$/m) : -1;
   const body = sourcesAt > 0 ? post.content.slice(0, sourcesAt) : post.content;
   const sources = sourcesAt > 0 ? post.content.slice(sourcesAt) : null;
+  const keyFacts = extractShortVersion(post.content);
+  const paths = await getPaths();
+  const key = stepKey("blog", post.slug);
+  const inPath = pathMemberships(paths, key).length > 0;
 
   return (
     <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
@@ -88,8 +99,10 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
           image={post.cover ?? undefined}
         />
       ) : null}
+      <ReadingProgress targetId="article-body" />
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <article>
+        <article id="article-body">
+          <PathBanner paths={paths} stepKey={key} />
           <header>
             {scheduledFor ? (
               <p className="mb-4 flex items-center gap-2 rounded-lg border-2 border-brand/40 bg-brand/10 px-3 py-2 text-sm font-medium">
@@ -112,13 +125,14 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
                   {byline ? `By ${byline.name}` : siteConfig.name}
                 </Link>
                 <div className="text-xs text-muted-foreground">
-                  {post.published ? format(new Date(post.published), "d MMMM yyyy", { locale: enGB }) : "Draft"} · {readingTime(post.content)} min read
+                  {post.published ? format(new Date(post.published), "d MMMM yyyy", { locale: enGB }) : "Draft"}
+                  {post.updated && post.updated.slice(0, 10) !== post.published?.slice(0, 10) ? ` · Updated ${format(new Date(post.updated), "d MMMM yyyy", { locale: enGB })}` : ""} · {readingTime(post.content)} min read
                 </div>
               </div>
             </div>
           </header>
           <div className="prose prose-neutral mt-8 max-w-none measure dark:prose-invert prose-headings:font-sans prose-a:text-brand">
-            <Mdx source={body} />
+            <Mdx source={body} pick={post.pick} anchors />
             {post.debate ? (
               <DebateCard
                 debate={post.debate}
@@ -130,8 +144,9 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
                 showHeading={!/^## Where do you stand\??\s*$/m.test(body)}
               />
             ) : null}
-            {sources ? <Mdx source={sources} /> : null}
+            {sources ? <Mdx source={sources} pick={post.pick} anchors /> : null}
           </div>
+          {inPath ? <ArticleEndTracker stepKey={key} /> : null}
           <InfoDisclaimer className="mt-10" />
           <div className="mt-10 flex flex-wrap items-center gap-3 border-t pt-6">
             {thread ? (
@@ -151,7 +166,8 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
             <EmailSignupCard source={urls.blogPost(post.slug)} variant="inline" />
           </div>
         </article>
-        <aside className="space-y-6 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:self-start">
+        <aside className="space-y-6 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:max-h-[calc(100vh-var(--header-height)-3rem)] lg:self-start lg:overflow-y-auto">
+          <KeyFacts bullets={keyFacts} />
           <TableOfContents headings={headings} />
         </aside>
       </div>

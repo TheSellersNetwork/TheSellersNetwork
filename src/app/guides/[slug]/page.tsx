@@ -9,6 +9,13 @@ import { extractHeadings } from "@/lib/content/blog";
 import { getGuide, getGuides } from "@/lib/content/guides";
 import { urls } from "@/lib/forum/urls";
 import { siteConfig } from "@/lib/site";
+import { KeyFacts } from "@/components/content/key-facts";
+import { ReadingProgress } from "@/components/content/reading-progress";
+import { PathBanner } from "@/components/content/path-banner";
+import { ArticleEndTracker } from "@/components/content/path-progress";
+import { extractShortVersion } from "@/lib/content/article-extras";
+import { getPaths } from "@/lib/content/paths";
+import { pathMemberships, stepKey } from "@/lib/content/paths-core";
 
 export async function generateStaticParams() {
   return (await getGuides()).map((g) => ({ slug: g.slug }));
@@ -26,6 +33,10 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
   const guide = await getGuide(slug);
   if (!guide) notFound();
   const headings = extractHeadings(guide.content);
+  const keyFacts = extractShortVersion(guide.content);
+  const paths = await getPaths();
+  const key = stepKey("guide", guide.slug);
+  const inPath = pathMemberships(paths, key).length > 0;
 
   return (
     <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
@@ -33,8 +44,10 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
       {guide.published ? (
         <ArticleJsonLd title={guide.title} description={guide.excerpt} url={urls.guide(guide.slug)} datePublished={guide.published} author={{ name: siteConfig.name, url: `${siteConfig.url}/about` }} />
       ) : null}
+      <ReadingProgress targetId="article-body" />
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <article>
+        <article id="article-body">
+          <PathBanner paths={paths} stepKey={key} />
           <p className="text-sm text-muted-foreground">
             <Link href={urls.guides()} className="hover:underline">
               Guides
@@ -43,8 +56,9 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
           <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{guide.title}</h1>
           <p className="mt-3 max-w-prose text-lg text-muted-foreground">{guide.excerpt}</p>
           <div data-glossary className="prose prose-neutral mt-8 max-w-none measure dark:prose-invert prose-a:text-brand">
-            <Mdx source={guide.content} />
+            <Mdx source={guide.content} anchors />
           </div>
+          {inPath ? <ArticleEndTracker stepKey={key} /> : null}
           <InfoDisclaimer className="mt-10" />
           <div className="mt-10 border-t pt-6">
             <EmailSignupCard source={urls.guide(guide.slug)} variant="inline" />
@@ -58,7 +72,8 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             ) : null}
           </div>
         </article>
-        <aside className="lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:self-start">
+        <aside className="space-y-6 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:max-h-[calc(100vh-var(--header-height)-3rem)] lg:self-start lg:overflow-y-auto">
+          <KeyFacts bullets={keyFacts} />
           <TableOfContents headings={headings} />
         </aside>
       </div>

@@ -5,10 +5,14 @@ import path from "node:path";
 import matter from "gray-matter";
 import { toMeta, type BlogMeta } from "@/lib/content/blog-meta";
 import { isLive, showUnpublished } from "@/lib/content/schedule";
+import { readingTime } from "@/lib/format";
 
 export type { BlogMeta, BlogPlatform, Debate } from "@/lib/content/blog-meta";
 
 export type BlogPost = BlogMeta & { content: string };
+
+/* A post in a listing: its metadata plus reading time in minutes. */
+export type BlogListing = BlogMeta & { minutes: number };
 
 const dir = path.join(process.cwd(), "content", "blog");
 
@@ -22,7 +26,7 @@ function visible(post: BlogMeta, now: Date): boolean {
 }
 
 /* Live posts, newest first. Drafts and scheduled posts show outside production. */
-export const getBlogPosts = cache(async (): Promise<BlogMeta[]> => {
+export const getBlogPosts = cache(async (): Promise<BlogListing[]> => {
   let files: string[] = [];
   try {
     files = (await readdir(dir)).filter((f) => f.endsWith(".mdx"));
@@ -32,8 +36,8 @@ export const getBlogPosts = cache(async (): Promise<BlogMeta[]> => {
   const now = new Date();
   const posts = await Promise.all(
     files.filter((f) => !f.startsWith("_")).map(async (file) => {
-      const { data } = matter(await readFile(path.join(dir, file), "utf8"));
-      return toMeta(file, data);
+      const { data, content } = matter(await readFile(path.join(dir, file), "utf8"));
+      return { ...toMeta(file, data), minutes: readingTime(content) };
     }),
   );
   return posts
