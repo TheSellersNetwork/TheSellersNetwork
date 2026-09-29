@@ -18,6 +18,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCoverImages, getDealOrder } from "@/lib/forum/extras-queries";
 import { GalleryGrid } from "@/components/forum/gallery-grid";
 import { urls } from "@/lib/forum/urls";
+import { parseStatus } from "@/lib/forum/status";
+import { StatusFilter } from "@/components/forum/status-filter";
 import type { TopicListView, TopPeriod } from "@/lib/db/types";
 
 export async function generateMetadata({ params }: PageProps<"/community/c/[slug]">): Promise<Metadata> {
@@ -40,6 +42,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
   const view: TopicListView = sp.view === "top" || sp.view === "unanswered" ? sp.view : "latest";
   const period: TopPeriod = sp.period === "day" || sp.period === "month" || sp.period === "all" ? sp.period : "week";
   const cursor = typeof sp.cursor === "string" ? sp.cursor : null;
+  const status = parseStatus(sp.status);
 
   const [all, viewer] = await Promise.all([getCategories(), getCurrentUser()]);
   const follows = viewer ? await getCategoryFollows(viewer.id) : new Map<string, "following" | "muted">();
@@ -48,7 +51,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
   const children = all.filter((c) => c.parent_id === category.id);
   const categoryIds = [category.id, ...children.map((c) => c.id)];
 
-  const [rawPage, online] = await Promise.all([getTopics({ view, period, cursor, categoryIds, includePinnedFirst: view === "latest", limit: category.layout === "list" ? undefined : 50 }), getOnlineMembers(50)]);
+  const [rawPage, online] = await Promise.all([getTopics({ view, period, cursor, categoryIds, status, includePinnedFirst: view === "latest", limit: category.layout === "list" ? undefined : 50 }), getOnlineMembers(50)]);
   // Deals forums sort by heat; gallery forums show photo tiles.
   const dealOrder = category.layout === "deals" && view === "latest" ? await getDealOrder(category.id) : null;
   const page = dealOrder
@@ -126,6 +129,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
         </ul>
       ) : null}
       <ViewTabs basePath={basePath} view={view} period={period} />
+      <StatusFilter href={`${basePath}?view=${view}${view === "top" ? `&period=${period}` : ""}`} status={status} />
       <LiveBar kind="topics" categoryIds={categoryIds} />
       {covers ? (
         <GalleryGrid topics={page.topics} covers={covers} emptyMessage="No photos yet. Post yours with a picture of your setup." />
@@ -136,10 +140,10 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
         dealMeta={dealOrder ?? undefined}
         topics={page.topics}
         nextCursor={page.nextCursor}
-        moreHref={(c) => `${basePath}?view=${view}&period=${period}&cursor=${encodeURIComponent(c)}`}
+        moreHref={(c) => `${basePath}?view=${view}&period=${period}${status ? `&status=${status}` : ""}&cursor=${encodeURIComponent(c)}`}
         showCategory={children.length > 0}
         sponsorPage={basePath}
-        emptyMessage="Nothing here yet. Start the first topic."
+        emptyMessage={status ? "No topics with that status here yet." : "Nothing here yet. Start the first topic."}
       />
       )}
     </ForumShell>

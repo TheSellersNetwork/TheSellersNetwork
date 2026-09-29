@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { CheckCircle2, Eye, Lock, Pin } from "lucide-react";
+import { Eye, Lock, Pin } from "lucide-react";
 import { ForumShell } from "@/components/layout/forum-shell";
 import { GuideCard } from "@/components/layout/right-rail";
 import { PostItem } from "@/components/forum/post-item";
@@ -9,6 +9,9 @@ import { AcceptedAnswer } from "@/components/forum/accepted-answer";
 import { QuoteSelection } from "@/components/forum/quote-selection";
 import { ReplySection } from "@/components/forum/reply-section";
 import { TopicStaffTools } from "@/components/forum/topic-staff-tools";
+import { StatusChip } from "@/components/forum/status-chip";
+import { TopicTagsCard } from "@/components/forum/topic-tags-card";
+import { getFollowedTagIds, tagFollowsAvailable } from "@/lib/forum/tag-queries";
 import { ReadTracker } from "@/components/forum/read-tracker";
 import { LandingTracker } from "@/components/analytics/landing-tracker";
 import { LiveBar } from "@/components/forum/live-bar";
@@ -60,7 +63,14 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
   // Renamed topics keep working through the short id; send crawlers to the current slug.
   if (topic.slug !== slug) permanentRedirect(urls.topic(topic));
 
-  const [categories, guide] = await Promise.all([getCategories(), getGuideForCategory(topic.category?.slug ?? null)]);
+  const [categories, guide, followedTags, canFollowTags] = await Promise.all([
+    getCategories(),
+    getGuideForCategory(topic.category?.slug ?? null),
+    viewer && topic.tags.length > 0 ? getFollowedTagIds(viewer.id) : Promise.resolve(null),
+    !viewer && topic.tags.length > 0 ? tagFollowsAvailable() : Promise.resolve(false),
+  ]);
+  // Null means the tag_follows table is not there yet, so the follow buttons stay hidden.
+  const showTagFollow = viewer ? followedTags !== null : canFollowTags;
   const category = categories.find((c) => c.id === topic.category_id) ?? null;
   const parent = category?.parent_id ? categories.find((c) => c.id === category.parent_id) : null;
 
@@ -95,7 +105,12 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
     <ForumShell
       activeCategory={category?.slug ?? null}
       source={urls.topic(topic)}
-      rail={<GuideCard guide={guide} />}
+      rail={
+        <>
+          {showTagFollow ? <TopicTagsCard tags={topic.tags} followed={followedTags ?? new Set()} signedIn={!!viewer} /> : null}
+          <GuideCard guide={guide} />
+        </>
+      }
     >
       <BreadcrumbJsonLd
         items={[
@@ -143,9 +158,10 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
       <header className="mb-6">
         <h1 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">{topic.title}</h1>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-          {topic.is_solved ? (
-            <span className="inline-flex items-center gap-1 text-success">
-              <CheckCircle2 className="size-4" /> Solved
+          <StatusChip topic={topic} size="md" />
+          {topic.is_locked && topic.is_solved ? (
+            <span className="inline-flex items-center gap-1">
+              <Lock className="size-4" aria-hidden="true" /> Locked
             </span>
           ) : null}
           {topic.is_pinned ? (
@@ -153,19 +169,14 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
               <Pin className="size-4" /> Pinned
             </span>
           ) : null}
-          {topic.is_locked ? (
-            <span className="inline-flex items-center gap-1">
-              <Lock className="size-4" /> Locked
-            </span>
-          ) : null}
           <span>{plural(topic.reply_count, "reply", "replies")}</span>
           <span className="inline-flex items-center gap-1">
             <Eye className="size-4" /> {topic.view_count}
           </span>
           {topic.tags.map((t) => (
-            <span key={t.id} className="rounded bg-secondary px-1.5 py-0.5 text-xs">
+            <Link key={t.id} href={urls.tag(t.slug)} className="rounded bg-secondary px-1.5 py-0.5 text-xs hover:underline">
               {t.name}
-            </span>
+            </Link>
           ))}
           {viewer?.profile.is_staff ? <TopicStaffTools topicId={topic.id} isPinned={topic.is_pinned} isLocked={topic.is_locked} /> : null}
         </div>
