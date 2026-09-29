@@ -11,10 +11,15 @@ const posthog = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.co
   and PostHog; images only from this site and our Supabase Storage (so a post
   cannot load a tracking pixel); no framing by other sites. 'unsafe-inline'
   for scripts is needed by Next.js hydration without per-request nonces.
+  'wasm-unsafe-eval' lets the background remover (/tools/background-remover)
+  compile ONNX Runtime's WebAssembly, served from this site. It allows only
+  WebAssembly compilation, not JavaScript eval. Its Web Worker is a same-origin
+  module file, which the existing worker-src 'self' already covers, and its
+  previews are blob: images, which img-src already allows.
 */
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://challenges.cloudflare.com https://eu-assets.i.posthog.com`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""} https://challenges.cloudflare.com https://eu-assets.i.posthog.com`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${supabase}`,
   "font-src 'self' data:",
@@ -56,6 +61,16 @@ const nextConfig: NextConfig = {
         { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()" },
         { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
       ],
+    },
+    {
+      // Background remover runtime and model. The runtime sits in a folder named for its version and
+      // the model file never changes (give a new model a new name), so browsers can keep them a year.
+      source: "/vendor/onnxruntime-web/:path*",
+      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+    },
+    {
+      source: "/models/:path*",
+      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
     },
     {
       // The service worker must never be cached, or a fix could take days to reach browsers.
