@@ -12,3 +12,9 @@ export async function findUserByEmail(supabase: SupabaseClient, email: string) {
   }
   return null;
 }
+
+/* The house account ("The Sellers Network") that automatic threads are posted as, if the seed has created it. */
+export async function findHouseAccountId(supabase: SupabaseClient): Promise<string | null> {
+  const { data } = await supabase.from("site_accounts").select("profile_id").eq("key", "house").maybeSingle();
+  return (data?.profile_id as string | undefined) ?? null;
+}

@@ -13,7 +13,7 @@ import type {
   TopPeriod,
 } from "@/lib/db/types";
 
-const PROFILE_SUMMARY = "id, username, display_name, avatar_url, trust_level, is_staff, solution_count, flair";
+const PROFILE_SUMMARY = "id, username, display_name, avatar_url, trust_level, is_staff, solution_count, flair, created_at";
 
 const TOPIC_SELECT = `
   *,

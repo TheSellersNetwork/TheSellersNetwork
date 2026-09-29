@@ -49,7 +49,7 @@ export type Flair = { platform: string; since?: number; label?: string };
 export type ProfileSummary = Pick<
   Profile,
   "id" | "username" | "display_name" | "avatar_url" | "trust_level" | "is_staff" | "solution_count"
-> & { flair?: Flair[] };
+> & { flair?: Flair[]; created_at?: string };
 
 export type Category = {
   id: string;
