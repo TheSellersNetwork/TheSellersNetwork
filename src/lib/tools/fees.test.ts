@@ -1,4 +1,4 @@
-import { calculate, fbaFees, minimumPrice } from "./fees";
+import { calculate, fbaFees, minimumPrice, solveMinimum } from "./fees";
 
 const sale = { price: 20, postageCharged: 3.5, postageCost: 3.2, itemCost: 5, vatOnFees: false };
 
@@ -61,5 +61,18 @@ describe("fee engine", () => {
     expect(f.referralFee).toBeCloseTo(2.25, 2);
     expect(f.fuel).toBeCloseTo(0.05, 2);
     expect(f.total).toBeGreaterThan(5);
+  });
+
+  it("leaves VAT off FBA fees when the seller reclaims it", () => {
+    const withVat = fbaFees(15, 3.0, "toys", 1, 0.1, false);
+    const without = fbaFees(15, 3.0, "toys", 1, 0.1, false, false);
+    expect(without.vat).toBe(0);
+    expect(withVat.total).toBeCloseTo(without.total * 1.2, 1);
+  });
+
+  it("solves for the lowest price on any profit function", () => {
+    expect(solveMinimum((p) => p * 0.9 - 5, 4)).toBe(10);
+    expect(solveMinimum((p) => p - 5, 0, 20)).toBe(20);
+    expect(solveMinimum(() => -1, 0)).toBeNull();
   });
 });
