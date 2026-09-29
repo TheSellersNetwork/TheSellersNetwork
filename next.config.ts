@@ -88,10 +88,32 @@ const nextConfig: NextConfig = {
       ],
     },
     {
+      /*
+        Cross-origin isolation for the background remover only, so ONNX Runtime
+        can use several threads (SharedArrayBuffer). COOP same-origin is already
+        sent site-wide above. COEP "credentialless" rather than "require-corp":
+        cross-origin images (Supabase Storage avatars) and the PostHog script
+        still load, just without cookies. Browsers without credentialless
+        support (Safari) are not isolated and run on one thread. The worker and
+        the runtime files get the same header so their threads are isolated too.
+        A visit that arrives by client-side navigation is not isolated either
+        (headers apply to full page loads), and also falls back to one thread.
+      */
+      source: "/tools/background-remover",
+      headers: [{ key: "Cross-Origin-Embedder-Policy", value: "credentialless" }],
+    },
+    {
+      source: "/workers/:path*",
+      headers: [{ key: "Cross-Origin-Embedder-Policy", value: "credentialless" }],
+    },
+    {
       // Background remover runtime and model. The runtime sits in a folder named for its version and
       // the model file never changes (give a new model a new name), so browsers can keep them a year.
       source: "/vendor/onnxruntime-web/:path*",
-      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      headers: [
+        { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+      ],
     },
     {
       source: "/models/:path*",

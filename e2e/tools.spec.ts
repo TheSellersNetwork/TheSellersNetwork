@@ -417,3 +417,79 @@ test.describe("header controls", () => {
     await expect(page).toHaveURL(/\/tools$/);
   });
 });
+
+test.describe("background remover", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+  test.skip(() => test.info().project.name !== "chromium", "desktop flows; the model runs once per test");
+
+  async function openRemover(page: Page) {
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    const base = test.info().project.use.baseURL ?? "http://localhost:3000";
+    await page.context().addCookies([{ name: "tsn-consent", value: "essential", url: base }]);
+    const res = await page.goto("/tools/background-remover");
+    expect(res?.status()).toBeLessThan(400);
+    // Cross-origin isolation for multi-threaded WASM on this route only.
+    expect(res?.headers()["cross-origin-embedder-policy"]).toBe("credentialless");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    return errors;
+  }
+
+  test("presets change the settings and say where their sizes come from", async ({ page }) => {
+    const errors = await openRemover(page);
+    await page.getByRole("button", { name: "eBay", exact: true }).click();
+    await expect(page.getByLabel("Size (longest side)")).toHaveValue("1600");
+    await expect(page.getByLabel("Square (1:1)")).toBeChecked();
+    await expect(page.getByTestId("bg-preset-note")).toContainText("1600 by 1600");
+    await page.getByRole("button", { name: "Vinted", exact: true }).click();
+    await expect(page.getByLabel("Portrait (4:5)")).toBeChecked();
+    await expect(page.getByTestId("bg-preset-note")).toContainText("our own");
+    await page.getByRole("button", { name: "Etsy", exact: true }).click();
+    await expect(page.getByLabel("Size (longest side)")).toHaveValue("2000");
+    // Changing a preset's setting drops the preset label.
+    await page.getByLabel("Portrait (4:5)").check();
+    await expect(page.getByTestId("bg-preset-note")).toHaveCount(0);
+    // Settings are remembered after a reload.
+    await page.reload();
+    await expect(page.getByLabel("Portrait (4:5)")).toBeChecked();
+    expect(errors).toEqual([]);
+  });
+
+  test("a bulk batch of 12 photos downloads as one zip", async ({ page }) => {
+    test.setTimeout(120_000);
+    const errors = await openRemover(page);
+    // Twelve small generated product photos, added through the photo picker.
+    await page.evaluate(async () => {
+      const dt = new DataTransfer();
+      for (let i = 0; i < 12; i++) {
+        const c = document.createElement("canvas");
+        c.width = 480;
+        c.height = 360;
+        const x = c.getContext("2d")!;
+        x.fillStyle = "rgb(230, 226, 218)";
+        x.fillRect(0, 0, 480, 360);
+        x.fillStyle = `hsl(${i * 30} 60% 40%)`;
+        x.beginPath();
+        x.ellipse(240, 180, 90 + i * 3, 120, 0, 0, Math.PI * 2);
+        x.fill();
+        const blob = await new Promise<Blob>((r) => c.toBlob((b) => r(b!), "image/jpeg", 0.9));
+        dt.items.add(new File([blob], `photo-${i + 1}.jpg`, { type: "image/jpeg" }));
+      }
+      const input = document.querySelector<HTMLInputElement>('input[aria-label="Choose photos"]')!;
+      input.files = dt.files;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await expect(page.getByTestId("bg-progress")).toContainText("12 of 12 done", { timeout: 90_000 });
+    const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: /Download all as a zip \(12\)/ }).click()]);
+    expect(download.suggestedFilename()).toBe("photos-no-background.zip");
+    const path = await download.path();
+    const { readFileSync } = await import("node:fs");
+    const zip = readFileSync(path);
+    // End of central directory record: signature, then the number of files.
+    const end = zip.length - 22;
+    expect(zip.readUInt32LE(end)).toBe(0x06054b50);
+    expect(zip.readUInt16LE(end + 10)).toBe(12);
+    expect(zip.includes(Buffer.from("photo-1-no-background.jpg"))).toBe(true);
+    expect(errors).toEqual([]);
+  });
+});

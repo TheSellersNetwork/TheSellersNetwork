@@ -16,8 +16,16 @@ const root = path.resolve(import.meta.dirname, "..");
 const pkgDir = path.join(root, "node_modules", "onnxruntime-web");
 const { version } = JSON.parse(await readFile(path.join(pkgDir, "package.json"), "utf8"));
 
-// The WASM-only build (no WebGL or WebGPU) and the single SIMD runtime it loads.
-const files = ["ort.wasm.min.mjs", "ort-wasm-simd-threaded.mjs", "ort-wasm-simd-threaded.wasm"];
+// The WASM-only build and its runtime, for browsers without WebGPU, and the WebGPU build and
+// its (asyncify) runtime, which also runs the WASM backend if WebGPU fails. No WebGL build.
+const files = [
+  "ort.wasm.min.mjs",
+  "ort-wasm-simd-threaded.mjs",
+  "ort-wasm-simd-threaded.wasm",
+  "ort.webgpu.min.mjs",
+  "ort-wasm-simd-threaded.asyncify.mjs",
+  "ort-wasm-simd-threaded.asyncify.wasm",
+];
 
 // LICENSE.txt beside the version folders holds the MIT notice (the npm package ships without one).
 const out = path.join(root, "public", "vendor", "onnxruntime-web", version);

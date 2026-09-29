@@ -2,6 +2,17 @@ import { createHash } from "node:crypto";
 import { readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import {
+  DEFAULT_SETTINGS,
+  PRESETS,
+  applyPreset,
+  formatDuration,
+  isImageFile,
+  matchingPreset,
+  parseSettings,
+  placementFor,
+  settingsKey,
+  timeLeft,
+  toBytes,
   MODEL_BYTES,
   MODEL_SHA256,
   ORT_VERSION,
@@ -98,12 +109,77 @@ describe("background remover", () => {
     expect(P.dw).toBeLessThanOrEqual(1600 * 0.8 + 0.001);
   });
 
+  it("fixes the output size when one is chosen, enlarging if needed", () => {
+    const L = layout({ w: 100, h: 50 }, "1:1", 0.1, 1600);
+    expect(L).toMatchObject({ width: 1600, height: 1600 });
+    expect(L.dw).toBeCloseTo(1280);
+    expect(L.dh).toBeCloseTo(640);
+    expect(L.dy).toBeCloseTo(480);
+    const P = layout({ w: 400, h: 400 }, "4:5", 0, 1600);
+    expect(P).toMatchObject({ width: 1280, height: 1600 });
+    expect(P.dw).toBeCloseTo(1280);
+    expect(P.dy).toBeCloseTo(160);
+  });
+
+  it("maps the photo onto the output for the before picture", () => {
+    const box = { x: 50, y: 20, w: 100, h: 50 };
+    const L = layout(box, "1:1", 0.1, 1600);
+    const p = placementFor(box, L);
+    // The box's corner lands where the layout puts the item.
+    expect(box.x * p.scale + p.offsetX).toBeCloseTo(L.dx);
+    expect(box.y * p.scale + p.offsetY).toBeCloseTo(L.dy);
+    expect((box.x + box.w) * p.scale + p.offsetX).toBeCloseTo(L.dx + L.dw);
+  });
+
+  it("presets set shape, size and background, and are dropped when changed", () => {
+    const ebay = applyPreset(DEFAULT_SETTINGS, "ebay");
+    expect(ebay).toMatchObject({ aspect: "1:1", outputSide: 1600, background: "white", preset: "ebay" });
+    expect(applyPreset(DEFAULT_SETTINGS, "vinted")).toMatchObject({ aspect: "4:5", outputSide: 1600 });
+    expect(applyPreset(DEFAULT_SETTINGS, "etsy").outputSide).toBe(2000);
+    expect(matchingPreset({ ...ebay, aspect: "4:5" })).toBeNull();
+    // Only eBay and Etsy publish sizes; the others are labelled as ours.
+    expect(PRESETS.filter((p) => p.source).map((p) => p.id).sort()).toEqual(["ebay", "etsy"]);
+  });
+
+  it("reads saved settings safely", () => {
+    expect(parseSettings(null)).toEqual(DEFAULT_SETTINGS);
+    expect(parseSettings("not json")).toEqual(DEFAULT_SETTINGS);
+    const s = parseSettings(JSON.stringify({ background: "grey", padding: 99, outputSide: 1234, shadow: true, preset: "ebay" }));
+    expect(s.background).toBe("grey");
+    expect(s.padding).toBe(DEFAULT_SETTINGS.padding);
+    expect(s.outputSide).toBe(0);
+    expect(s.shadow).toBe(true);
+    expect(s.preset).toBeNull(); // eBay's size and shape do not match
+    expect(settingsKey({ ...s, preset: "ebay" })).toBe(settingsKey(s));
+  });
+
+  it("estimates time left and says durations in words", () => {
+    expect(timeLeft([], 5)).toBeNull();
+    expect(timeLeft([1000, 3000], 10)).toBe(20000);
+    expect(timeLeft([1000], 0)).toBe(0);
+    expect(formatDuration(45_000)).toBe("45 seconds");
+    expect(formatDuration(61_000)).toBe("1 minute 1 second");
+    expect(formatDuration(3_900_000)).toBe("1 hour 5 minutes");
+  });
+
+  it("recognises photos, including from folders with no type", () => {
+    expect(isImageFile({ name: "a.JPG", type: "" })).toBe(true);
+    expect(isImageFile({ name: "notes.txt", type: "" })).toBe(false);
+    expect(isImageFile({ name: "x", type: "image/png" })).toBe(true);
+    expect(isImageFile({ name: "x.pdf", type: "application/pdf" })).toBe(false);
+  });
+
+  it("stores masks as bytes", () => {
+    expect(Array.from(toBytes([0, 0.5, 1, 2]))).toEqual([0, 128, 255, 255]);
+  });
+
   it("names and types the downloads", () => {
     expect(outputType("white")).toEqual({ mime: "image/jpeg", ext: "jpg" });
     expect(outputType("grey").ext).toBe("jpg");
     expect(outputType("transparent")).toEqual({ mime: "image/png", ext: "png" });
     expect(outputName("Red jumper.jpeg", "transparent")).toBe("Red jumper-no-background.png");
     expect(outputName(".png", "white")).toBe("photo-no-background.jpg");
+    expect(outputName("shoes/left/IMG_1.jpeg", "white")).toBe("IMG_1-no-background.jpg");
   });
 
   it("explains failures in plain words", () => {
@@ -117,7 +193,14 @@ describe("background remover", () => {
     expect(createHash("sha256").update(model).digest("hex")).toBe(MODEL_SHA256);
     const pkg = JSON.parse(readFileSync(path.join(root, "node_modules/onnxruntime-web/package.json"), "utf8"));
     expect(pkg.version).toBe(ORT_VERSION);
-    for (const f of ["ort.wasm.min.mjs", "ort-wasm-simd-threaded.mjs", "ort-wasm-simd-threaded.wasm"]) {
+    for (const f of [
+      "ort.wasm.min.mjs",
+      "ort-wasm-simd-threaded.mjs",
+      "ort-wasm-simd-threaded.wasm",
+      "ort.webgpu.min.mjs",
+      "ort-wasm-simd-threaded.asyncify.mjs",
+      "ort-wasm-simd-threaded.asyncify.wasm",
+    ]) {
       const shipped = statSync(path.join(root, `public/vendor/onnxruntime-web/${ORT_VERSION}/${f}`)).size;
       expect(shipped).toBe(statSync(path.join(root, `node_modules/onnxruntime-web/dist/${f}`)).size);
     }

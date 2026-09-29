@@ -1,15 +1,19 @@
 /*
   Web Worker for /tools/background-remover. It runs the u2netp model with
-  ONNX Runtime Web (WASM) so the page stays responsive. Everything it loads
-  comes from this site; photos never leave the device.
+  ONNX Runtime Web off the main thread so the page stays responsive.
+  Everything it loads comes from this site; photos never leave the device.
+
+  It uses WebGPU (the graphics chip) when asked, with the WebGPU build of
+  the runtime, falling back to that build's WASM backend. Otherwise the WASM
+  build, on as many threads as the page asks for (threads need the page to
+  be cross-origin isolated). See src/components/tools/background-remover-engine.ts.
 
   Messages in:
-    { type: "init", ortBase, modelUrl, modelSha256 }
+    { type: "init", ortBase, model: ArrayBuffer, gpu: boolean, threads: number }
     { type: "run", id, input: Float32Array (1 x 3 x size x size), size }
   Messages out:
-    { type: "progress", loaded, total }       while the model downloads
-    { type: "ready" }
-    { type: "result", id, output: Float32Array (size x size) }
+    { type: "ready", backend: "webgpu" | "wasm", threads }
+    { type: "result", id, output: Float32Array (size x size), ms }
     { type: "error", id?, name, message }
 
   Model: U-2-Net u2netp, Apache License 2.0 (https://github.com/xuebinqin/U-2-Net),
@@ -17,56 +21,54 @@
   Runtime: onnxruntime-web, MIT (https://github.com/microsoft/onnxruntime).
 */
 
+let ort = null;
 let session = null;
+let backend = "wasm";
+let modelBytes = null;
 let loading = null;
 
 function fail(err, id) {
   self.postMessage({ type: "error", id, name: err?.name ?? "Error", message: err?.message ?? String(err) });
 }
 
-async function download(url, expectedTotal) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to load the model (${res.status})`);
-  // The known size, since content-length is the compressed size when the host compresses.
-  const total = expectedTotal || Number(res.headers.get("content-length")) || 0;
-  if (!res.body) return new Uint8Array(await res.arrayBuffer());
-  const reader = res.body.getReader();
-  const chunks = [];
-  let loaded = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    chunks.push(value);
-    loaded += value.length;
-    self.postMessage({ type: "progress", loaded, total });
-  }
-  const bytes = new Uint8Array(loaded);
-  let offset = 0;
-  for (const c of chunks) {
-    bytes.set(c, offset);
-    offset += c.length;
-  }
-  return bytes;
+async function createSession(kind) {
+  // A copy, because some backends take ownership of the buffer.
+  return ort.InferenceSession.create(modelBytes.slice(), { executionProviders: [kind], graphOptimizationLevel: "all" });
 }
 
-async function sha256(bytes) {
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-async function init({ ortBase, modelUrl, modelSha256, modelBytes }) {
-  const ort = await import(`${ortBase}ort.wasm.min.mjs`);
+async function init({ ortBase, model, gpu, threads }) {
+  ort = await import(`${ortBase}${gpu ? "ort.webgpu.min.mjs" : "ort.wasm.min.mjs"}`);
   // Load the runtime's own .mjs and .wasm from this site, not a CDN.
   ort.env.wasm.wasmPaths = ortBase;
-  // Threads need cross-origin isolation, which the site does not turn on. One thread is enough here.
-  ort.env.wasm.numThreads = 1;
+  ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.max(1, threads || 1) : 1;
   ort.env.wasm.proxy = false;
-  const bytes = await download(modelUrl, modelBytes);
-  if (crypto?.subtle && modelSha256 && (await sha256(bytes)) !== modelSha256) {
-    throw new Error("Model checksum mismatch");
+  modelBytes = new Uint8Array(model);
+  if (gpu) {
+    try {
+      session = await createSession("webgpu");
+      backend = "webgpu";
+      return;
+    } catch {
+      // Fall through to WASM in the same runtime.
+    }
   }
-  session = await ort.InferenceSession.create(bytes, { executionProviders: ["wasm"], graphOptimizationLevel: "all" });
-  self.ort = ort;
+  session = await createSession("wasm");
+  backend = "wasm";
+}
+
+async function infer(input, size) {
+  const tensor = new ort.Tensor("float32", input, [1, 3, size, size]);
+  try {
+    const results = await session.run({ [session.inputNames[0]]: tensor });
+    // The first output (d1) is the fused, most detailed saliency map.
+    const out = results[session.outputNames[0]];
+    const data = typeof out.getData === "function" ? await out.getData() : out.data;
+    const output = new Float32Array(data);
+    for (const name of session.outputNames) results[name].dispose?.();
+    return output;
+  } finally {
+    tensor.dispose?.();
+  }
 }
 
 self.onmessage = async (event) => {
@@ -75,7 +77,7 @@ self.onmessage = async (event) => {
     loading ??= init(msg);
     try {
       await loading;
-      self.postMessage({ type: "ready" });
+      self.postMessage({ type: "ready", backend, threads: ort.env.wasm.numThreads });
     } catch (err) {
       loading = null;
       fail(err);
@@ -83,17 +85,21 @@ self.onmessage = async (event) => {
     return;
   }
   if (msg.type === "run") {
+    const started = performance.now();
     try {
       if (!session) throw new Error("Model not loaded");
-      const ort = self.ort;
-      const tensor = new ort.Tensor("float32", msg.input, [1, 3, msg.size, msg.size]);
-      const results = await session.run({ [session.inputNames[0]]: tensor });
-      // The first output (d1) is the fused, most detailed saliency map.
-      const out = results[session.outputNames[0]];
-      const output = new Float32Array(out.data);
-      for (const name of session.outputNames) results[name].dispose?.();
-      tensor.dispose?.();
-      self.postMessage({ type: "result", id: msg.id, output }, [output.buffer]);
+      let output;
+      try {
+        output = await infer(msg.input, msg.size);
+      } catch (err) {
+        if (backend !== "webgpu") throw err;
+        // WebGPU failed mid-batch (for example the graphics driver reset): carry on with WASM.
+        session = await createSession("wasm");
+        backend = "wasm";
+        self.postMessage({ type: "ready", backend, threads: ort.env.wasm.numThreads });
+        output = await infer(msg.input, msg.size);
+      }
+      self.postMessage({ type: "result", id: msg.id, output, ms: performance.now() - started }, [output.buffer]);
     } catch (err) {
       fail(err, msg.id);
     }
