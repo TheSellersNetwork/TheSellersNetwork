@@ -165,26 +165,40 @@ export function calculate(platform: PlatformId, s: Sale): Result {
   };
 }
 
-/* The lowest price that still leaves the target profit, found by stepping up in pennies. */
-export function minimumPrice(platform: PlatformId, s: Omit<Sale, "price">, targetProfit: number): number | null {
-  let lo = 0;
+/*
+  The lowest price at which profitAt(price) reaches the target, by halving the
+  gap between 0 and £100,000. Assumes profit rises with price, which holds
+  between fee band edges; callers with stepped fees should check the edges.
+*/
+export function solveMinimum(profitAt: (price: number) => number, targetProfit: number, from = 0): number | null {
+  let lo = from;
   let hi = 100000;
-  if (calculate(platform, { ...s, price: hi }).profit < targetProfit) return null;
+  if (profitAt(hi) < targetProfit) return null;
+  if (profitAt(lo) >= targetProfit) return Math.ceil(lo * 100) / 100;
   for (let i = 0; i < 60; i += 1) {
     const mid = (lo + hi) / 2;
-    if (calculate(platform, { ...s, price: mid }).profit >= targetProfit) hi = mid;
+    if (profitAt(mid) >= targetProfit) hi = mid;
     else lo = mid;
   }
-  return Math.ceil(hi * 100) / 100;
+  // Round up to the penny, allowing for floating-point dust, then make sure the penny price still works.
+  let p = Math.ceil(Math.round(hi * 1e6) / 1e4) / 100;
+  if (profitAt(p) < targetProfit) p = Math.round((p + 0.01) * 100) / 100;
+  return p;
 }
 
-export function fbaFees(price: number, fulfilment: number, category: string, months: number, cubicFeet: number, peak: boolean) {
+/* The lowest price that still leaves the target profit. */
+export function minimumPrice(platform: PlatformId, s: Omit<Sale, "price">, targetProfit: number): number | null {
+  return solveMinimum((price) => calculate(platform, { ...s, price }).profit, targetProfit);
+}
+
+/* FBA fees on one unit. VAT on fees is added unless vatOnFees is false (for sellers who reclaim it). */
+export function fbaFees(price: number, fulfilment: number, category: string, months: number, cubicFeet: number, peak: boolean, vatOnFees = true) {
   const referral = calculate("amazon_fbm", { price, postageCharged: 0, postageCost: 0, itemCost: 0, amazonCategory: category, vatOnFees: false });
   const referralFee = referral.lines.filter((l) => !/Digital services/.test(l.label)).reduce((t, l) => t + l.amount, 0);
   const fuel = pct(fulfilment, fees.amazon.fuelSurchargePercent);
   const storage = cubicFeet * months * (peak ? fees.amazon.storagePerCubicFoot.octDec : fees.amazon.storagePerCubicFoot.janSep);
   const beforeDst = referralFee + fulfilment + fuel + storage;
   const dst = pct(referralFee + fulfilment + fuel, fees.amazon.digitalServicesPercent);
-  const vat = pct(beforeDst + dst, fees.vatRate);
+  const vat = vatOnFees ? pct(beforeDst + dst, fees.vatRate) : 0;
   return { referralFee: r2(referralFee), fulfilment: r2(fulfilment), fuel: r2(fuel), storage: r2(storage), dst: r2(dst), vat: r2(vat), total: r2(beforeDst + dst + vat) };
 }

@@ -1,0 +1,83 @@
+{
+  "_readme": [
+    "Researched dates for the reseller calendar at /tools/calendar.",
+    "Every entry needs an official source (the brand's own site or press release, https only) and the date it was checked (YYYY-MM-DD). Never add a date from a rumour, a leak, a retailer listing or a third-party prediction.",
+    "Fields: id (unique, kebab-case, never reuse or change it because calendar apps use it), date (YYYY-MM-DD, UK on-sale or start date), endDate (optional, last day), title, category (pokemon, lego, sale or other), region (UK), source (https URL), checked (YYYY-MM-DD), note (optional).",
+    "LEGO does not publish retirement dates. Its 'Retiring soon' page (https://www.lego.com/en-gb/categories/last-chance-to-buy) lists sets without dates, so retirements only go in here if LEGO itself names an end-of-sale date.",
+    "Fee and policy changes come from content/changes, tax dates from src/lib/tools/tax.ts, and bank holidays from the GOV.UK feed, so do not repeat them here.",
+    "The daily change monitor or staff can add entries. Remove nothing that has passed; the page hides old entries on its own."
+  ],
+  "entries": [
+    {
+      "id": "lego-holiday-sets-2026",
+      "date": "2026-10-01",
+      "title": "LEGO holiday sets on sale: Buddy the Elf, Santa's Holiday Countdown, Christmas Stocking",
+      "category": "lego",
+      "region": "UK",
+      "source": "https://www.lego.com/en-gb/aboutus/news/2026/september/the-lego-group-builds-up-to-the-holidays",
+      "checked": "2026-09-29",
+      "note": "Sets 40865, 40874 and 40958, on sale for all from this date according to the LEGO Group."
+    },
+    {
+      "id": "lego-icons-holiday-house-11387",
+      "date": "2026-10-04",
+      "title": "LEGO Icons Holiday House (11387) on sale",
+      "category": "lego",
+      "region": "UK",
+      "source": "https://www.lego.com/en-gb/aboutus/news/2026/september/the-lego-group-builds-up-to-the-holidays",
+      "checked": "2026-09-29",
+      "note": "LEGO Insiders early access from 1 October 2026."
+    },
+    {
+      "id": "lego-ideas-downton-abbey-21373",
+      "date": "2026-10-04",
+      "title": "LEGO Ideas Downton Abbey (21373) on sale",
+      "category": "lego",
+      "region": "UK",
+      "source": "https://www.lego.com/en-gb/aboutus/news/2026/september/downton-abbey-makes-a-grand-debut-in-lego-brick-form",
+      "checked": "2026-09-29",
+      "note": "LEGO Insiders early access from 1 October 2026."
+    },
+    {
+      "id": "amazon-prime-big-deal-days-2026",
+      "date": "2026-10-06",
+      "endDate": "2026-10-07",
+      "title": "Amazon Prime Big Deal Days",
+      "category": "sale",
+      "region": "UK",
+      "source": "https://www.aboutamazon.co.uk/news/retail/amazon-prime-big-deal-days-2026-date",
+      "checked": "2026-09-29",
+      "note": "From 12:01am on 6 October to 11:59pm on 7 October, for Prime members."
+    },
+    {
+      "id": "lego-architecture-sagrada-familia-21065",
+      "date": "2026-11-01",
+      "title": "LEGO Architecture Sagrada Família (21065) on sale",
+      "category": "lego",
+      "region": "UK",
+      "source": "https://www.lego.com/en-gb/aboutus/news/2026/june/lego-architecture-sagrada-fam-lia-set-unveiled",
+      "checked": "2026-09-29",
+      "note": "On sale globally from this date according to the LEGO Group. Pre-orders opened on 4 June 2026."
+    },
+    {
+      "id": "lego-icons-dragon-ball-shenron-goku-11390",
+      "date": "2026-11-04",
+      "title": "LEGO Icons Dragon Ball Shenron and Goku (11390) on sale",
+      "category": "lego",
+      "region": "UK",
+      "source": "https://www.lego.com/en-gb/aboutus/news/2026/september/lego-icons-dragon-ball-shenron-goku-set",
+      "checked": "2026-09-29",
+      "note": "LEGO Insiders early access from 1 November 2026."
+    },
+    {
+      "id": "pokemon-tcg-mega-evolution-delta-reign",
+      "date": "2026-11-06",
+      "title": "Pokémon TCG Mega Evolution: Delta Reign expansion",
+      "category": "pokemon",
+      "region": "UK",
+      "source": "https://www.pokemon.com/uk/pokemon-news/the-pokemon-tcg-mega-evolution-delta-reign-expansion-arrives-november-6-2026",
+      "checked": "2026-09-29",
+      "note": "English-language release date from The Pokémon Company."
+    }
+  ]
+}

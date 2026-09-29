@@ -1,6 +1,8 @@
+import { calculatorSlugs, toolGroups } from "@/lib/tools/catalogue";
 import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getBlogPosts } from "@/lib/content/blog";
+import { isLive } from "@/lib/content/schedule";
 import { getGuides } from "@/lib/content/guides";
 import { getChanges } from "@/lib/content/changes";
 import { getCategories } from "@/lib/forum/queries";
@@ -8,7 +10,8 @@ import { siteConfig } from "@/lib/site";
 
 /*
   Split sitemaps: 0 is static pages, categories, guides and blog posts;
-  1 onwards are topics in pages of 5,000. Regenerated hourly by revalidate.
+  1 onwards are topics in pages of 5,000. Regenerated hourly by revalidate,
+  so a scheduled blog post joins within an hour of its UK publish date.
   Profiles are not included (noindex). Tag pages arrive in Phase B.
 */
 export const revalidate = 3600;
@@ -28,7 +31,9 @@ export async function generateSitemaps() {
   return Array.from({ length: topicSitemaps + 1 }, (_, i) => ({ id: i }));
 }
 
-export default async function sitemap({ id }: { id: number }): Promise<MetadataRoute.Sitemap> {
+// In Next 16 the id arrives as a promise of a string, so await it and convert before comparing.
+export default async function sitemap(props: { id: Promise<string> | string | number }): Promise<MetadataRoute.Sitemap> {
+  const id = Number(await props.id);
   const base = siteConfig.url;
 
   if (id === 0) {
@@ -44,8 +49,8 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
       ...categories.filter((c) => !c.is_private).map((c) => ({ url: `${base}/community/c/${c.slug}`, changeFrequency: "hourly" as const, priority: 0.7 })),
       ...guides.filter((g) => g.published).map((g) => ({ url: `${base}/guides/${g.slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
       ...changes.map((c) => ({ url: `${base}/blog/${c.slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
-      ...["/tools", "/tools/parcel-size", "/tools/tax-dates", "/tools/downloads", "/tools/glossary"].map((p) => ({ url: `${base}${p}`, changeFrequency: "monthly" as const, priority: 0.6 })),
-      ...posts.filter((p) => p.published).map((p) => ({ url: `${base}/blog/${p.slug}`, lastModified: p.updated ?? p.published ?? undefined, changeFrequency: "monthly" as const, priority: 0.7 })),
+      ...[...new Set(["/tools", "/tools/glossary", ...toolGroups.flatMap((g) => g.tools.map((t) => t.href)).filter((h) => h.startsWith("/tools/")), ...calculatorSlugs.map((s) => `/tools/calculator/${s}`)])].map((p) => ({ url: `${base}${p}`, changeFrequency: "monthly" as const, priority: 0.6 })),
+      ...posts.filter((p) => isLive(p.published)).map((p) => ({ url: `${base}/blog/${p.slug}`, lastModified: p.updated ?? p.published ?? undefined, changeFrequency: "monthly" as const, priority: 0.7 })),
     ];
   }
 

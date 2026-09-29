@@ -4,6 +4,7 @@ import { CalendarClock, MessageCircle } from "lucide-react";
 import { ImpactBadge, PlatformChip, StatusBadge } from "@/components/changes/change-badges";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { getBlogPosts } from "@/lib/content/blog";
+import { isScheduled, publishedUkDate } from "@/lib/content/schedule";
 import { getChanges } from "@/lib/content/changes";
 import { getAuthor } from "@/lib/content/authors";
 import { getChangeReplyCounts } from "@/lib/forum/change-discussions";
@@ -17,6 +18,9 @@ export const metadata: Metadata = {
     "Fee and policy changes on eBay, Amazon, Vinted, Depop, TikTok Shop, Royal Mail and HMRC, broken down in plain English, plus articles and the weekly forum roundup.",
   alternates: { canonical: urls.blog() },
 };
+
+/* Rendered per request, so a scheduled post appears on its UK publish date without a rebuild. */
+export const dynamic = "force-dynamic";
 
 const types = [
   { id: "all", label: "Everything" },
@@ -47,6 +51,8 @@ type Item = {
   initials: string;
   change?: ChangeMeta;
   replies: number;
+  /* Outside production only: the UK date a scheduled post goes live. */
+  scheduled?: string | null;
 };
 
 function href(type: string, platform: string) {
@@ -86,7 +92,8 @@ export default async function BlogPage({ searchParams }: PageProps<"/blog">) {
       slug: p.slug,
       title: p.title,
       excerpt: p.excerpt,
-      date: p.published ? p.published.slice(0, 10) : null,
+      date: p.published ? publishedUkDate(p.published) : null,
+      scheduled: isScheduled(p.published) ? publishedUkDate(p.published!) : null,
       kind: "article" as const,
       platforms: p.platforms as string[],
       replies: 0,
@@ -173,6 +180,9 @@ export default async function BlogPage({ searchParams }: PageProps<"/blog">) {
                 ) : (
                   <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs">Article</span>
                 )}
+                {i.scheduled ? (
+                  <span className="rounded-full border border-brand/60 bg-brand/15 px-2.5 py-0.5 text-xs font-medium">Scheduled for {formatChangeDate(i.scheduled)}</span>
+                ) : null}
               </div>
               <h2 className="mt-3 font-serif text-xl font-semibold leading-snug">
                 <Link href={urls.blogPost(i.slug)} className="after:absolute after:inset-0">

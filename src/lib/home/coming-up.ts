@@ -36,7 +36,7 @@ const inDays = (days: number) => (days === 0 ? "Today" : days === 1 ? "Tomorrow"
 const agoDays = (days: number) => (days < 14 ? `${days} days ago` : days < 60 ? `${Math.round(days / 7)} weeks ago` : `${Math.round(days / 30)} months ago`);
 
 /* Tools worth a spotlight. One is chosen each day. */
-const spotlightTools = ["/tools/where-to-sell", "/tools/scam-check", "/tools/profit-report", "/tools/listing-builder", "/tools/postage-finder", "/tools/stock-ageing", "/tools/isbn", "/tools/claims-deadline"];
+const spotlightTools = ["/tools/calculator", "/tools/scam-check", "/tools/sales-reports", "/tools/listing-builder", "/tools/postage", "/tools/pricing", "/tools/worth-it", "/tools/amazon-claims", "/tools/tax", "/tools/background-remover", "/tools/calendar"];
 
 /*
   The revolving card at the top of the home page. A mix of things worth a
@@ -50,7 +50,7 @@ export async function getHeroSlides(unanswered: RecentTopic[], today = new Date(
   const dayOfYear = Math.floor((Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()) - Date.UTC(today.getUTCFullYear(), 0, 0)) / 86_400_000);
 
   const dated: Dated[] = changes.map((c) => ({ key: c.slug, date: c.date, days: daysUntil(utc(c.date), today), title: c.title, summary: c.summary, href: `/blog/${c.slug}`, label: platformLabels[c.platform] ?? "Everyone" }));
-  const taxes: Dated[] = upcomingTaxDates(today, 2, false).map((t) => ({ key: `tax-${iso(t.date)}`, date: iso(t.date), days: daysUntil(t.date, today), title: t.title, summary: t.detail, href: "/tools/tax-dates", label: "Tax" }));
+  const taxes: Dated[] = upcomingTaxDates(today, 2, false).map((t) => ({ key: `tax-${iso(t.date)}`, date: iso(t.date), days: daysUntil(t.date, today), title: t.title, summary: t.detail, href: "/tools/tax", label: "Tax" }));
   const upcoming = [...dated.filter((d) => d.days >= 0), ...taxes].sort((a, b) => a.days - b.days);
   const latestInEffect = dated.filter((d) => d.days < 0).sort((a, b) => b.days - a.days)[0];
 

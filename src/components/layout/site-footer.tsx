@@ -21,7 +21,7 @@ const columns = [
       { href: urls.blog(), label: "Blog" },
       { href: "/newsletter", label: "Newsletter" },
       { href: "/tools", label: "Tools" },
-      { href: "/tools/parcel-size", label: "Parcel size checker" },
+      { href: "/tools/postage?tab=size", label: "Parcel size checker" },
       { href: "/blog?type=changes", label: "Fee and policy changes" },
     ],
   },

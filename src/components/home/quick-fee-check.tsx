@@ -48,7 +48,7 @@ export function QuickFeeCheck() {
     <div className="rounded-2xl border bg-card p-5 sm:p-6">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-lg font-semibold">What will I keep?</h2>
-        <Link href="/tools/where-to-sell" className="inline-flex items-center gap-1 text-sm text-brand underline-offset-2 hover:underline">
+        <Link href="/tools/calculator" className="inline-flex items-center gap-1 text-sm text-brand underline-offset-2 hover:underline">
           Full breakdown <ArrowRight className="size-3.5" aria-hidden="true" />
         </Link>
       </div>
