@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { ChevronDown, ExternalLink, Trophy } from "lucide-react";
 import { calculate, fbaFees, feeData, minimumPrice, platforms, type PlatformId, type Result, type Sale } from "@/lib/tools/fees";
 import { checkParcel } from "@/lib/tools/parcels";
+import { CLAIM_KINDS } from "@/lib/tools/claims";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -644,12 +645,8 @@ export function PostageFinder() {
 
 /* ---- Amazon claims deadline ---- */
 export function ClaimsDeadline() {
-  const kinds = [
-    { id: "fc", label: "Lost or damaged in Amazon's warehouse", from: "the date Amazon reported it lost or damaged", days: 60 },
-    { id: "removal", label: "Removal order arrived damaged, short or wrong", from: "the delivery date", days: 60 },
-    { id: "reimb", label: "A reimbursement you think is too low", from: "the date it was paid", days: 60 },
-  ];
-  const [kind, setKind] = useState(kinds[0].id);
+  const kinds = CLAIM_KINDS;
+  const [kind, setKind] = useState<string>(kinds[0].id);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const k = kinds.find((x) => x.id === kind)!;
   const start = new Date(`${date}T00:00:00Z`);
