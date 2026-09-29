@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { VenetianMask } from "lucide-react";
+import { CheckCircle2, VenetianMask } from "lucide-react";
 import { UserAvatar } from "@/components/forum/user-avatar";
+import { ProfileName } from "@/components/forum/profile-name";
 import { PostActions } from "@/components/forum/post-actions";
 import { FlairChips, StreakChip } from "@/components/forum/flair-chips";
 import { getStreak } from "@/lib/forum/extras-queries";
 import { FoundingChip } from "@/components/forum/founding-chip";
-import { displayName, isFoundingMember, longDate, timeAgo, trustLabel } from "@/lib/format";
+import { isFoundingMember, longDate, timeAgo, trustLabel } from "@/lib/format";
 import { siteConfig } from "@/lib/site";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { urls } from "@/lib/forum/urls";
@@ -50,7 +51,19 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
   }
 
   return (
-    <article id={anchor} className={cn("scroll-mt-20", framed && "forum-card rounded-lg border bg-card", post.is_hidden && "opacity-70")}>
+    <article
+      id={anchor}
+      tabIndex={-1}
+      data-post-number={post.post_number}
+      data-quote-author={anonymous ? "" : (post.author?.username ?? "")}
+      data-quote-anonymous={anonymous ? "true" : undefined}
+      className={cn(
+        "scroll-mt-20 focus:outline-none",
+        framed && "forum-card rounded-lg border bg-card",
+        framed && isSolution && "outline outline-success/50",
+        post.is_hidden && "opacity-70",
+      )}
+    >
       <header className="flex items-center gap-3 px-4 pt-4">
         {anonymous ? (
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground" aria-hidden="true">
@@ -73,9 +86,7 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
                 ) : null}
               </>
             ) : post.author ? (
-              <Link href={urls.profile(post.author.username)} className="font-semibold hover:underline">
-                {displayName(post.author)}
-              </Link>
+              <ProfileName profile={post.author} className="font-semibold hover:underline" />
             ) : (
               <span className="font-semibold">Deleted member</span>
             )}
@@ -93,6 +104,11 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
             ) : null}
             {isOpening && !anonymous && post.author?.id === topic.author_id ? <span className="text-xs text-muted-foreground">Original poster</span> : null}
             <StreakChip weeks={streak} />
+            {isSolution && framed ? (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-success">
+                <CheckCircle2 className="size-3.5" aria-hidden="true" /> Accepted answer
+              </span>
+            ) : null}
           </div>
           {anonymous ? null : <FlairChips flair={post.author?.flair} className="mt-0.5 block" />}
           <div className="text-xs text-muted-foreground">
@@ -112,7 +128,7 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
         </div>
         <span className="text-xs text-muted-foreground">#{post.post_number}</span>
       </header>
-      <div data-glossary className="post-body prose prose-neutral max-w-none px-4 py-3 dark:prose-invert prose-a:text-brand prose-img:rounded-md" dangerouslySetInnerHTML={{ __html: html }} />
+      <div data-glossary data-quote-body className="post-body prose prose-neutral max-w-none px-4 py-3 dark:prose-invert prose-a:text-brand prose-img:rounded-md" dangerouslySetInnerHTML={{ __html: html }} />
       <PostActions
         postId={post.id}
         postNumber={post.post_number}

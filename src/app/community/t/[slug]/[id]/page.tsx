@@ -5,6 +5,8 @@ import { CheckCircle2, Eye, Lock, Pin } from "lucide-react";
 import { ForumShell } from "@/components/layout/forum-shell";
 import { GuideCard } from "@/components/layout/right-rail";
 import { PostItem } from "@/components/forum/post-item";
+import { AcceptedAnswer } from "@/components/forum/accepted-answer";
+import { QuoteSelection } from "@/components/forum/quote-selection";
 import { ReplySection } from "@/components/forum/reply-section";
 import { TopicStaffTools } from "@/components/forum/topic-staff-tools";
 import { ReadTracker } from "@/components/forum/read-tracker";
@@ -176,26 +178,21 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
           <PostItem post={opening} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution={false} isOpening likeLabel={likeLabel} anonymousAuthor={anonymousAuthors.get(opening.id)} />
         ) : null}
 
-        {solution ? (
-          <section aria-labelledby="solution-heading" className="rounded-lg border-2 border-success/60 bg-card">
-            <h2 id="solution-heading" className="flex items-center gap-2 border-b border-success/30 px-4 py-2 text-sm font-semibold text-success">
-              <CheckCircle2 className="size-4" /> Solution
-            </h2>
-            <PostItem post={solution} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution framed={false} likeLabel={likeLabel} anonymousAuthor={anonymousAuthors.get(solution.id)} />
-            <div className="border-t p-4">
-              <EmailSignupCard source={`${urls.topic(topic)}#solution`} variant="inline" />
-            </div>
-          </section>
+        {solution && !solution.is_deleted && !solution.is_hidden ? (
+          <AcceptedAnswer post={solution}>
+            <EmailSignupCard source={`${urls.topic(topic)}#solution`} variant="inline" />
+          </AcceptedAnswer>
         ) : null}
 
         {replies.length > 0 ? (
-          <h2 className="pt-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{plural(replies.length, "reply", "replies")}</h2>
+          <h2 className="pt-2 text-sm font-semibold text-muted-foreground">{plural(replies.length, "reply", "replies")}</h2>
         ) : null}
         {replies.map((post) => (
           <PostItem key={post.id} post={post} topic={topic} viewer={viewer} canMarkSolution={canMarkSolution} isSolution={post.id === solution?.id} likeLabel={likeLabel} anonymousAuthor={anonymousAuthors.get(post.id)} />
         ))}
       </div>
 
+      {canReply ? <QuoteSelection /> : null}
       <LiveBar kind="replies" topicId={topic.id} />
       <div className="mt-8">
         <ReplySection allowAnonymous={!!category?.allow_anonymous} topicId={topic.id} topicSlug={topic.slug} shortId={topic.short_id} canReply={canReply} isLocked={topic.is_locked} signedIn={!!viewer} emailConfirmed={viewer?.emailConfirmed ?? false} />

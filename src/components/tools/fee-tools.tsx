@@ -9,6 +9,8 @@ import { CLAIM_KINDS } from "@/lib/tools/claims";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { sharedFieldValues, type SharedInputs } from "@/lib/og/calculator-share";
+import { ShareResultLink } from "@/components/tools/share-result-link";
 
 const gbp = (n: number | null | undefined) => (n === null || n === undefined || !Number.isFinite(n) ? "" : n.toLocaleString("en-GB", { style: "currency", currency: "GBP" }));
 const num = (s: string) => Number(s.replace(/[£,\s%]/g, "")) || 0;
@@ -64,14 +66,15 @@ function Breakdown({ r }: { r: Result }) {
   );
 }
 
-/* Shared inputs for a sale. */
-function useSaleInputs(defaults?: Partial<Record<string, string>>) {
-  const [price, setPrice] = useState(defaults?.price ?? "25");
-  const [postageCharged, setPostageCharged] = useState(defaults?.postageCharged ?? "3.50");
-  const [postageCost, setPostageCost] = useState(defaults?.postageCost ?? "3.20");
-  const [itemCost, setItemCost] = useState(defaults?.itemCost ?? "5");
-  const [ebayCategory, setEbayCategory] = useState("general");
-  const [vatOnFees, setVatOnFees] = useState(true);
+/* Shared inputs for a sale. `shared` holds the figures from a shared result link, if any. */
+function useSaleInputs(defaults?: Partial<Record<string, string>>, shared?: SharedInputs) {
+  const start = { ...defaults, ...(shared ? sharedFieldValues(shared) : {}) };
+  const [price, setPrice] = useState(start.price ?? "25");
+  const [postageCharged, setPostageCharged] = useState(start.postageCharged ?? "3.50");
+  const [postageCost, setPostageCost] = useState(start.postageCost ?? "3.20");
+  const [itemCost, setItemCost] = useState(start.itemCost ?? "5");
+  const [ebayCategory, setEbayCategory] = useState(shared?.category ?? "general");
+  const [vatOnFees, setVatOnFees] = useState(!shared?.noVat);
   const sale: Sale = { price: num(price), postageCharged: num(postageCharged), postageCost: num(postageCost), itemCost: num(itemCost), ebayCategory, vatOnFees };
   const fields = (
     <div className="grid gap-3 sm:grid-cols-4">
@@ -103,8 +106,8 @@ function useSaleInputs(defaults?: Partial<Record<string, string>>) {
 }
 
 /* ---- Where should I sell this? ---- */
-export function WhereToSell() {
-  const { sale, fields, extras } = useSaleInputs();
+export function WhereToSell({ shared }: { shared?: SharedInputs }) {
+  const { sale, fields, extras } = useSaleInputs(undefined, shared);
   const [open, setOpen] = useState<PlatformId | null>(null);
   // Buying to resell makes you a business seller on eBay, so the private-seller rate is only shown when asked for.
   const [ownThings, setOwnThings] = useState(false);
@@ -162,6 +165,11 @@ export function WhereToSell() {
           ))}
         </ol>
       ) : null}
+      {sale.price > 0 ? (
+        <ShareResultLink
+          inputs={{ price: sale.price, postage: sale.postageCharged, postageCost: sale.postageCost, cost: sale.itemCost, category: sale.ebayCategory === "general" ? null : (sale.ebayCategory ?? null), noVat: !sale.vatOnFees }}
+        />
+      ) : null}
       <p className="text-xs text-muted-foreground">Fees are only part of it: where your buyers are, how fast things sell and how much work each sale takes matter just as much. Amazon FBA has its own calculator.</p>
       <Checked />
     </div>
@@ -169,16 +177,16 @@ export function WhereToSell() {
 }
 
 /* ---- One platform, in detail ---- */
-export function PlatformCalculator({ platform }: { platform: PlatformId }) {
-  const { sale, fields } = useSaleInputs(platform === "vinted" ? { postageCharged: "0" } : undefined);
-  const [ebayCategory, setEbayCategory] = useState("general");
-  const [amazonCategory, setAmazonCategory] = useState("other");
+export function PlatformCalculator({ platform, shared }: { platform: PlatformId; shared?: SharedInputs }) {
+  const { sale, fields } = useSaleInputs(platform === "vinted" ? { postageCharged: "0" } : undefined, shared);
+  const [ebayCategory, setEbayCategory] = useState((platform === "ebay_business" && shared?.category) || "general");
+  const [amazonCategory, setAmazonCategory] = useState((platform === "amazon_fbm" && shared?.category) || "other");
   const [promoted, setPromoted] = useState("");
   const [boost, setBoost] = useState(false);
   const [offsite, setOffsite] = useState(false);
   const [reduced, setReduced] = useState(false);
   const [individual, setIndividual] = useState(false);
-  const [vatOnFees, setVatOnFees] = useState(true);
+  const [vatOnFees, setVatOnFees] = useState(!shared?.noVat);
   const [target, setTarget] = useState("5");
   const full: Sale = { ...sale, ebayCategory, amazonCategory, promotedPercent: num(promoted), depopBoost: boost, etsyOffsiteAds: offsite, reducedRate: reduced, amazonIndividual: individual, vatOnFees };
   const r = calculate(platform, full);
@@ -256,6 +264,16 @@ export function PlatformCalculator({ platform }: { platform: PlatformId }) {
               {n}
             </p>
           ))}
+          <ShareResultLink
+            inputs={{
+              price: sale.price,
+              postage: sale.postageCharged,
+              postageCost: sale.postageCost,
+              cost: sale.itemCost,
+              category: platform === "ebay_business" && ebayCategory !== "general" ? ebayCategory : platform === "amazon_fbm" && amazonCategory !== "other" ? amazonCategory : null,
+              noVat: !vatOnFees,
+            }}
+          />
         </>
       ) : null}
 

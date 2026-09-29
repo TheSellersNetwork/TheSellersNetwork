@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getGuides, type GuideMeta } from "@/lib/content/guides";
 import { urls } from "@/lib/forum/urls";
 import { plural } from "@/lib/format";
+import { PathProgress } from "@/components/content/path-progress";
+import { getPaths } from "@/lib/content/paths";
 
 export const metadata: Metadata = {
   title: "Guides",
@@ -27,7 +29,7 @@ const groups: { id: string; name: string; colour: string; match: (slug: string) 
 ];
 
 export default async function GuidesPage() {
-  const guides = await getGuides();
+  const [guides, paths] = await Promise.all([getGuides(), getPaths()]);
   const sections = groups
     .map((g) => ({ ...g, guides: guides.filter((guide) => guide.categories.some(g.match)) }))
     .filter((g) => g.guides.length > 0);
@@ -38,6 +40,29 @@ export default async function GuidesPage() {
     <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight">Guides</h1>
       <p className="mt-2 max-w-2xl text-muted-foreground">One guide per common problem. Short, practical, free. Pick your platform.</p>
+
+      {paths.length > 0 ? (
+        <section aria-labelledby="paths-heading" className="mt-8 rounded-xl border bg-card p-4 sm:p-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="paths-heading" className="text-lg font-semibold tracking-tight">
+              New to this? Follow a path
+            </h2>
+            <Link href="/guides/paths" className="inline-flex min-h-11 items-center text-sm text-brand underline-offset-4 hover:underline sm:min-h-0">
+              All beginner paths
+            </Link>
+          </div>
+          <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {paths.map((p) => (
+              <li key={p.slug} className="relative rounded-lg border bg-background p-3 transition-colors hover:border-brand/60 focus-within:border-brand/60 motion-reduce:transition-none">
+                <Link href={`/guides/paths/${p.slug}`} className="font-medium leading-snug after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring">
+                  {p.title}
+                </Link>
+                <PathProgress steps={p.steps} size={28} className="mt-2" />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {sections.length === 0 ? (
         <p className="mt-10 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">Guides are being written. The forums are open in the meantime.</p>

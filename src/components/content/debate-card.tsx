@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MessagesSquare, Scale } from "lucide-react";
-import { PollCard } from "@/components/forum/poll-card";
+import { DebatePoll } from "@/components/content/debate-poll";
 import { Button } from "@/components/ui/button";
 import type { Debate } from "@/lib/content/blog-meta";
 import { isLive, publishedUkDate } from "@/lib/content/schedule";
@@ -9,7 +9,8 @@ import { formatChangeDate } from "@/lib/tools/changes";
 
 /*
   "Where do you stand?" on a debate blog post. Once the daily cron has opened
-  the forum thread it shows the live poll and a link to vote and reply there;
+  the forum thread it shows the live poll (vote here or in the forum, with a
+  plain-English summary of the result) and a link to reply there;
   until then, the question and the date the discussion opens.
 */
 export function DebateCard({
@@ -42,7 +43,7 @@ export function DebateCard({
         <>
           <div>
             {poll ? (
-              <PollCard poll={poll} signedIn={signedIn} returnTo={returnTo} />
+              <DebatePoll poll={poll} signedIn={signedIn} returnTo={returnTo} />
             ) : (
               <p className="font-medium">{debate.question}</p>
             )}

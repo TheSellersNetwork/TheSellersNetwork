@@ -15,6 +15,7 @@ import { createAnonymousReply, createAnonymousTopic, isAnonymousAuthor } from "@
 import { parsePollInput } from "@/lib/forum/polls";
 import { allowAction } from "@/lib/rate-limit";
 import type { Topic } from "@/lib/db/types";
+import { getProfileCardData, type ProfileCardData } from "@/lib/forum/profile-card";
 
 export type ActionState = { ok: boolean; message: string; redirectTo?: string };
 
@@ -360,4 +361,10 @@ export async function votePoll(pollId: string, optionId: string): Promise<Action
   const { data: poll } = await supabase.from("polls").select("topic:topics (slug, short_id)").eq("id", pollId).single();
   if (poll) revalidatePath(urls.topic(poll.topic as unknown as Pick<Topic, "slug" | "short_id">));
   return { ok: true, message: "Vote saved." };
+}
+
+/* Profile hover cards load lazily. Public fields only; see lib/forum/profile-card. */
+export async function getProfileCard(username: string): Promise<ProfileCardData | null> {
+  if (typeof username !== "string") return null;
+  return getProfileCardData(username);
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { UserAvatar } from "@/components/forum/user-avatar";
+import { ProfileName } from "@/components/forum/profile-name";
 import { displayName, timeAgo } from "@/lib/format";
 import { urls } from "@/lib/forum/urls";
 import type { RecentReply, RecentTopic } from "@/lib/forum/overview-queries";
@@ -48,7 +49,7 @@ export function ActivityTabs({ replies, topics, onlineIds = [], compact }: Props
                     </Link>
                   ) : null}
                   <p className="text-xs text-muted-foreground">
-                    {displayName(r.author)} replied {timeAgo(r.created_at)} ago
+                    {r.author ? <ProfileName profile={r.author} className="hover:underline" /> : displayName(r.author)} replied {timeAgo(r.created_at)} ago
                   </p>
                 </div>
               </li>
@@ -61,7 +62,7 @@ export function ActivityTabs({ replies, topics, onlineIds = [], compact }: Props
                     {t.title}
                   </Link>
                   <p className="text-xs text-muted-foreground">
-                    {displayName(t.author)} started {timeAgo(t.created_at)} ago · {t.reply_count} replies
+                    {t.author ? <ProfileName profile={t.author} className="hover:underline" /> : displayName(t.author)} started {timeAgo(t.created_at)} ago · {t.reply_count} replies
                   </p>
                 </div>
               </li>

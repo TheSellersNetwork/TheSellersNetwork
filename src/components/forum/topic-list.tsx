@@ -1,14 +1,19 @@
+import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, Lock, Pin } from "lucide-react";
 import { UserAvatar } from "@/components/forum/user-avatar";
+import { TopicPreview } from "@/components/forum/topic-preview";
 import { Button } from "@/components/ui/button";
 import { SponsorSlot } from "@/components/partners/sponsor-slot";
 import { timeAgo } from "@/lib/format";
 import { urls } from "@/lib/forum/urls";
 import type { TopicRow } from "@/lib/db/types";
+import type { TopicPreview as TopicPreviewData } from "@/lib/forum/previews";
+
+type ListTopic = TopicRow & { preview?: TopicPreviewData | null };
 
 type Props = {
-  topics: TopicRow[];
+  topics: ListTopic[];
   nextCursor?: string | null;
   /* Base path and params for the "more" link. */
   moreHref?: (cursor: string) => string;
@@ -26,7 +31,9 @@ type Props = {
 
 /*
   Topic rows: title, category bar, tags, reply count, last activity, up to
-  three avatars. No excerpts, as the brief asks.
+  three avatars. No inline excerpts, as the brief asks: a small thumbnail when
+  the opening post has a photo, and on desktop the first lines of the opening
+  post in a preview on hover or keyboard focus of the title.
 */
 export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCategory = true, sponsorPage, newSince, onlineIds, dealMeta }: Props) {
   if (topics.length === 0) {
@@ -64,7 +71,7 @@ export function TopicList({ topics, nextCursor, moreHref, emptyMessage, showCate
   );
 }
 
-function TopicRowItem({ topic, showCategory, isNew, onlineIds, deal }: { topic: TopicRow; showCategory: boolean; isNew: boolean; onlineIds?: Set<string>; deal?: { valid: number; expired: number; heat: number } }) {
+function TopicRowItem({ topic, showCategory, isNew, onlineIds, deal }: { topic: ListTopic; showCategory: boolean; isNew: boolean; onlineIds?: Set<string>; deal?: { valid: number; expired: number; heat: number } }) {
   const ended = topic.expires_at ? new Date(topic.expires_at) < new Date() : false;
   const avatars = [topic.is_anonymous ? null : topic.author, topic.last_poster].filter(
     (p, i, arr): p is NonNullable<typeof p> => !!p && arr.findIndex((x) => x?.id === p.id) === i,
@@ -74,11 +81,22 @@ function TopicRowItem({ topic, showCategory, isNew, onlineIds, deal }: { topic: 
   return (
     <div className="topic-row flex items-center gap-3 px-3 sm:px-4">
       <span className="h-9 w-1 shrink-0 rounded-full" style={{ background: `var(--cat-${colour})` }} aria-hidden="true" />
+      {topic.preview?.image ? (
+        <Image src={topic.preview.image} alt="" width={40} height={40} sizes="40px" className="size-10 shrink-0 rounded-md bg-secondary object-cover" data-testid="topic-thumb" />
+      ) : null}
       <div className="min-w-0 flex-1">
         <div className="flex items-start gap-2">
-          <Link href={urls.topic(topic)} className="topic-title line-clamp-2 font-medium leading-snug hover:underline">
-            {topic.title}
-          </Link>
+          {topic.preview?.excerpt ? (
+            <TopicPreview excerpt={topic.preview.excerpt} className="min-w-0">
+              <Link href={urls.topic(topic)} className="topic-title line-clamp-2 font-medium leading-snug hover:underline">
+                {topic.title}
+              </Link>
+            </TopicPreview>
+          ) : (
+            <Link href={urls.topic(topic)} className="topic-title line-clamp-2 font-medium leading-snug hover:underline">
+              {topic.title}
+            </Link>
+          )}
           <span className="flex shrink-0 items-center gap-1 pt-0.5 text-muted-foreground">
             {isNew ? <span className="unread-pill">New</span> : null}
             {topic.is_solved ? <CheckCircle2 className="tick-draw size-4 text-success" aria-label="Solved" /> : null}

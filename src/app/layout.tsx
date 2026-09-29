@@ -4,6 +4,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
+import { PageTransition } from "@/components/layout/page-transition";
+import { CommandSearch } from "@/components/search/command-search";
 import { Toaster } from "@/components/ui/sonner";
 import { GlossaryTerms } from "@/components/content/glossary-terms";
 import { ServiceWorker } from "@/components/app/service-worker";
@@ -37,12 +40,15 @@ export const metadata: Metadata = {
     locale: "en_GB",
     type: "website",
   },
+  // Large share cards on X. The image itself comes from each page's og:image.
+  twitter: { card: "summary_large_image" },
   icons: { apple: "/icons/apple-touch-icon.png" },
   appleWebApp: { capable: true, title: "Sellers Network", statusBarStyle: "black-translucent" },
 };
 
 // Matches the dark navy in tokens.css so the phone's status bar blends in.
-export const viewport: Viewport = { themeColor: "#0b1220" };
+// viewportFit "cover" lets the phone navigation bar pad itself clear of the home indicator (env(safe-area-inset-bottom)).
+export const viewport: Viewport = { themeColor: "#0b1220", viewportFit: "cover" };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const style = await currentStyle();
@@ -64,8 +70,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeProvider>
           <AnalyticsProvider>
             <SiteHeader />
-            {children}
+            <PageTransition>{children}</PageTransition>
             <SiteFooter />
+            <MobileTabBar />
+            <CommandSearch />
             <Toaster position="bottom-center" />
             <GlossaryTerms />
             <ServiceWorker />

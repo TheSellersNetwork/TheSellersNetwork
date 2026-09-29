@@ -4,6 +4,7 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
 import { defaultAuthor } from "@/lib/content/authors";
+import { readingTime } from "@/lib/format";
 import type { ChangeImpact, ChangeMeta, ChangePlatform, ChangeStatus } from "@/lib/tools/changes";
 
 export type Change = ChangeMeta & { content: string };
@@ -43,6 +44,23 @@ function toMeta(slug: string, data: Record<string, unknown>): ChangeMeta {
     author: data.author ? String(data.author) : defaultAuthor(String(data.platform ?? "general")),
   };
 }
+
+/* Reading time in minutes for every change, by slug, for the blog index cards. */
+export const getChangeReadingTimes = cache(async (): Promise<Map<string, number>> => {
+  let files: string[] = [];
+  try {
+    files = (await readdir(dir)).filter((f) => f.endsWith(".mdx") && !f.startsWith("_"));
+  } catch {
+    return new Map();
+  }
+  const entries = await Promise.all(
+    files.map(async (file) => {
+      const { content } = matter(await readFile(path.join(dir, file), "utf8"));
+      return [file.replace(/\.mdx$/, ""), readingTime(content)] as const;
+    }),
+  );
+  return new Map(entries);
+});
 
 /* Every change, newest first. */
 export const getChanges = cache(async (): Promise<ChangeMeta[]> => {

@@ -28,6 +28,13 @@ export type BlogMeta = {
   author: string | null;
   /* Set only for category "debate" posts with well-formed debate frontmatter. */
   debate: Debate | null;
+  /* `featured: true` puts the post at the top of the blog index. */
+  featured: boolean;
+  /*
+    Comparison posts: the overall pick from "Our verdict". Any table row whose
+    first cell starts with one of these is highlighted as "Our pick".
+  */
+  pick: string[];
 };
 
 export const DEBATE_DEFAULT_FORUM = "deals";
@@ -51,6 +58,12 @@ export function parseDebate(category: unknown, raw: unknown): Debate | null {
   return { forum, question, options };
 }
 
+/* `pick: "Starling"` or `pick: ["A", "B"]`. Blank or non-string entries are dropped. */
+export function parsePick(raw: unknown): string[] {
+  const list = Array.isArray(raw) ? raw : raw === undefined || raw === null ? [] : [raw];
+  return list.filter((p): p is string => typeof p === "string").map((p) => p.trim()).filter((p) => p.length > 0 && p.length <= 80);
+}
+
 function toIso(value: unknown): string | null {
   if (!value) return null;
   const d = new Date(String(value instanceof Date ? value.toISOString() : value));
@@ -71,5 +84,7 @@ export function toMeta(file: string, data: Record<string, unknown>): BlogMeta {
     discussion_topic_id: data.discussion_topic_id ? String(data.discussion_topic_id) : null,
     author: data.author ? String(data.author) : null,
     debate: parseDebate(data.category, data.debate),
+    featured: data.featured === true,
+    pick: parsePick(data.pick),
   };
 }

@@ -18,6 +18,7 @@ import { UserAvatar } from "@/components/forum/user-avatar";
 import { displayName } from "@/lib/format";
 import { urls } from "@/lib/forum/urls";
 import { createClient } from "@/lib/supabase/client";
+import { openSearch } from "@/components/search/open-search";
 
 type HeaderUser = {
   username: string;
@@ -26,24 +27,37 @@ type HeaderUser = {
   is_staff: boolean;
 };
 
+/*
+  Below 768px the header keeps only search (and the account menu from 640px):
+  the bar along the bottom of the screen has New post, Notifications, Sign in
+  and Join, and the menu has the theme switch and account links, so the header
+  fits a 320px screen.
+*/
 export function HeaderActions({ user, children }: { user: HeaderUser | null; children?: React.ReactNode }) {
   return (
     <>
       <SearchForm />
-      <Button asChild size="sm" className="hidden sm:inline-flex">
+      <Button variant="ghost" size="icon" className="size-11 md:hidden" aria-label="Search" aria-haspopup="dialog" onClick={() => openSearch()}>
+        <Search />
+      </Button>
+      <Button asChild size="sm" className="hidden md:inline-flex">
         <Link href={urls.newTopic()}>
           <Plus data-icon="inline-start" />
           New topic
         </Link>
       </Button>
-      <ThemeToggle />
+      <span className="hidden md:contents">
+        <ThemeToggle />
+      </span>
       {user ? (
         <>
-          {children}
-          <UserMenu user={user} />
+          <span className="hidden md:contents">{children}</span>
+          <span className="hidden sm:contents">
+            <UserMenu user={user} />
+          </span>
         </>
       ) : (
-        <Button asChild variant="outline" size="sm">
+        <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
           <Link href={urls.login()}>Sign in</Link>
         </Button>
       )}
@@ -51,7 +65,21 @@ export function HeaderActions({ user, children }: { user: HeaderUser | null; chi
   );
 }
 
+/* True on Apple devices, where the search shortcut is Cmd+K. False on the server. */
+function useIsApple() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent),
+    () => false,
+  );
+}
+
+/*
+  The header search box. A click opens the search palette; typing into it
+  with the keyboard and pressing Enter still goes to the full search page.
+*/
 function SearchForm() {
+  const apple = useIsApple();
   return (
     <form action={urls.search()} role="search" className="hidden items-center md:flex">
       <label htmlFor="header-search" className="sr-only">
@@ -64,14 +92,22 @@ function SearchForm() {
           name="q"
           type="search"
           placeholder="Search"
-          className="h-9 w-44 rounded-md border bg-background pl-8 pr-3 text-sm outline-none transition-[width] focus:w-64 focus-visible:ring-2 focus-visible:ring-ring lg:w-56"
+          aria-keyshortcuts="Control+K Meta+K"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            openSearch(e.currentTarget.value);
+          }}
+          className="h-9 w-44 rounded-md border bg-background pl-8 pr-14 text-sm outline-none transition-[width] focus:w-64 focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none lg:w-56"
         />
+        <kbd aria-hidden="true" className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border bg-secondary px-1.5 font-sans text-[11px] leading-5 text-muted-foreground">
+          {apple ? "⌘K" : "Ctrl K"}
+        </kbd>
       </div>
     </form>
   );
 }
 
-function ThemeToggle() {
+export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(
     () => () => {},

@@ -1,0 +1,79 @@
+{
+  "paths": [
+    {
+      "slug": "starting-on-vinted",
+      "title": "Starting on Vinted",
+      "description": "From your first listing to getting paid, postage, claims and when Vinted Pro applies.",
+      "steps": [
+        "blog:first-week-selling-your-clothes-on-vinted",
+        "guide:photos-on-a-phone",
+        "guide:measuring-clothes-for-listings",
+        "guide:vinted-postage-options",
+        "guide:vinted-bundles-and-discounts",
+        "guide:vinted-payments-and-balance",
+        "guide:vinted-fake-or-not-as-described-claims",
+        "guide:vinted-pro-and-selling-as-a-business"
+      ]
+    },
+    {
+      "slug": "starting-on-ebay",
+      "title": "Starting on eBay",
+      "description": "Pricing, listing, posting and handling returns and cases on eBay UK, in the order you will need them.",
+      "steps": [
+        "guide:pricing-from-sold-comps",
+        "guide:photos-on-a-phone",
+        "guide:ebay-titles-item-specifics-and-search",
+        "guide:descriptions-that-sell",
+        "guide:postage-and-royal-mail-choices",
+        "guide:packaging-cheaply",
+        "guide:returns-without-losing-money",
+        "guide:item-not-received-and-cases",
+        "blog:when-ebay-says-you-are-a-business-seller"
+      ]
+    },
+    {
+      "slug": "starting-amazon-fba",
+      "title": "Starting Amazon FBA",
+      "description": "Setting up, the fees on a sale, sourcing, prep and your first shipment into Amazon's warehouses.",
+      "steps": [
+        "guide:how-to-start-amazon-fba-uk",
+        "blog:every-amazon-fee-on-one-sale",
+        "guide:amazon-seller-central-settings-that-matter",
+        "guide:amazon-retail-arbitrage-uk",
+        "guide:amazon-ungating-uk",
+        "guide:amazon-prep-equipment-and-prep-centres",
+        "guide:amazon-adding-products-and-creating-shipments",
+        "guide:amazon-account-health"
+      ]
+    },
+    {
+      "slug": "car-boot-and-charity-shop-sourcing",
+      "title": "Car boot and charity shop sourcing",
+      "description": "Finding stock in person, checking it before you pay, pricing it and keeping track of it at home.",
+      "steps": [
+        "guide:sourcing-for-resale",
+        "guide:car-boot-sales-for-resellers",
+        "guide:charity-shop-sourcing",
+        "guide:spotting-fakes-before-you-buy",
+        "guide:pricing-from-sold-comps",
+        "guide:storage-and-stock-numbers",
+        "guide:stale-stock",
+        "blog:car-boot-haul-videos-versus-real-margins"
+      ]
+    },
+    {
+      "slug": "tax-and-paperwork-basics",
+      "title": "Tax and paperwork basics",
+      "description": "What HMRC and the platforms expect, keeping records, filing a return and the accounts and cover worth knowing about.",
+      "steps": [
+        "blog:hmrc-and-your-vinted-sales-what-is-true",
+        "blog:when-ebay-says-you-are-a-business-seller",
+        "guide:bookkeeping-and-tax-for-resellers",
+        "blog:bookkeeping-and-tax-software-compared",
+        "blog:filing-self-assessment-options-compared",
+        "blog:business-bank-accounts-for-resellers-compared",
+        "blog:business-insurance-for-resellers-compared"
+      ]
+    }
+  ]
+}

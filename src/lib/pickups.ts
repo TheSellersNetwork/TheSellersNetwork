@@ -79,3 +79,32 @@ export function multiple(paid: number, sold: number | null): string | null {
   const m = Number(sold) / Number(paid);
   return m >= 10 ? `${Math.round(m)}x` : `${m.toFixed(1).replace(/\.0$/, "")}x`;
 }
+
+/* First day of the current calendar month in the UK, as YYYY-MM-DD (sold_at is a plain date). */
+export function ukMonthStart(now: Date = new Date()): string {
+  const ymd = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit" }).format(now);
+  return `${ymd.slice(0, 7)}-01`;
+}
+
+/* The month's name in the UK, for headings: "September". */
+export function ukMonthName(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", month: "long" }).format(now);
+}
+
+/*
+  Sold pickups ranked by sold price over price paid, highest first. Pickups
+  with nothing paid have no multiple and are left out. Ties go to the bigger
+  sold price, then the newer pickup.
+*/
+export function rankByMultiple<T extends Pick<Pickup, "paid" | "sold_price" | "created_at">>(rows: T[], limit: number): T[] {
+  const ratio = (r: T) => (r.sold_price !== null && Number(r.paid) > 0 ? Number(r.sold_price) / Number(r.paid) : null);
+  return rows
+    .filter((r) => ratio(r) !== null)
+    .sort((a, b) => ratio(b)! - ratio(a)! || Number(b.sold_price) - Number(a.sold_price) || b.created_at.localeCompare(a.created_at))
+    .slice(0, limit);
+}
+
+/* Key for remembering that a viewer has already seen a pickup's sold stamp. Changes if the sold price is edited. */
+export function soldStampKey(p: Pick<Pickup, "id" | "sold_price">): string {
+  return `${p.id}:${p.sold_price}`;
+}

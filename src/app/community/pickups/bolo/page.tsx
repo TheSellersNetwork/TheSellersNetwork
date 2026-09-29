@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ForumShell } from "@/components/layout/forum-shell";
+import { SoldThisMonth } from "@/components/pickups/sold-this-month";
 import { getBoloBrands } from "@/lib/pickups-queries";
 import { gbp, pickupCategories, pickupSources, type PickupCategory, type PickupSource } from "@/lib/pickups";
 
@@ -36,11 +37,13 @@ export default async function BoloPage() {
         Sold prices are before fees and postage, and condition, size and season change everything. Check recent sold listings before you buy.
       </p>
 
+      <SoldThisMonth />
+
       {brands.length === 0 ? (
         <div className="mt-10 rounded-xl border border-dashed p-10 text-center">
           <p className="font-medium">The list builds itself as members add sold prices.</p>
           <p className="mt-1 text-sm text-muted-foreground">Post your pickups, and when they sell, add the price. Once three pickups of a brand have sold, it shows here.</p>
-          <Link href="/community/pickups/new" className="mt-4 inline-block rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-deep">
+          <Link href="/community/pickups/new" className="mt-4 inline-block rounded-md bg-brand px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-deep">
             Post a pickup
           </Link>
         </div>

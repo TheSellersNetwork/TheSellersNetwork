@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Flag, Heart, Link2, Pencil, Quote, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import { Composer } from "@/components/composer/composer";
 import { deletePost, editPost, flagPost, markSolved, toggleLike, type ActionState } from "@/app/community/actions";
 import { track } from "@/lib/analytics/client";
 import { cn } from "@/lib/utils";
+import { postArticleFor, quoteMarkdownFor, selectedTextIn, sendQuote } from "@/components/forum/quote-client";
 
 type Props = {
   postId: string;
@@ -54,6 +55,8 @@ export function PostActions(props: Props) {
   const [pending, start] = useTransition();
   const [flagOpen, setFlagOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const footerRef = useRef<HTMLElement>(null);
+  const selectionRef = useRef<string | null>(null);
 
   function like() {
     if (!props.signedIn) {
@@ -75,14 +78,15 @@ export function PostActions(props: Props) {
     });
   }
 
+  /* Quotes the text selected in this post, or the whole post when nothing is selected. */
+  function rememberSelection() {
+    selectionRef.current = selectedTextIn(postArticleFor(footerRef.current));
+  }
   function quote() {
-    const lines = props.bodyMd.split("\n").slice(0, 12).join("\n");
-    const md = `> ${props.authorUsername ? `@${props.authorUsername}` : "A member"} wrote:\n${lines
-      .split("\n")
-      .map((l) => `> ${l}`)
-      .join("\n")}`;
-    window.dispatchEvent(new CustomEvent("forum:quote", { detail: md }));
-    document.getElementById("reply")?.scrollIntoView({ behavior: "smooth" });
+    const article = postArticleFor(footerRef.current);
+    const text = selectionRef.current ?? selectedTextIn(article) ?? props.bodyMd;
+    selectionRef.current = null;
+    if (article) sendQuote(quoteMarkdownFor(article, text));
   }
 
   async function copyLink() {
@@ -118,14 +122,14 @@ export function PostActions(props: Props) {
   }
 
   return (
-    <footer className="flex flex-wrap items-center gap-1 border-t px-2 py-1.5">
+    <footer ref={footerRef} className="flex flex-wrap items-center gap-1 border-t px-2 py-1.5">
       <Button type="button" variant="ghost" size="sm" onClick={like} aria-pressed={liked} aria-label={liked ? "Unlike" : "Like"} disabled={pending}>
         <Heart className={cn("size-4", liked && "fill-current text-destructive")} />
         {props.likeLabel ? <span>{props.likeLabel}</span> : null}
         <span className="tabular-nums">{count}</span>
       </Button>
       {props.signedIn ? (
-        <Button type="button" variant="ghost" size="sm" onClick={quote}>
+        <Button type="button" variant="ghost" size="sm" onPointerDown={rememberSelection} onClick={quote} title="Quote the selected text, or the whole post">
           <Quote className="size-4" /> Quote
         </Button>
       ) : null}
