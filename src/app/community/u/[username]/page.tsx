@@ -21,6 +21,8 @@ import { PickupMasonry } from "@/components/pickups/pickup-masonry";
 import { getActivityEvents, getProfileBadges } from "@/lib/badges-queries";
 import { buildActivity } from "@/lib/badges-activity";
 import { getPickupsForUser } from "@/lib/pickups-queries";
+import { Milestones } from "@/components/profile/milestones";
+import { getMilestones } from "@/app/community/u/milestone-queries";
 
 export async function generateMetadata({ params }: PageProps<"/community/u/[username]">): Promise<Metadata> {
   const { username } = await params;
@@ -39,7 +41,7 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
   // The shared anonymous account has no public profile; listing its posts would only help guess who wrote them.
   if (!profile || profile.id === (await getAnonymousAccountId())) notFound();
 
-  const [activity, viewer, streak, kits, earned, events, pickups] = await Promise.all([
+  const [activity, viewer, streak, kits, earned, events, pickups, milestones] = await Promise.all([
     getProfileActivity(profile.id),
     getCurrentUser(),
     getStreak(profile.id),
@@ -47,6 +49,7 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
     getProfileBadges(profile.id),
     getActivityEvents(profile.id, ACTIVITY_WEEKS),
     getPickupsForUser(profile.id, PICKUPS_SHOWN + 1),
+    getMilestones(profile.id),
   ]);
   const calendar = buildActivity(events, new Date(), ACTIVITY_WEEKS);
   const publicKits = kits.filter((k) => k.is_public || viewer?.id === profile.id);
@@ -125,6 +128,8 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
       </section>
 
       <ProfileBadges ids={earned} own={isOwn} />
+
+      {milestones.available ? <Milestones items={milestones.items} name={displayName(profile)} own={isOwn} /> : null}
 
       <section aria-labelledby="pickups-heading" className="mt-8">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">

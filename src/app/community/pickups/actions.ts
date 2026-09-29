@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { allowAction } from "@/lib/rate-limit";
 import { friendlyError } from "@/lib/errors";
 import { pickupCategories, pickupPlatforms, pickupSources } from "@/lib/pickups";
+import { validateComment } from "@/lib/pickups-comments";
 
 export type PickupState = { ok: boolean; message: string };
 
@@ -107,4 +108,60 @@ export async function togglePickupLike(id: string): Promise<{ ok: boolean; liked
   if (error) return { ok: false, message: friendlyError(error) };
   const { data } = await supabase.from("pickups").select("like_count").eq("id", id).single();
   return { ok: true, liked: !existing, count: data?.like_count ?? 0 };
+}
+
+export type CommentState = { ok: boolean; message: string; nonce?: number };
+
+/* Comments on a pickup: members only, rate limited, same link rule as forum posts. */
+export async function addPickupComment(_prev: CommentState, formData: FormData): Promise<CommentState> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, message: "Sign in to comment." };
+  if (!user.profile.onboarded_at) return { ok: false, message: "Finish setting up your profile first." };
+  if (!user.emailConfirmed) return { ok: false, message: "Confirm your email address first." };
+  if (user.profile.is_suspended) return { ok: false, message: "Your account is suspended." };
+  const id = String(formData.get("pickup_id") ?? "");
+  if (!/^[0-9a-f-]{36}$/.test(id)) return { ok: false, message: "That pickup could not be found." };
+  const body = String(formData.get("body") ?? "").trim();
+  const invalid = validateComment(body, user.profile.trust_level, user.profile.is_staff);
+  if (invalid) return { ok: false, message: invalid };
+  if (!(await allowAction(`pickup-comment:${user.id}`, 30, "1 hour"))) return { ok: false, message: "That is a lot of comments in an hour. Try again a little later." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("pickup_comments").insert({ pickup_id: id, user_id: user.id, body });
+  if (error) {
+    if (error.message.includes("links_not_allowed")) return { ok: false, message: "New members cannot post links yet. Describe it in words for now." };
+    if (error.message.includes("posting_too_fast")) return { ok: false, message: "That is a lot of comments in an hour. Try again a little later." };
+    return { ok: false, message: friendlyError(error) };
+  }
+  revalidatePath(`/community/pickups/${id}`);
+  return { ok: true, message: "Comment posted.", nonce: Date.now() };
+}
+
+export async function deletePickupComment(commentId: string, pickupId: string): Promise<{ ok: boolean; message?: string }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, message: "Sign in first." };
+  if (!/^[0-9a-f-]{36}$/.test(commentId) || !/^[0-9a-f-]{36}$/.test(pickupId)) return { ok: false };
+  const supabase = await createClient();
+  // RLS limits this to the author (or staff).
+  const { error } = await supabase.from("pickup_comments").delete().eq("id", commentId);
+  if (error) return { ok: false, message: friendlyError(error) };
+  revalidatePath(`/community/pickups/${pickupId}`);
+  return { ok: true };
+}
+
+/* "Would you have bought it at that price?" One answer per member, which they can change. Not on your own pickup. */
+export async function votePickup(id: string, wouldBuy: boolean): Promise<{ ok: boolean; message?: string; yes?: number; no?: number; mine?: boolean }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, message: "Sign in to vote." };
+  if (!/^[0-9a-f-]{36}$/.test(id) || typeof wouldBuy !== "boolean") return { ok: false, message: "That did not work." };
+  if (!(await allowAction(`pickup-vote:${user.id}`, 120, "1 hour"))) return { ok: false, message: "Slow down a little." };
+  const supabase = await createClient();
+  const { data: existing } = await supabase.from("pickup_votes").select("would_buy").eq("pickup_id", id).eq("user_id", user.id).maybeSingle();
+  const { error } = existing
+    ? await supabase.from("pickup_votes").update({ would_buy: wouldBuy }).eq("pickup_id", id).eq("user_id", user.id)
+    : await supabase.from("pickup_votes").insert({ pickup_id: id, user_id: user.id, would_buy: wouldBuy });
+  if (error) return { ok: false, message: friendlyError(error, "You cannot vote on this pickup.") };
+  const { data } = await supabase.from("pickups").select("vote_yes_count, vote_no_count").eq("id", id).single();
+  revalidatePath(`/community/pickups/${id}`);
+  return { ok: true, yes: data?.vote_yes_count ?? 0, no: data?.vote_no_count ?? 0, mine: wouldBuy };
 }

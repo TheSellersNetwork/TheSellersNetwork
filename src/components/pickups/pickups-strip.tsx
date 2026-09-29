@@ -6,6 +6,7 @@ import { gbp, multiple, pickupSources, type Pickup } from "@/lib/pickups";
 import { getPickups } from "@/lib/pickups-queries";
 import { displayName, timeAgo } from "@/lib/format";
 import { urls } from "@/lib/forum/urls";
+import { TalkCounts } from "@/components/pickups/pickup-masonry";
 
 /*
   Latest pickups for the home page: the photo, what was paid and what it sold
@@ -98,6 +99,9 @@ function StripCard({ p }: { p: Pickup }) {
             {pickupSources[p.source_type]}
             {p.area ? `, ${p.area}` : ""}
           </span>
+        </p>
+        <p className="flex gap-2 text-xs text-muted-foreground empty:hidden">
+          <TalkCounts p={p} />
         </p>
         {p.author ? (
           <p className="relative z-10 mt-auto flex items-center gap-1.5 pt-1 text-xs text-muted-foreground">
