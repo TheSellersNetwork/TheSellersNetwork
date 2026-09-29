@@ -13,6 +13,7 @@ import path from "node:path";
 import matter from "gray-matter";
 import { createClient } from "@supabase/supabase-js";
 import { findUserByEmail } from "./find-user";
+import { isLive } from "../src/lib/content/schedule";
 
 config({ path: ".env.local" });
 
@@ -48,6 +49,16 @@ async function main() {
     const slug = file.replace(/\.mdx$/, "");
     if (!parsed.data.published) {
       console.log(`Skipping draft ${slug}`);
+      continue;
+    }
+    // Scheduled posts stay hidden until their UK publish date, so no thread or row before then.
+    if (!isLive(parsed.data.published)) {
+      console.log(`Skipping ${slug}, scheduled for ${String(parsed.data.published instanceof Date ? parsed.data.published.toISOString().slice(0, 10) : parsed.data.published)}`);
+      continue;
+    }
+    // Debate posts get their thread and poll from npm run debates:sync (and the daily cron).
+    if (parsed.data.category === "debate") {
+      console.log(`Skipping debate ${slug}; run npm run debates:sync`);
       continue;
     }
 

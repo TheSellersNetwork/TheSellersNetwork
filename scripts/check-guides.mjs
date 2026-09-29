@@ -28,6 +28,21 @@ const fail = (file, msg) => {
   console.log(`  ${file}: ${msg}`);
 };
 
+/* Debate posts: the poll the daily cron opens in the forum (src/lib/content/debate-sync.ts). */
+function checkDebate(file, data) {
+  if (data.category !== "debate") return fail(file, 'has a debate block but category is not "debate"');
+  const d = data.debate;
+  if (!d || typeof d !== "object" || Array.isArray(d)) return fail(file, "debate post is missing its debate block (forum, question, options)");
+  if (typeof d.question !== "string" || d.question.trim().length < 3 || d.question.trim().length > 200) fail(file, "debate.question must be 3 to 200 characters");
+  if (!Array.isArray(d.options) || d.options.length < 3 || d.options.length > 5) fail(file, "debate.options must list 3 to 5 answers");
+  else {
+    for (const o of d.options) if (typeof o !== "string" || o.trim().length < 1 || o.trim().length > 80) fail(file, `debate option must be 1 to 80 characters: ${JSON.stringify(o)}`);
+    const labels = d.options.filter((o) => typeof o === "string").map((o) => o.trim().toLowerCase());
+    if (new Set(labels).size !== labels.length) fail(file, "debate.options has the same answer twice");
+  }
+  if (typeof d.forum !== "string" || !forums.has(d.forum)) fail(file, `debate.forum must be a known forum slug: ${d.forum}`);
+}
+
 for (const dir of ["guides", "blog"]) {
   const full = path.join(root, "content", dir);
   if (!existsSync(full)) continue;
@@ -51,6 +66,7 @@ for (const dir of ["guides", "blog"]) {
     if (!data.title) fail(file, "missing title");
     if (!data.excerpt) fail(file, "missing excerpt");
     if (!data.published) fail(file, "missing published date");
+    if (dir === "blog" && (data.category === "debate" || data.debate !== undefined)) checkDebate(file, data);
     if (dir === "guides") {
       if (!Array.isArray(data.categories) || data.categories.length === 0) fail(file, "missing categories");
       for (const c of data.categories ?? []) if (!forums.has(c)) fail(file, `unknown category ${c}`);

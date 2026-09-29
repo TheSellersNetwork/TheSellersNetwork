@@ -3,45 +3,25 @@ import { cache } from "react";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
+import { toMeta, type BlogMeta } from "@/lib/content/blog-meta";
+import { isLive, showUnpublished } from "@/lib/content/schedule";
 
-export type BlogPlatform = "ebay" | "amazon" | "vinted" | "etsy" | "facebook" | "other";
-
-export type BlogMeta = {
-  slug: string;
-  title: string;
-  excerpt: string;
-  platforms: BlogPlatform[];
-  category: string | null;
-  related_topic_ids: string[];
-  cover: string | null;
-  published: string | null;
-  updated: string | null;
-  discussion_topic_id: string | null;
-  /* Pen-name byline (see src/lib/content/authors.ts), or null for the site itself. */
-  author: string | null;
-};
+export type { BlogMeta, BlogPlatform, Debate } from "@/lib/content/blog-meta";
 
 export type BlogPost = BlogMeta & { content: string };
 
 const dir = path.join(process.cwd(), "content", "blog");
 
-function toMeta(file: string, data: Record<string, unknown>): BlogMeta {
-  return {
-    slug: file.replace(/\.mdx$/, ""),
-    title: String(data.title ?? file),
-    excerpt: String(data.excerpt ?? ""),
-    platforms: Array.isArray(data.platforms) ? (data.platforms.map(String) as BlogPlatform[]) : [],
-    category: data.category ? String(data.category) : null,
-    related_topic_ids: Array.isArray(data.related_topic_ids) ? data.related_topic_ids.map(String) : [],
-    cover: data.cover ? String(data.cover) : null,
-    published: data.published ? new Date(String(data.published)).toISOString() : null,
-    updated: data.updated ? new Date(String(data.updated)).toISOString() : null,
-    discussion_topic_id: data.discussion_topic_id ? String(data.discussion_topic_id) : null,
-    author: data.author ? String(data.author) : null,
-  };
+/*
+  Whether a post can be shown. In production only posts whose UK publish date
+  has arrived; outside production drafts and scheduled posts show too, labelled,
+  so staff can preview them.
+*/
+function visible(post: BlogMeta, now: Date): boolean {
+  return showUnpublished() || isLive(post.published, now);
 }
 
-/* Published posts, newest first. Drafts (no published date) show outside production. */
+/* Live posts, newest first. Drafts and scheduled posts show outside production. */
 export const getBlogPosts = cache(async (): Promise<BlogMeta[]> => {
   let files: string[] = [];
   try {
@@ -49,14 +29,15 @@ export const getBlogPosts = cache(async (): Promise<BlogMeta[]> => {
   } catch {
     return [];
   }
+  const now = new Date();
   const posts = await Promise.all(
-    files.map(async (file) => {
+    files.filter((f) => !f.startsWith("_")).map(async (file) => {
       const { data } = matter(await readFile(path.join(dir, file), "utf8"));
       return toMeta(file, data);
     }),
   );
   return posts
-    .filter((p) => p.published || process.env.NODE_ENV !== "production")
+    .filter((p) => visible(p, now))
     .sort((a, b) => (b.published ?? "9").localeCompare(a.published ?? "9"));
 });
 
@@ -65,7 +46,8 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
     const raw = await readFile(path.join(dir, `${safe}.mdx`), "utf8");
     const { data, content } = matter(raw);
-    return { ...toMeta(`${safe}.mdx`, data), content };
+    const post = { ...toMeta(`${safe}.mdx`, data), content };
+    return visible(post, new Date()) ? post : null;
   } catch {
     return null;
   }

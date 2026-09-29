@@ -2,6 +2,7 @@ import { calculatorSlugs, toolGroups } from "@/lib/tools/catalogue";
 import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getBlogPosts } from "@/lib/content/blog";
+import { isLive } from "@/lib/content/schedule";
 import { getGuides } from "@/lib/content/guides";
 import { getChanges } from "@/lib/content/changes";
 import { getCategories } from "@/lib/forum/queries";
@@ -9,7 +10,8 @@ import { siteConfig } from "@/lib/site";
 
 /*
   Split sitemaps: 0 is static pages, categories, guides and blog posts;
-  1 onwards are topics in pages of 5,000. Regenerated hourly by revalidate.
+  1 onwards are topics in pages of 5,000. Regenerated hourly by revalidate,
+  so a scheduled blog post joins within an hour of its UK publish date.
   Profiles are not included (noindex). Tag pages arrive in Phase B.
 */
 export const revalidate = 3600;
@@ -48,7 +50,7 @@ export default async function sitemap(props: { id: Promise<string> | string | nu
       ...guides.filter((g) => g.published).map((g) => ({ url: `${base}/guides/${g.slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
       ...changes.map((c) => ({ url: `${base}/blog/${c.slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
       ...[...new Set(["/tools", "/tools/glossary", ...toolGroups.flatMap((g) => g.tools.map((t) => t.href)).filter((h) => h.startsWith("/tools/")), ...calculatorSlugs.map((s) => `/tools/calculator/${s}`)])].map((p) => ({ url: `${base}${p}`, changeFrequency: "monthly" as const, priority: 0.6 })),
-      ...posts.filter((p) => p.published).map((p) => ({ url: `${base}/blog/${p.slug}`, lastModified: p.updated ?? p.published ?? undefined, changeFrequency: "monthly" as const, priority: 0.7 })),
+      ...posts.filter((p) => isLive(p.published)).map((p) => ({ url: `${base}/blog/${p.slug}`, lastModified: p.updated ?? p.published ?? undefined, changeFrequency: "monthly" as const, priority: 0.7 })),
     ];
   }
 

@@ -22,6 +22,7 @@
     "icons:build": "node scripts/build-icons.mjs",
     "changes:sync": "tsx scripts/sync-changes.ts",
     "changes:check": "node scripts/check-changes.mjs",
+    "debates:sync": "tsx scripts/sync-debates.ts",
     "guides:check": "node scripts/check-guides.mjs",
     "tools:ort": "node scripts/copy-onnxruntime.mjs"
   },

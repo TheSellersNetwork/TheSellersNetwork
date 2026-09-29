@@ -5,6 +5,8 @@ import path from "node:path";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { postingAuthorId } from "@/lib/supabase/house-account";
 import { renderMarkdown } from "@/lib/markdown/render";
+import { getBlogPosts } from "@/lib/content/blog";
+import { dueDebates, syncDebates } from "@/lib/content/debate-sync";
 import { pickStarter, rituals, ritualDue, ritualTitle, type Starter } from "@/lib/rituals";
 
 /*
@@ -12,6 +14,8 @@ import { pickStarter, rituals, ritualDue, ritualTitle, type Starter } from "@/li
   vercel.json, protected by CRON_SECRET. ?force=<id> posts a given ritual
   regardless of the day, for testing. Templates live in
   content/templates/rituals and are the only thing staff need to edit.
+  Afterwards it opens the forum thread and poll for any debate blog post
+  whose UK publish date has arrived (src/lib/content/debate-sync.ts).
 */
 /* Compares the bearer token in constant time, so its value cannot be guessed from response timing. */
 function cronAuthorised(request: Request): boolean {
@@ -31,7 +35,6 @@ export async function GET(request: Request) {
   const force = new URL(request.url).searchParams.get("force");
   const today = new Date();
   const due = rituals.filter((r) => (force ? r.id === force : ritualDue(r, today)));
-  if (due.length === 0) return NextResponse.json({ message: "Nothing due today" });
 
   const admin = createAdminClient();
   // Posted as the house account, The Sellers Network, falling back to SEED_AUTHOR_EMAIL.
@@ -39,7 +42,8 @@ export async function GET(request: Request) {
   const author = authorId ? { id: authorId } : null;
   if (!author) return NextResponse.json({ message: "No house account and SEED_AUTHOR_EMAIL is not set or missing" }, { status: 500 });
 
-  const results: Record<string, string> = {};
+  const results: Record<string, string | Record<string, string>> = {};
+  if (due.length === 0) results.message = "No rituals due today";
   for (const ritual of due) {
     if (ritual.starter) {
       results[ritual.id] = await postStarter(admin, author.id, today);
@@ -70,6 +74,10 @@ export async function GET(request: Request) {
     await admin.from("posts").insert({ topic_id: topic.id, author_id: author.id, body_md, body_html: await renderMarkdown(body_md) });
     results[ritual.id] = `/community/t/${topic.slug}/${topic.short_id}`;
   }
+
+  // Debate posts that are live today or earlier and have no thread yet.
+  const debates = dueDebates(await getBlogPosts(), today);
+  results.debates = debates.length === 0 ? { message: "No debates due" } : await syncDebates(admin, author.id, debates);
   return NextResponse.json(results);
 }
 
