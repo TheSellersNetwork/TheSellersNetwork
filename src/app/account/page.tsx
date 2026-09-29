@@ -7,13 +7,16 @@ import { currentStyle } from "@/lib/style-server";
 import { urls } from "@/lib/forum/urls";
 import { AppCard } from "@/components/app/app-card";
 import { DeleteAccount } from "@/components/auth/delete-account";
+import { EmailPreferences } from "@/app/account/email-preferences";
+import { getEmailPrefs } from "@/lib/email/prefs";
+import { getFollowedTags } from "@/lib/forum/tag-queries";
 
 export const metadata: Metadata = { title: "Account", robots: { index: false } };
 
 export default async function AccountPage() {
   const user = await requireUser(urls.account());
   const p = user.profile;
-  const style = await currentStyle();
+  const [style, emailPrefs, followedTags] = await Promise.all([currentStyle(), getEmailPrefs(user.id), getFollowedTags(user.id)]);
 
   return (
     <main id="main" className="mx-auto w-full max-w-2xl flex-1 px-4 py-10 sm:px-6">
@@ -33,6 +36,15 @@ export default async function AccountPage() {
           }}
         />
       </div>
+      {/* Hidden until migration 20260930000100 is applied. */}
+      {emailPrefs ? <EmailPreferences initial={emailPrefs} tags={followedTags?.map(({ id, slug, name }) => ({ id, slug, name })) ?? null} /> : null}
+      <section className="mt-12 rounded-lg border p-4 text-sm">
+        <h2 className="font-semibold">Saved calculations</h2>
+        <p className="mt-1 text-muted-foreground">Fee calculations you have saved, worked out again with today&rsquo;s fees.</p>
+        <Link href="/account/calculations" className="mt-3 inline-block rounded-md border px-3 py-1.5 font-medium hover:bg-secondary">
+          Your saved calculations
+        </Link>
+      </section>
       <AppCard className="mt-12" />
       <section className="mt-12">
         <h2 className="text-lg font-semibold">How the forum looks to you</h2>

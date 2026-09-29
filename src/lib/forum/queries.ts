@@ -13,6 +13,7 @@ import type {
   TopPeriod,
 } from "@/lib/db/types";
 import { topicPreview, type TopicPreview } from "@/lib/forum/previews";
+import { statusFilter, type TopicStatus } from "@/lib/forum/status";
 
 const PROFILE_SUMMARY = "id, username, display_name, avatar_url, trust_level, is_staff, solution_count, flair, created_at";
 
@@ -96,6 +97,10 @@ export type TopicListParams = {
   cursor?: string | null;
   limit?: number;
   includePinnedFirst?: boolean;
+  /* Open, answered, solved or closed (src/lib/forum/status.ts). */
+  status?: TopicStatus | null;
+  /* Only these topics, for example the ones carrying a tag. */
+  topicIds?: string[];
 };
 
 export type TopicPage = { topics: TopicListRow[]; nextCursor: string | null };
@@ -140,6 +145,13 @@ export async function getTopics(params: TopicListParams = {}): Promise<TopicPage
 
   if (categoryIds && categoryIds.length > 0) {
     query = query.in("category_id", categoryIds);
+  }
+  if (params.topicIds) {
+    if (params.topicIds.length === 0) return { topics: [], nextCursor: null };
+    query = query.in("id", params.topicIds);
+  }
+  if (params.status) {
+    for (const f of statusFilter(params.status)) query = f.op === "eq" ? query.eq(f.column, f.value) : query.gt(f.column, f.value);
   }
 
   if (view === "top") {

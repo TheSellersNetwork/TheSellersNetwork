@@ -24,6 +24,8 @@ function describe(n: Notification): string {
       return `Your reply in ${title} was marked as the solution`;
     case "like":
       return `Someone liked your post in ${title}`;
+    case "tag_topic":
+      return `New topic tagged ${n.payload.tag_name ?? "a tag you follow"}: ${title}`;
     case "moderation":
       return n.payload.message ?? "A moderation update on your account";
     default:

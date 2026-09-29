@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, Lock, Pin } from "lucide-react";
+import { Pin } from "lucide-react";
 import { UserAvatar } from "@/components/forum/user-avatar";
 import { TopicPreview } from "@/components/forum/topic-preview";
+import { StatusChip } from "@/components/forum/status-chip";
 import { Button } from "@/components/ui/button";
 import { SponsorSlot } from "@/components/partners/sponsor-slot";
 import { timeAgo } from "@/lib/format";
@@ -99,21 +100,20 @@ function TopicRowItem({ topic, showCategory, isNew, onlineIds, deal }: { topic: 
           )}
           <span className="flex shrink-0 items-center gap-1 pt-0.5 text-muted-foreground">
             {isNew ? <span className="unread-pill">New</span> : null}
-            {topic.is_solved ? <CheckCircle2 className="tick-draw size-4 text-success" aria-label="Solved" /> : null}
             {topic.is_pinned ? <Pin className="size-4" aria-label="Pinned" /> : null}
-            {topic.is_locked ? <Lock className="size-4" aria-label="Locked" /> : null}
           </span>
         </div>
         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+          <StatusChip topic={topic} />
           {showCategory && topic.category ? (
             <Link href={urls.category(topic.category.slug)} className="hover:underline">
               {topic.category.name}
             </Link>
           ) : null}
           {topic.tags.map((tag) => (
-            <span key={tag.id} className="rounded bg-secondary px-1.5 py-0.5">
+            <Link key={tag.id} href={urls.tag(tag.slug)} className="rounded bg-secondary px-1.5 py-0.5 hover:underline">
               {tag.name}
-            </span>
+            </Link>
           ))}
           {deal ? (
             <span className={ended ? "text-destructive" : "text-success"}>

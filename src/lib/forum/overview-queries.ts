@@ -73,18 +73,28 @@ export const getRecentTopics = cache(async (limit = 8): Promise<RecentTopic[]> =
   return (data ?? []) as unknown as RecentTopic[];
 });
 
-/* Newest topics nobody has replied to yet, for "Can you answer this?" on the home page. Pinned staff posts are left out. */
+/*
+  Newest real member questions nobody has replied to. Threads the site posts
+  itself (the house, anonymous-holder and deleted accounts: fee change
+  discussions, weekly threads, starters) are not questions, so they are left out,
+  and so are staff posts.
+*/
 export const getUnansweredTopics = cache(async (limit = 5): Promise<RecentTopic[]> => {
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data: site } = await supabase.from("site_accounts").select("profile_id").in("key", ["house", "deleted"]);
+  const siteIds = (site ?? []).map((r) => r.profile_id as string);
+  let query = supabase
     .from("topics")
-    .select(`id, title, slug, short_id, created_at, reply_count, author:profiles!topics_author_id_fkey (${PROFILE_SUMMARY})`)
+    .select(`id, title, slug, short_id, created_at, reply_count, author:profiles!topics_author_id_fkey!inner (${PROFILE_SUMMARY})`)
     .is("deleted_at", null)
     .eq("is_unlisted", false)
     .eq("reply_count", 0)
     .eq("is_pinned", false)
+    .eq("author.is_staff", false)
     .order("created_at", { ascending: false })
     .limit(limit);
+  if (siteIds.length) query = query.not("author_id", "in", `(${siteIds.join(",")})`);
+  const { data } = await query;
   return (data ?? []) as unknown as RecentTopic[];
 });
 

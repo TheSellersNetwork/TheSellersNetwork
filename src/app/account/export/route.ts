@@ -32,6 +32,11 @@ export async function GET() {
     supabase.from("push_subscriptions").select("created_at, user_agent").eq("user_id", user.id),
   ]);
 
+  // Added by migration 20260930000100; a missing table just gives an empty list.
+  const [tagFollows, emailPrefs, digestSends, feeAlertSends] = await Promise.all([own("tag_follows"), own("member_email_prefs"), own("digest_sends"), own("fee_alert_sends")]);
+  // Pickups (20260928002200) and the member features in 20260930000200 and 0300; a missing table gives an empty list.
+  const [pickups, pickupLikes, pickupComments, pickupVotes, milestones, savedCalculations] = await Promise.all([own("pickups"), own("pickup_likes"), own("pickup_comments"), own("pickup_votes"), own("profile_milestones"), own("saved_calculations")]);
+
   const body = {
     exported_at: new Date().toISOString(),
     account: { id: user.id, email: user.email },
@@ -49,6 +54,16 @@ export async function GET() {
     setups: kits.data ?? [],
     reports_you_made: flags.data ?? [],
     push_devices: push.data ?? [],
+    followed_tags: tagFollows.data ?? [],
+    email_preferences: emailPrefs.data ?? [],
+    digest_emails_sent: digestSends.data ?? [],
+    fee_alert_emails_sent: feeAlertSends.data ?? [],
+    pickups: pickups.data ?? [],
+    pickup_likes: pickupLikes.data ?? [],
+    pickup_comments: pickupComments.data ?? [],
+    pickup_votes: pickupVotes.data ?? [],
+    milestones: milestones.data ?? [],
+    saved_calculations: savedCalculations.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(body, null, 2), {
