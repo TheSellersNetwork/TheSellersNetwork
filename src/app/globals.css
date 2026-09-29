@@ -268,25 +268,57 @@
   --accent-foreground: #e2e8f0;
   color-scheme: dark;
 }
-.hero-grid {
-  background-image: linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse at 30% 20%, black 30%, transparent 75%);
-}
-@keyframes cursor-drift {
-  0%,
-  100% {
-    transform: translate(0, 0);
+
+/* Home page "Coming up" card: each date slides in, and a line shows time to the next. */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
-  50% {
-    transform: translate(6px, -8px);
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
-.hero-cursor {
-  animation: cursor-drift 6s ease-in-out infinite;
+@keyframes slide-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.slide-in {
+  animation: slide-in 320ms ease-out both;
+}
+.slide-progress {
+  animation: slide-progress linear both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-cursor {
+  .slide-in,
+  .slide-progress {
+    animation: none;
+  }
+}
+
+/* Home hero ribbon: two columns drifting upwards, faded at the edges */
+@keyframes feed-up {
+  to {
+    transform: translateY(-50%);
+  }
+}
+.feed-col {
+  animation: feed-up linear infinite;
+}
+.feed-paused .feed-col,
+.feed-mask:hover .feed-col {
+  animation-play-state: paused;
+}
+.feed-mask {
+  mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .feed-col {
     animation: none;
   }
 }

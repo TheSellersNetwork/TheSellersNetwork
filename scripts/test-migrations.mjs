@@ -727,6 +727,13 @@ await step("security: contact messages are staff-only", async () => {
   await expectError(asAnon(`insert into public.contact_messages (kind, message) values ('general', 'spam spam spam spam')`), DENIED);
 });
 
+await step("site accounts: the house account key is allowed, members cannot add one", async () => {
+  const h = await db.query(`insert into auth.users (email, raw_user_meta_data) values ('house@example.test', '{"username":"the_sellers_network"}') returning id`);
+  await db.query(`insert into public.site_accounts (key, profile_id) values ('house', $1)`, [h.rows[0].id]);
+  await expectError(db.query(`insert into public.site_accounts (key, profile_id) values ('pretend', $1)`, [ids.member]), "site_accounts_key_valid");
+  await expectError(asUser(ids.member, `insert into public.site_accounts (key, profile_id) values ('anonymous', $1)`, [ids.member]), DENIED);
+});
+
 await step("account deletion: posts move to the deleted account, the rest goes", async () => {
   const u = await db.query(`insert into auth.users (email, raw_user_meta_data) values ('leaver@example.test', '{"username":"leaver"}') returning id`);
   const d = await db.query(`insert into auth.users (email, raw_user_meta_data) values ('deleted@example.test', '{"username":"deleted_member"}') returning id`);

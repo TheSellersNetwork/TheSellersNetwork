@@ -26,6 +26,11 @@ export const siteConfig = {
     icoNumber: process.env.NEXT_PUBLIC_ICO_NUMBER || null,
   },
   /* Marketplaces a member can pick during onboarding. Order is display order. */
+  /*
+    Members who joined on or before this date get a "Founding member" badge
+    for good. Set NEXT_PUBLIC_FOUNDING_UNTIL (YYYY-MM-DD) to move it.
+  */
+  foundingUntil: process.env.NEXT_PUBLIC_FOUNDING_UNTIL || "2027-03-31",
   marketplaces: [
     { id: "ebay", label: "eBay" },
     { id: "amazon", label: "Amazon" },

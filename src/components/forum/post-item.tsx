@@ -4,7 +4,9 @@ import { UserAvatar } from "@/components/forum/user-avatar";
 import { PostActions } from "@/components/forum/post-actions";
 import { FlairChips, StreakChip } from "@/components/forum/flair-chips";
 import { getStreak } from "@/lib/forum/extras-queries";
-import { displayName, longDate, timeAgo, trustLabel } from "@/lib/format";
+import { FoundingChip } from "@/components/forum/founding-chip";
+import { displayName, isFoundingMember, longDate, timeAgo, trustLabel } from "@/lib/format";
+import { siteConfig } from "@/lib/site";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { urls } from "@/lib/forum/urls";
 import type { CurrentUser } from "@/lib/auth";
@@ -79,8 +81,11 @@ export async function PostItem({ post, topic, viewer, canMarkSolution, isSolutio
             )}
             {post.author && !anonymous ? <span className="text-muted-foreground">@{post.author.username}</span> : null}
             {post.author && !anonymous ? (
-              <span className="rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground">{trustLabel(post.author.trust_level, post.author.is_staff)}</span>
+              <span className={post.author.is_staff ? "rounded bg-brand-soft px-1.5 py-0.5 text-xs font-medium text-brand" : "rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground"}>
+                {trustLabel(post.author.trust_level, post.author.is_staff)}
+              </span>
             ) : null}
+            {post.author && !anonymous && isFoundingMember(post.author, siteConfig.foundingUntil) ? <FoundingChip /> : null}
             {post.author && !anonymous && post.author.solution_count > 0 ? (
               <span className="text-xs text-success" title="Accepted answers">
                 {post.author.solution_count} {post.author.solution_count === 1 ? "solution" : "solutions"}

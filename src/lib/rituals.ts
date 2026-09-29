@@ -14,7 +14,11 @@ export type Ritual = {
   pin: boolean;
   /* Monthly rituals post on this day of the month instead of a weekday. */
   monthDay?: number;
+  /* Discussion starters: the title, forum and body come from starters.json instead of a template. */
+  starter?: boolean;
 };
+
+export type Starter = { title: string; forum: string; body: string };
 
 export const rituals: Ritual[] = [
   { id: "numbers", weekday: 1, titlePrefix: "What did you sell this week?", template: "monday-numbers.md", categorySlug: "weekly-threads", pin: true },
@@ -22,7 +26,17 @@ export const rituals: Ritual[] = [
   { id: "wins", weekday: 5, titlePrefix: "Friday wins", template: "friday-wins.md", categorySlug: "weekly-threads", pin: true },
   { id: "goals", weekday: 1, titlePrefix: "Goals for the week:", template: "monday-goals.md", categorySlug: "diaries-and-challenges", pin: true },
   { id: "monthly", weekday: -1, monthDay: 1, titlePrefix: "Monthly results:", template: "monthly-results.md", categorySlug: "diaries-and-challenges", pin: true },
+  { id: "pickups", weekday: 6, titlePrefix: "Weekend pickups:", template: "saturday-weekend-pickups.md", categorySlug: "weekly-threads", pin: true },
+  { id: "starter-tue", weekday: 2, titlePrefix: "", template: "starters.json", categorySlug: "sourcing-and-stock", pin: false, starter: true },
+  { id: "starter-thu", weekday: 4, titlePrefix: "", template: "starters.json", categorySlug: "sourcing-and-stock", pin: false, starter: true },
 ];
+
+/* Which discussion starter to post on a given day. Tuesdays and Thursdays step through the list in turn. */
+export function pickStarter(starters: Starter[], date: Date): Starter | null {
+  if (starters.length === 0) return null;
+  const week = Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / (7 * 86_400_000));
+  return starters[(week * 2 + (date.getUTCDay() === 4 ? 1 : 0)) % starters.length];
+}
 
 /* Is this ritual due on the given date? */
 export function ritualDue(r: Ritual, date: Date): boolean {

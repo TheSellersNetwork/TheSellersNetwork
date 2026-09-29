@@ -16,7 +16,7 @@ import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import { createClient } from "@supabase/supabase-js";
-import { findUserByEmail } from "./find-user";
+import { findHouseAccountId, findUserByEmail } from "./find-user";
 
 config({ path: ".env.local", quiet: true });
 
@@ -44,8 +44,10 @@ async function main() {
     console.log("Skipping: the polls table is missing. Apply supabase/migrations/20260928001800_polls_anonymous_push.sql first.");
     return;
   }
-  const author = await findUserByEmail(supabase, authorEmail!);
-  if (!author) throw new Error(`No auth user with email ${authorEmail}.`);
+  // Threads are posted as the house account, The Sellers Network, once the seed has created it.
+  const houseId = await findHouseAccountId(supabase);
+  const author = houseId ? { id: houseId } : await findUserByEmail(supabase, authorEmail!);
+  if (!author) throw new Error(`No house account and no auth user with email ${authorEmail}.`);
   const { data: categories } = await supabase.from("categories").select("id, slug");
   const bySlug = new Map((categories ?? []).map((c) => [c.slug as string, c.id as string]));
 

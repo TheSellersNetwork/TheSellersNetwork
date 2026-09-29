@@ -10,7 +10,8 @@ import { getKitsForUser, getStreak } from "@/lib/forum/extras-queries";
 import { getCurrentUser } from "@/lib/auth";
 import { getProfileActivity, getProfileByUsername } from "@/lib/forum/queries";
 import { getAnonymousAccountId } from "@/lib/forum/anonymous";
-import { displayName, longDate, plural, timeAgo, trustLabel } from "@/lib/format";
+import { FoundingChip } from "@/components/forum/founding-chip";
+import { displayName, isFoundingMember, longDate, plural, timeAgo, trustLabel } from "@/lib/format";
 import { excerpt } from "@/lib/markdown/render";
 import { urls } from "@/lib/forum/urls";
 import { siteConfig } from "@/lib/site";
@@ -43,6 +44,7 @@ export default async function ProfilePage({ params }: PageProps<"/community/u/[u
           <p className="text-muted-foreground">@{profile.username}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             <Badge variant="secondary">{trustLabel(profile.trust_level, profile.is_staff)}</Badge>
+            {isFoundingMember(profile, siteConfig.foundingUntil) ? <FoundingChip /> : null}
             <StreakChip weeks={streak} />
             {marketplaces.map((m) => (
               <Badge key={m.id} variant="outline">

@@ -14,11 +14,13 @@
 */
 
 import { config } from "dotenv";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { parse } from "csv-parse/sync";
 import { createClient } from "@supabase/supabase-js";
 import { findUserByEmail } from "./find-user";
+import { rituals } from "../src/lib/rituals";
 
 config({ path: ".env.local" });
 
@@ -234,9 +236,9 @@ async function ensureAnonymousAccount() {
 }
 
 /* Shared accounts the site writes as: "deleted" holds posts from members who deleted their account. */
-async function ensureSiteAccount(key: string, username: string, displayName: string) {
+async function ensureSiteAccount(key: string, username: string, displayName: string): Promise<string> {
   const { data: existing } = await supabase.from("site_accounts").select("profile_id").eq("key", key).maybeSingle();
-  if (existing) return;
+  if (existing) return existing.profile_id as string;
   const { data, error } = await supabase.auth.admin.createUser({
     email: `${username.replace(/_/g, "-")}@example.com`,
     password: randomBytes(32).toString("base64url"),
@@ -248,12 +250,55 @@ async function ensureSiteAccount(key: string, username: string, displayName: str
   const { error: linkError } = await supabase.from("site_accounts").insert({ key, profile_id: data.user.id });
   if (linkError) throw linkError;
   console.log(`${displayName} account created.`);
+  return data.user.id;
+}
+
+/*
+  The house account, "The Sellers Network". A clearly labelled staff account
+  (shown as Team) that posts the intro topics, recurring threads, discussion
+  starters and fee change threads, so no one's personal account does. It never
+  signs in and is never onboarded, so it does not appear among members.
+  Needs migration 20260928002300; without it the seed carries on as before.
+*/
+async function ensureHouseAccount(): Promise<string | null> {
+  try {
+    const id = await ensureSiteAccount("house", "the_sellers_network", "The Sellers Network");
+    await supabase
+      .from("profiles")
+      .update({ is_staff: true, trust_level: 4, bio: "The site's own account, run by the team. It posts the weekly threads, discussion starters and fee change threads. It is not a member and does not answer questions as one." })
+      .eq("id", id);
+    return id;
+  } catch (error) {
+    console.log(`House account skipped (${error instanceof Error ? error.message : String(error)}). Apply migration 20260928002300_house_account.sql, then run the seed again.`);
+    return null;
+  }
+}
+
+/* Moves the site's own threads (intro topics, recurring threads, change threads) from the staff account to the house account. */
+async function adoptSiteThreads(from: string, to: string) {
+  const prefixes = ["Read this first:", "When to automate", ...rituals.map((r) => r.titlePrefix)];
+  const changeDir = path.join(process.cwd(), "content", "changes");
+  const discussions = readdirSync(changeDir)
+    .filter((f) => f.endsWith(".mdx"))
+    .map((f) => readFileSync(path.join(changeDir, f), "utf8").match(/^discussion:\s*"?([A-Za-z0-9_-]+)"?\s*$/m)?.[1])
+    .filter((id): id is string => Boolean(id));
+
+  const { data: topics } = await supabase.from("topics").select("id, title, short_id, last_poster_id, reply_count").eq("author_id", from);
+  const mine = (topics ?? []).filter((t) => prefixes.some((p) => String(t.title).startsWith(p)) || discussions.includes(String(t.short_id)));
+  for (const t of mine) {
+    await supabase.from("topics").update({ author_id: to, ...(t.last_poster_id === from && t.reply_count === 0 ? { last_poster_id: to } : {}) }).eq("id", t.id);
+    await supabase.from("posts").update({ author_id: to }).eq("topic_id", t.id).eq("post_number", 1).eq("author_id", from);
+  }
+  if (mine.length) console.log(`Moved ${mine.length} site thread(s) to The Sellers Network account.`);
 }
 
 async function main() {
-  const author = await authorId();
+  const staff = await authorId();
   await ensureAnonymousAccount();
   await ensureSiteAccount("deleted", "deleted_member", "Deleted member");
+  const house = await ensureHouseAccount();
+  if (house) await adoptSiteThreads(staff, house);
+  const author = house ?? staff;
   let position = 0;
   for (const parent of launch) {
     position += 1;

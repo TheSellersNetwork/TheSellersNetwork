@@ -1,25 +1,29 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BookOpen, ChevronRight, MessageSquare, Radio, ShoppingBag, Sparkles, Store, Tag, Users } from "lucide-react";
 import { ActivityTabs } from "@/components/forum/activity-tabs";
-import { CommunityStats } from "@/components/forum/community-stats";
 import { HeroCards } from "@/components/forum/hero-cards";
 import { UserAvatar } from "@/components/forum/user-avatar";
+import { HeroFeed } from "@/components/home/hero-feed";
+import { HeroCopy } from "@/components/home/hero-copy";
+import { QuickFeeCheck } from "@/components/home/quick-fee-check";
+import { StartHere, type StartTab } from "@/components/home/start-here";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
-import { HeroCursors } from "@/components/marketing/hero-cursors";
 import { PlatformTiles } from "@/components/marketing/platform-tiles";
 import { MembersStrip } from "@/components/marketing/members-strip";
 import { AskFirst } from "@/components/marketing/ask-first";
 import { NewsletterProof } from "@/components/marketing/newsletter-proof";
+import { PickupsStrip } from "@/components/pickups/pickups-strip";
 import { getCurrentUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { getGuides } from "@/lib/content/guides";
+import { getHeroSlides } from "@/lib/home/coming-up";
+import { getHeroFeed } from "@/lib/home/hero-feed";
 import { getCategories } from "@/lib/forum/queries";
-import { getCommunityStats, getOnlineMembers } from "@/lib/forum/live-queries";
-import { getRecentReplies, getRecentTopics } from "@/lib/forum/overview-queries";
-import { displayName } from "@/lib/format";
+import { getOnlineMembers } from "@/lib/forum/live-queries";
+import { getRecentReplies, getRecentTopics, getUnansweredTopics } from "@/lib/forum/overview-queries";
+import { displayName, timeAgo } from "@/lib/format";
 import { urls } from "@/lib/forum/urls";
 import { siteConfig } from "@/lib/site";
-import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: { absolute: `${siteConfig.name}: the free forum for UK resellers` },
@@ -27,212 +31,179 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-/* The Categories card. Slugs match the seed script. */
-const quickCategories = [
-  { slug: "ebay", label: "eBay", icon: ShoppingBag },
-  { slug: "amazon", label: "Amazon", icon: Store },
-  { slug: "vinted", label: "Vinted", icon: Tag },
-  { slug: "tiktok-shop", label: "TikTok Shop", icon: Sparkles },
-  { slug: "whatnot", label: "Whatnot", icon: Radio },
+/* Start here: the first guides to read for each platform, in order. Slugs are files in content/guides. */
+const startPlan = [
+  { id: "ebay", label: "eBay", forum: "ebay", tool: { href: "/tools/fees/ebay", label: "eBay fee calculator" }, guides: ["pricing-from-sold-comps", "ebay-titles-item-specifics-and-search", "promoted-listings", "avoiding-vero-and-suspensions"] },
+  { id: "amazon", label: "Amazon", forum: "amazon", tool: { href: "/tools/fba-calculator", label: "FBA profit calculator" }, guides: ["how-to-start-amazon-fba-uk", "amazon-ungating-uk", "amazon-where-the-money-leaks", "amazon-lost-and-damaged-stock-claims"] },
+  { id: "vinted", label: "Vinted", forum: "vinted", tool: { href: "/tools/fees/vinted", label: "Vinted fee calculator" }, guides: ["vinted-pro-and-selling-as-a-business", "vinted-postage-options", "vinted-bundles-and-discounts", "vinted-fake-or-not-as-described-claims"] },
+  { id: "tiktok", label: "TikTok Shop", forum: "tiktok-shop", tool: { href: "/tools/fees/tiktok-shop", label: "TikTok Shop fee calculator" }, guides: ["tiktok-shop-getting-started-uk", "tiktok-shop-first-live", "tiktok-shop-shipping-and-returns", "tiktok-shop-account-health-and-restricted-products"] },
+  { id: "whatnot", label: "Whatnot", forum: "whatnot", tool: { href: "/tools/show-planner", label: "Live show planner" }, guides: ["whatnot-first-show", "live-auctions-and-starting-bids", "live-selling-kit-and-schedule", "packing-orders-after-a-show"] },
+  { id: "sourcing", label: "Car boots and charity shops", forum: null, tool: { href: "/tools/trip-cost", label: "Sourcing trip cost" }, guides: ["car-boot-sales-for-resellers", "charity-shop-sourcing", "spotting-fakes-before-you-buy", "returns-pallets-and-liquidation-stock"] },
+];
+
+/* What is here, in the words members use. A plain list, not a row of icon cards. */
+const whatIsHere = [
+  { href: "/community/pickups", title: "Pickups and BOLO", body: "Post what you found, what you paid and what it sold for. Brands with three or more sold comps go on the BOLO list." },
+  { href: `${urls.community()}?view=unanswered`, title: "Straight answers", body: "The person who asked marks the answer that worked, and it sits under the question, not on page four." },
+  { href: "/tools", title: "Free tools", body: "FVF and fee calculators for every platform, FBA fees, offer maths and where an item nets the most." },
+  { href: urls.blog(), title: "Fee and policy changes", body: "When a marketplace or Royal Mail changes something, we explain what it means for your margins in plain English." },
 ];
 
 export default async function HomePage() {
-  const supabase = await createClient();
   const viewer = await getCurrentUser();
-  const [categories, replies, topics, online, stats, { data: recentMembers }] = await Promise.all([
+  const [categories, replies, topics, unanswered, online, guides] = await Promise.all([
     getCategories(),
     getRecentReplies(6),
     getRecentTopics(6),
+    getUnansweredTopics(5),
     getOnlineMembers(50),
-    getCommunityStats(),
-    supabase.from("profiles").select("id, username, display_name, avatar_url, trust_level, is_staff, solution_count").not("onboarded_at", "is", null).order("created_at", { ascending: false }).limit(4),
+    getGuides(),
   ]);
+  const [slides, feed] = await Promise.all([getHeroSlides(unanswered), getHeroFeed(topics)]);
   const onlineIds = online.map((m) => m.id);
-  const members = recentMembers ?? [];
   const bySlug = new Map(categories.map((c) => [c.slug, c]));
+  const titles = new Map(guides.map((g) => [g.slug, g.title]));
+  const startTabs: StartTab[] = startPlan.map((t) => ({
+    id: t.id,
+    label: t.label,
+    tool: t.tool,
+    forum: t.forum && bySlug.has(t.forum) ? { href: urls.category(t.forum), label: `Ask in the ${t.label} forum` } : { href: "/community/pickups", label: "Pickups and BOLO" },
+    guides: t.guides.filter((s) => titles.has(s)).map((s) => ({ slug: s, title: titles.get(s)! })),
+  }));
 
   return (
     <main id="main" className="flex-1">
-      {/* Dark hero band, whatever the theme, like the reference */}
-      <section className="hero-dark relative overflow-hidden bg-background text-foreground">
-        <div className="hero-grid pointer-events-none absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:py-24">
-          <div className="relative">
-            <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium">
-              <span className="live-dot size-2 rounded-full bg-success" aria-hidden="true" />
-              {stats.members >= 25 ? `${stats.members.toLocaleString("en-GB")} members. Free to join` : "Free to join. Always will be"}
-            </p>
-            <div className="relative mt-6">
-              <HeroCursors names={members.map((m) => displayName(m))} />
-              <h1 className="text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-                The free forum
-                <br />
-                for UK resellers.
-                <br />
-                Every platform.
-              </h1>
-            </div>
-            <p className="mt-6 max-w-lg text-lg text-muted-foreground">
-              Ask a question and get an answer from someone who has actually done it. <span className="text-brand">eBay</span>, <span className="text-brand">Amazon</span>, <span className="text-brand">Vinted</span>,{" "}
-              <span className="text-brand">Whatnot</span>, car boots and everything in between. No fees, no selling in the threads, no nonsense.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link href={urls.signup()}>Join free</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href={urls.community()}>
-                  Explore the forums
-                  <ArrowRight data-icon="inline-end" />
-                </Link>
-              </Button>
-            </div>
-            <div className="mt-12">
-              <PlatformTiles />
-            </div>
-          </div>
+      {/* Dark band, whatever the theme. Words on the left, real content drifting behind the revolving card on the right. */}
+      <section className="hero-dark border-b bg-background text-foreground">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16 lg:py-16">
+          <HeroCopy signedIn={!!viewer} />
+          <HeroFeed slides={slides} feed={feed} />
+        </div>
+      </section>
 
-          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
-            {/* How to join */}
-            <div className="forum-card row-enter rounded-2xl border bg-card p-6">
-              <h2 className="text-lg font-semibold">How to join</h2>
-              <ol className="mt-4 space-y-5 border-l pl-5 text-sm">
-                <li className="relative">
-                  <span className="absolute -left-[26px] top-1 size-2.5 rounded-full border-2 border-brand bg-card" aria-hidden="true" />
-                  <p className="font-medium">Tell us where you sell</p>
-                  <p className="text-muted-foreground">Your feed starts with the forums that matter to you.</p>
-                </li>
-                <li className="relative">
-                  <span className="absolute -left-[26px] top-1 size-2.5 rounded-full border-2 border-brand bg-brand" aria-hidden="true" />
-                  <p className="font-medium">Ask, answer, share your numbers</p>
-                  <p className="text-muted-foreground">Good answers get marked solved and stay at the top.</p>
-                  {members.length > 0 ? (
-                    <div className="mt-3 flex items-center gap-2">
-                      <div className="flex -space-x-2">
-                        {members.slice(0, 3).map((m) => (
-                          <UserAvatar key={m.id} profile={m} size="md" className="ring-2 ring-card" online={onlineIds.includes(m.id)} />
-                        ))}
-                      </div>
-                      <Link href={urls.signup()} className="grid size-9 place-items-center rounded-full border bg-background text-sm font-medium hover:border-brand" aria-label="Join">
-                        +
-                      </Link>
-                    </div>
-                  ) : null}
-                </li>
-                <li className="relative">
-                  <span className="absolute -left-[26px] top-1 size-2.5 rounded-full border-2 border-border bg-card" aria-hidden="true" />
-                  <p className="font-medium">Come back on a Monday</p>
-                  <p className="text-muted-foreground">Every week there is a thread for what you listed, what sold and what you made.</p>
-                </li>
-              </ol>
-            </div>
-
-            {/* Categories */}
-            <div className="forum-card row-enter rounded-2xl border bg-card p-4">
-              <h2 className="flex items-center gap-1.5 text-base font-semibold">
-                <Sparkles className="size-4 text-brand" aria-hidden="true" /> Forums
-              </h2>
-              <ul className="mt-3 space-y-1 text-sm">
-                {quickCategories.map((c) => {
-                  const cat = bySlug.get(c.slug);
-                  return (
-                    <li key={c.slug}>
-                      <Link href={cat ? urls.category(cat.slug) : urls.community()} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-secondary">
-                        <span className="grid size-6 place-items-center rounded-md bg-secondary">
-                          <c.icon className="size-3.5" aria-hidden="true" />
-                        </span>
-                        {c.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-                <li>
-                  <Link href={urls.community()} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-muted-foreground hover:bg-secondary">
-                    <span className="grid size-6 place-items-center rounded-md bg-secondary">
-                      <ChevronRight className="size-3.5" aria-hidden="true" />
-                    </span>
-                    More
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* The short version of the rules */}
-            <div className="forum-card row-enter rounded-2xl border bg-card p-5 text-sm sm:col-start-2">
-              <p className="font-medium">Three rules, no small print</p>
-              <ul className="mt-2 space-y-1 text-muted-foreground">
-                <li>No selling in the threads.</li>
-                <li>No links to your listings.</li>
-                <li>Real numbers welcome.</li>
-              </ul>
-              <Link href={urls.rules()} className="mt-2 inline-block text-xs text-brand underline underline-offset-2 hover:text-brand-deep">
-                All six house rules
-              </Link>
-            </div>
-
-            {/* Wide banner */}
-            <Link href={urls.guides()} className="forum-card row-enter group flex items-center justify-between gap-4 rounded-2xl border bg-card px-6 py-5 transition-colors hover:border-brand/60 sm:col-span-2">
-              <span className="flex items-center gap-3 text-lg font-semibold">
-                <BookOpen className="size-5 text-brand" aria-hidden="true" />
-                Selling guides
-                <ChevronRight className="size-5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-              </span>
-              <span className="flex -space-x-2">
-                {["eBay", "Vinted", "Whatnot"].map((p) => (
-                  <span key={p} className="grid size-9 place-items-center rounded-full border bg-background text-[10px] font-semibold ring-2 ring-card">
-                    {p.slice(0, 2)}
-                  </span>
-                ))}
-              </span>
+      {/* Every platform forum in one row */}
+      <section className="border-b bg-card/60">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <h2 className="font-semibold">Forums by platform</h2>
+            <Link href={urls.community()} className="text-sm text-brand underline-offset-2 hover:underline">
+              All forums
             </Link>
           </div>
+          <PlatformTiles className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8" />
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <CommunityStats />
-        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-          <AskFirst categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id }))} signedIn={!!viewer} />
-          <MembersStrip />
-        </div>
-      </section>
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0 space-y-12">
+          <PickupsStrip />
+          <StartHere tabs={startTabs} />
+          <QuickFeeCheck />
 
-      <section className="border-y bg-card/60">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">This week in the community</h2>
+          <section aria-labelledby="needs-answer">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 id="needs-answer" className="text-2xl font-semibold tracking-tight">
+                  Can you answer this?
+                </h2>
+                <p className="mt-1 text-muted-foreground">The newest questions without a reply.</p>
+              </div>
+              <Link href={`${urls.community()}?view=unanswered`} className="text-sm text-brand underline-offset-2 hover:underline">
+                All unanswered
+              </Link>
+            </div>
+            {unanswered.length === 0 ? (
+              <p className="mt-5 rounded-xl border border-dashed bg-card p-5 text-sm text-muted-foreground">
+                Every question has at least one reply.{" "}
+                <Link href={urls.newTopic()} className="text-brand underline underline-offset-2">
+                  Ask one
+                </Link>
+                .
+              </p>
+            ) : (
+              <ul className="mt-5 divide-y rounded-xl border bg-card">
+                {unanswered.map((t) => (
+                  <li key={t.id} className="group relative flex items-center gap-3 px-4 py-3 hover:bg-secondary/60">
+                    <UserAvatar profile={t.author} size="sm" link={false} />
+                    <div className="min-w-0 flex-1">
+                      <Link href={urls.topic(t)} className="line-clamp-1 font-medium after:absolute after:inset-0 group-hover:underline">
+                        {t.title}
+                      </Link>
+                      <p className="text-xs text-muted-foreground">
+                        {displayName(t.author)} asked {timeAgo(t.created_at)} ago
+                      </p>
+                    </div>
+                    <span className="shrink-0 rounded-md border px-2.5 py-1 text-xs font-medium text-brand group-hover:border-brand/60">Answer</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section aria-labelledby="this-week">
+            <h2 id="this-week" className="text-2xl font-semibold tracking-tight">
+              This week in the community
+            </h2>
             <div className="mt-5">
               <HeroCards />
             </div>
-          </div>
-          <div className="forum-card rounded-xl border bg-card p-5">
-            <h2 className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <MessageSquare className="size-3.5" aria-hidden="true" /> Happening now
-            </h2>
+          </section>
+        </div>
+
+        <aside className="space-y-6 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:self-start" aria-label="Community">
+          <div className="rounded-2xl border bg-card p-5">
+            <h2 className="mb-1 font-semibold">Happening now</h2>
             <ActivityTabs replies={replies} topics={topics} onlineIds={onlineIds} compact />
           </div>
+          <MembersStrip />
+          {viewer ? null : (
+            <div className="rounded-2xl border bg-card p-5">
+              <h2 className="font-semibold">How to join</h2>
+              <ol className="mt-3 space-y-3 text-sm">
+                {[
+                  ["Tell us where you sell", "Your feed starts with the forums that matter to you."],
+                  ["Ask, answer, share your numbers", "Good answers get marked solved and stay at the top."],
+                  ["Come back on a Monday", "A weekly thread for what you listed, what sold and what you made."],
+                ].map(([title, body], i) => (
+                  <li key={title} className="flex gap-3">
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold tabular-nums">{i + 1}</span>
+                    <span>
+                      <span className="font-medium">{title}</span>
+                      <span className="block text-muted-foreground">{body}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <Button asChild className="mt-4 w-full">
+                <Link href={urls.signup()}>Join free</Link>
+              </Button>
+            </div>
+          )}
+        </aside>
+      </div>
+
+      <section className="border-y bg-card/60">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2">
+          <AskFirst categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id }))} signedIn={!!viewer} />
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">What is here</h2>
+            <dl className="mt-5 divide-y border-y">
+              {whatIsHere.map((item) => (
+                <div key={item.href} className="py-4">
+                  <dt>
+                    <Link href={item.href} className="font-semibold text-brand underline-offset-2 hover:underline">
+                      {item.title}
+                    </Link>
+                  </dt>
+                  <dd className="mt-1 text-sm text-muted-foreground">{item.body}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <h2 className="text-2xl font-semibold tracking-tight">What you get here</h2>
-        <p className="mt-1 text-muted-foreground">It is a forum. A good one, run properly, and free.</p>
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {[
-            { href: `${urls.community()}?view=unanswered`, icon: MessageSquare, title: "Straight answers", body: "Questions get marked solved by the person who asked. The answer sits at the top of the thread, not on page four." },
-            { href: urls.community(), icon: Users, title: "Real numbers", body: "A weekly thread for what you listed, what sold and what you made. Nobody is here to impress anyone." },
-            { href: urls.community(), icon: BookOpen, title: "Every platform", body: "eBay, Amazon, Vinted, Whatnot, TikTok Shop, Etsy, Depop, Facebook Marketplace. If you sell on it, there is a forum for it." },
-          ].map((p) => (
-            <Link key={p.href} href={p.href} className="forum-card row-enter group rounded-xl border bg-card p-5 transition-colors hover:border-brand/60">
-              <p.icon className="size-6 text-brand" aria-hidden="true" />
-              <h3 className="mt-3 text-lg font-semibold group-hover:underline">{p.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{p.body}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section id="newsletter" className="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
+      <section id="newsletter" className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
         <EmailSignupCard source="/" variant="inline" />
         <NewsletterProof />
       </section>

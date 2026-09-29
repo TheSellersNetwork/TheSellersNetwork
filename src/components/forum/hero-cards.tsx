@@ -43,7 +43,7 @@ export async function HeroCards() {
 function Card({ icon, label, href, title, children }: { icon: React.ReactNode; label: string; href: string; title: string; children?: React.ReactNode }) {
   return (
     <Link href={href} className="forum-card row-enter group flex flex-col gap-2 rounded-lg border bg-card p-4 transition-colors hover:border-brand/60">
-      <span className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
         {icon}
         {label}
       </span>

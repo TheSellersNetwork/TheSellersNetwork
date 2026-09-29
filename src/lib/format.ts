@@ -37,9 +37,16 @@ export function initials(p: Pick<ProfileSummary, "display_name" | "username"> | 
 
 export const trustLabels = ["New", "Basic", "Member", "Regular", "Leader"] as const;
 
+/* Staff, including the house account, are shown as Team. */
 export function trustLabel(level: number, isStaff: boolean): string {
-  if (isStaff) return "Staff";
+  if (isStaff) return "Team";
   return trustLabels[level] ?? "Member";
+}
+
+/* Joined on or before siteConfig.foundingUntil. Staff are left out: they are Team. */
+export function isFoundingMember(p: { created_at?: string | null; is_staff?: boolean } | null | undefined, foundingUntil: string): boolean {
+  if (!p?.created_at || p.is_staff) return false;
+  return p.created_at.slice(0, 10) <= foundingUntil;
 }
 
 export function plural(n: number, one: string, many = `${one}s`): string {
