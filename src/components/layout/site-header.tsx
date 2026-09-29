@@ -26,7 +26,7 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40 border-b bg-background">
       {user ? <Heartbeat /> : null}
       <div className="mx-auto flex h-(--header-height) max-w-7xl items-center gap-4 px-4 sm:px-6">
-        <MobileNav items={nav} />
+        <MobileNav items={nav} user={user ? { is_staff: user.profile.is_staff } : null} />
         <Link href="/" className="shrink-0 rounded-sm" aria-label="The Sellers Network home">
           <Logo size={22} />
         </Link>

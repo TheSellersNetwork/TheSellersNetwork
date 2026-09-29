@@ -335,3 +335,63 @@ abbr.gloss:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
+
+/*
+  Phone navigation bar (src/components/layout/mobile-tab-bar-client.tsx).
+  Below 768px the page gets bottom padding so the fixed bar never covers the
+  end of the page, and toasts and the cookie notice sit above it. :has() means
+  pages without the bar (staff pages, /brand) keep their normal spacing.
+  viewport-fit=cover is set in the root layout, so keep landscape content
+  clear of the notch.
+*/
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+@media (max-width: 767.98px) {
+  body:has(.mobile-tabbar) {
+    --tabbar-space: calc(3.5rem + env(safe-area-inset-bottom));
+    padding-bottom: var(--tabbar-space);
+  }
+  body:has(.mobile-tabbar) [data-sonner-toaster][data-y-position="bottom"] {
+    bottom: calc(var(--tabbar-space) + 0.75rem) !important;
+  }
+  body:has(.mobile-tabbar) [role="dialog"][aria-labelledby="cookie-heading"] {
+    bottom: calc(var(--tabbar-space) + 0.75rem);
+  }
+}
+
+/*
+  Page transitions (src/components/layout/page-transition.tsx): the old page
+  fades out and the new one fades in, 180ms, no movement. The rest of the
+  screen (header, footer) cross-fades in the same time, which is invisible
+  where nothing changed. Switched off entirely for reduced motion.
+*/
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+::view-transition-old(.page-fade) {
+  animation: 120ms ease-out both page-fade-out;
+}
+::view-transition-new(.page-fade) {
+  animation: 180ms ease-out both page-fade-in;
+}
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { EbayShop, FbaCalculator, OfferCalculator, PlatformCalculator, ShowPlanner, WhereToSell } from "@/components/tools/fee-tools";
 import { ToolHeader, ToolIntro, ToolSection } from "@/components/tools/tool-header";
 import { calculatorSlugs, type CalculatorSlug } from "@/lib/tools/catalogue";
+import { parseShared, sharedQuery } from "@/lib/og/calculator-share";
 import type { PlatformId } from "@/lib/tools/fees";
 import { cn } from "@/lib/utils";
 
@@ -51,17 +52,30 @@ function resolve(platform: string[] | undefined): { slug: string | null; view: V
   return slug ? { slug, view: views[slug] } : null;
 }
 
-export async function generateMetadata({ params }: PageProps<"/tools/calculator/[[...platform]]">): Promise<Metadata> {
+/*
+  The share card comes from /api/og/calculator, which can read the inputs a
+  shared link carries (?price=20&cost=5) and show that result.
+*/
+function shareCard(slug: string | null, sp: Record<string, string | string[] | undefined>, alt: string): Pick<Metadata, "openGraph" | "twitter"> {
+  const shared = parseShared(sp);
+  const query = [slug ? `platform=${slug}` : "", shared ? sharedQuery(shared) : ""].filter(Boolean).join("&");
+  const images = [{ url: `/api/og/calculator${query ? `?${query}` : ""}`, width: 1200, height: 630, alt }];
+  return { openGraph: { title: alt, images }, twitter: { card: "summary_large_image", images } };
+}
+
+export async function generateMetadata({ params, searchParams }: PageProps<"/tools/calculator/[[...platform]]">): Promise<Metadata> {
   const r = resolve((await params).platform);
   if (!r) return {};
+  const sp = await searchParams;
   if (!r.view || !r.slug) {
     return {
       title: "Fee and profit calculator for UK sellers",
       description: "Compare what you keep after fees on eBay, Vinted, Depop, Etsy, Amazon, TikTok Shop, Whatnot and eBay Live for the same item, then open any platform for the full breakdown. Free, no sign-up.",
       alternates: { canonical: "/tools/calculator" },
+      ...shareCard(null, sp, "Fee and profit calculator for UK sellers"),
     };
   }
-  return { title: r.view.name, description: describe(r.view), alternates: { canonical: `/tools/calculator/${r.slug}` } };
+  return { title: r.view.name, description: describe(r.view), alternates: { canonical: `/tools/calculator/${r.slug}` }, ...shareCard(r.slug, sp, r.view.name) };
 }
 
 function Switcher({ current }: { current: string | null }) {
@@ -94,10 +108,12 @@ const offer = (
   </ToolSection>
 );
 
-export default async function Page({ params }: PageProps<"/tools/calculator/[[...platform]]">) {
+export default async function Page({ params, searchParams }: PageProps<"/tools/calculator/[[...platform]]">) {
   const r = resolve((await params).platform);
   if (!r) notFound();
   const { slug, view } = r;
+  // A shared result link (?price=20&cost=5) opens with those figures filled in.
+  const shared = parseShared(await searchParams) ?? undefined;
 
   if (!view) {
     return (
@@ -111,7 +127,7 @@ export default async function Page({ params }: PageProps<"/tools/calculator/[[..
           <ToolIntro>
             Enter one price and see what you would actually keep on eBay, Vinted, Depop, Etsy, TikTok Shop, Whatnot, eBay Live, Amazon and Facebook, side by side. Tap a platform for the breakdown.
           </ToolIntro>
-          <WhereToSell />
+          <WhereToSell shared={shared} />
         </section>
         {offer}
       </main>
@@ -122,7 +138,7 @@ export default async function Page({ params }: PageProps<"/tools/calculator/[[..
     <main id="main" className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
       <ToolHeader title={view.name} intro={view.intro} parent={{ href: "/tools/calculator", label: HUB }} />
       <Switcher current={slug} />
-      {view.fba ? <FbaCalculator /> : view.id ? <PlatformCalculator platform={view.id} /> : null}
+      {view.fba ? <FbaCalculator /> : view.id ? <PlatformCalculator platform={view.id} shared={shared} /> : null}
       {offer}
       {view.ebayShop ? (
         <ToolSection id="ebay-shop" title="Is an eBay shop worth it?" intro="For private sellers: compare listing fees with and without an eBay shop for the number of listings you make each month.">
