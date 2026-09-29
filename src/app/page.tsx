@@ -13,6 +13,19 @@ import { MembersStrip } from "@/components/marketing/members-strip";
 import { AskFirst } from "@/components/marketing/ask-first";
 import { NewsletterProof } from "@/components/marketing/newsletter-proof";
 import { PickupsStrip } from "@/components/pickups/pickups-strip";
+import { WelcomeChecklist } from "@/components/onboarding/welcome-checklist";
+import { AskSearchBar } from "@/components/home/sections/ask-search-bar";
+import { DebateBand } from "@/components/home/sections/debate-band";
+import { FeeTimeline } from "@/components/home/sections/fee-timeline";
+import { GuidesShelf } from "@/components/home/sections/guides-shelf";
+import { HomeSidebar } from "@/components/home/sections/home-sidebar";
+import { KeepGame } from "@/components/home/sections/keep-game";
+import { PickupsSection } from "@/components/home/sections/pickups-section";
+import { PlatformSwitcher } from "@/components/home/sections/platform-switcher";
+import { WeekRhythm } from "@/components/home/sections/week-rhythm";
+import { homeSections as on } from "@/lib/home/sections/config";
+import { orderByPlatform } from "@/lib/home/sections/platform";
+import { getHomePlatform } from "@/lib/home/sections/platform-server";
 import { getCurrentUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { getGuides } from "@/lib/content/guides";
@@ -51,6 +64,7 @@ const whatIsHere = [
 
 export default async function HomePage() {
   const viewer = await getCurrentUser();
+  const platform = on.platformSwitcher ? await getHomePlatform() : "all";
   const [categories, replies, topics, unanswered, online, guides] = await Promise.all([
     getCategories(),
     getRecentReplies(6),
@@ -63,13 +77,15 @@ export default async function HomePage() {
   const onlineIds = online.map((m) => m.id);
   const bySlug = new Map(categories.map((c) => [c.slug, c]));
   const titles = new Map(guides.map((g) => [g.slug, g.title]));
-  const startTabs: StartTab[] = startPlan.map((t) => ({
+  const allStartTabs: StartTab[] = startPlan.map((t) => ({
     id: t.id,
     label: t.label,
     tool: t.tool,
     forum: t.forum && bySlug.has(t.forum) ? { href: urls.category(t.forum), label: `Ask in the ${t.label} forum` } : { href: "/community/pickups", label: "Pickups and BOLO" },
     guides: t.guides.filter((s) => titles.has(s)).map((s) => ({ slug: s, title: titles.get(s)! })),
   }));
+  // The visitor's platform first, if they picked one.
+  const startTabs = orderByPlatform(allStartTabs, platform, (t) => [t.id]);
 
   return (
     <main id="main" className="flex-1">
@@ -94,12 +110,21 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {on.platformSwitcher ? (
+        <div className="border-b">
+          <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+            <PlatformSwitcher value={platform} />
+          </div>
+        </div>
+      ) : null}
+
+      {on.debateBand ? <DebateBand returnTo="/" /> : null}
+
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0 space-y-12">
-          <PickupsStrip />
+          {on.askSearch ? <AskSearchBar signedIn={!!viewer} /> : null}
+          {on.pickupsSection ? <PickupsSection /> : <PickupsStrip />}
           <StartHere tabs={startTabs} />
-          <QuickFeeCheck />
-
           <section aria-labelledby="needs-answer">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
@@ -139,52 +164,120 @@ export default async function HomePage() {
               </ul>
             )}
           </section>
-
-          <section aria-labelledby="this-week">
-            <h2 id="this-week" className="text-2xl font-semibold tracking-tight">
-              This week in the community
-            </h2>
-            <div className="mt-5">
-              <HeroCards />
-            </div>
-          </section>
+          {on.keepGame ? <KeepGame /> : <QuickFeeCheck />}
+          {on.guidesShelf ? <GuidesShelf /> : null}
+          {on.askSearch ? null : (
+            <section aria-labelledby="this-week">
+              <h2 id="this-week" className="text-2xl font-semibold tracking-tight">
+                This week in the community
+              </h2>
+              <div className="mt-5">
+                <HeroCards />
+              </div>
+            </section>
+          )}
+          {on.layoutRhythm ? null : (
+            <>
+              {on.weekRhythm ? <WeekRhythm /> : null}
+              {on.feeTimeline ? <FeeTimeline /> : null}
+            </>
+          )}
         </div>
 
-        <aside className="space-y-6 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:self-start" aria-label="Community">
-          <div className="rounded-2xl border bg-card p-5">
-            <h2 className="mb-1 font-semibold">Happening now</h2>
-            <ActivityTabs replies={replies} topics={topics} onlineIds={onlineIds} compact />
-          </div>
-          <MembersStrip />
-          {viewer ? null : (
+        {on.sidebar ? (
+          <HomeSidebar>
+            <WelcomeChecklist />
             <div className="rounded-2xl border bg-card p-5">
-              <h2 className="font-semibold">How to join</h2>
-              <ol className="mt-3 space-y-3 text-sm">
-                {[
-                  ["Tell us where you sell", "Your feed starts with the forums that matter to you."],
-                  ["Ask, answer, share your numbers", "Good answers get marked solved and stay at the top."],
-                  ["Come back on a Monday", "A weekly thread for what you listed, what sold and what you made."],
-                ].map(([title, body], i) => (
-                  <li key={title} className="flex gap-3">
-                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold tabular-nums">{i + 1}</span>
-                    <span>
-                      <span className="font-medium">{title}</span>
-                      <span className="block text-muted-foreground">{body}</span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-              <Button asChild className="mt-4 w-full">
-                <Link href={urls.signup()}>Join free</Link>
-              </Button>
+              <h2 className="mb-1 font-semibold">Happening now</h2>
+              <ActivityTabs replies={replies} topics={topics} onlineIds={onlineIds} compact />
             </div>
-          )}
-        </aside>
+            {viewer ? null : (
+              <div className="rounded-2xl border bg-card p-5">
+                <h2 className="font-semibold">How to join</h2>
+                <ol className="mt-3 space-y-3 text-sm">
+                  {[
+                    ["Tell us where you sell", "Your feed starts with the forums that matter to you."],
+                    ["Ask, answer, share your numbers", "Good answers get marked solved and stay at the top."],
+                    ["Come back on a Monday", "A weekly thread for what you listed, what sold and what you made."],
+                  ].map(([title, body], i) => (
+                    <li key={title} className="flex gap-3">
+                      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold tabular-nums">{i + 1}</span>
+                      <span>
+                        <span className="font-medium">{title}</span>
+                        <span className="block text-muted-foreground">{body}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+                <Button asChild className="mt-4 w-full">
+                  <Link href={urls.signup()}>Join free</Link>
+                </Button>
+              </div>
+            )}
+          </HomeSidebar>
+        ) : (
+          <aside className="space-y-6 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:self-start" aria-label="Community">
+            <WelcomeChecklist />
+            <div className="rounded-2xl border bg-card p-5">
+              <h2 className="mb-1 font-semibold">Happening now</h2>
+              <ActivityTabs replies={replies} topics={topics} onlineIds={onlineIds} compact />
+            </div>
+            <MembersStrip />
+            {viewer ? null : (
+              <div className="rounded-2xl border bg-card p-5">
+                <h2 className="font-semibold">How to join</h2>
+                <ol className="mt-3 space-y-3 text-sm">
+                  {[
+                    ["Tell us where you sell", "Your feed starts with the forums that matter to you."],
+                    ["Ask, answer, share your numbers", "Good answers get marked solved and stay at the top."],
+                    ["Come back on a Monday", "A weekly thread for what you listed, what sold and what you made."],
+                  ].map(([title, body], i) => (
+                    <li key={title} className="flex gap-3">
+                      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold tabular-nums">{i + 1}</span>
+                      <span>
+                        <span className="font-medium">{title}</span>
+                        <span className="block text-muted-foreground">{body}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+                <Button asChild className="mt-4 w-full">
+                  <Link href={urls.signup()}>Join free</Link>
+                </Button>
+              </div>
+            )}
+          </aside>
+        )}
       </div>
+
+      {on.layoutRhythm && on.weekRhythm ? (
+        <section className="border-y bg-card/60">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+            <WeekRhythm />
+          </div>
+        </section>
+      ) : null}
+
+      {on.layoutRhythm && on.feeTimeline ? (
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <FeeTimeline />
+        </section>
+      ) : null}
 
       <section className="border-y bg-card/60">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2">
-          <AskFirst categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id }))} signedIn={!!viewer} />
+          {on.askSearch ? (
+            <section aria-labelledby="this-week">
+              <h2 id="this-week" className="text-2xl font-semibold tracking-tight">
+                This week in the community
+              </h2>
+              <div className="mt-5">
+                <HeroCards />
+              </div>
+            </section>
+          ) : (
+            <AskFirst categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id }))} signedIn={!!viewer} />
+          )}
           <div>
             <h2 className="text-2xl font-semibold tracking-tight">What is here</h2>
             <dl className="mt-5 divide-y border-y">

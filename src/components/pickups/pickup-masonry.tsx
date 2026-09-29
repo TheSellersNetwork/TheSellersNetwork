@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, MapPin, Package } from "lucide-react";
+import { Heart, MapPin, MessageCircle, Package, Vote } from "lucide-react";
 import { SoldStamp } from "@/components/pickups/sold-stamp";
 import { gbp, multiple, pickupPlatforms, pickupSources, soldStampKey, type Pickup } from "@/lib/pickups";
 import { displayName, timeAgo } from "@/lib/format";
@@ -66,6 +66,7 @@ export function PickupTile({ p, showAuthor = true, heading: H = "h2" }: { p: Pic
               {p.like_count}<span className="sr-only"> nice find{p.like_count === 1 ? "" : "s"}</span>
             </span>
           ) : null}
+          <TalkCounts p={p} />
         </p>
         <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
           {showAuthor && p.author ? <span className="truncate">{displayName(p.author)}</span> : null}
@@ -73,5 +74,29 @@ export function PickupTile({ p, showAuthor = true, heading: H = "h2" }: { p: Pic
         </p>
       </div>
     </li>
+  );
+}
+
+/* Comment and "would you have bought it?" answer counts, shown only when there are some. */
+export function TalkCounts({ p }: { p: Pickup }) {
+  const comments = p.comment_count ?? 0;
+  const votes = (p.vote_yes_count ?? 0) + (p.vote_no_count ?? 0);
+  return (
+    <>
+      {comments > 0 ? (
+        <span className="inline-flex items-center gap-1">
+          <MessageCircle className="size-3" aria-hidden="true" />
+          {comments}
+          <span className="sr-only"> comment{comments === 1 ? "" : "s"}</span>
+        </span>
+      ) : null}
+      {votes > 0 ? (
+        <span className="inline-flex items-center gap-1">
+          <Vote className="size-3" aria-hidden="true" />
+          {votes}
+          <span className="sr-only"> {votes === 1 ? "answer" : "answers"} to would you have bought it</span>
+        </span>
+      ) : null}
+    </>
   );
 }

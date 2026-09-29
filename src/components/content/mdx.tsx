@@ -23,8 +23,8 @@ const baseComponents = {
     if (href.startsWith("/")) return <Link href={href}>{props.children}</Link>;
     return <a {...props} rel="noopener" />;
   },
-  Signup: ({ source }: { source: string }) => <EmailSignupCard source={source} variant="inline" className="not-prose my-8" />,
-  Download: ({ file }: { file: "bookkeeping" | "stock" | "sourcing" }) => <DownloadCard file={file} showGuide={false} className="my-8" />,
+  Signup: ({ source }: { source: string }) => <EmailSignupCard source={source} variant="inline" className="not-prose my-8 print:hidden" />,
+  Download: ({ file }: { file: "bookkeeping" | "stock" | "sourcing" }) => <DownloadCard file={file} showGuide={false} className="my-8 print:hidden" />,
   OperatorDetails,
   PerUnitCalculator,
   PercentCalculator,

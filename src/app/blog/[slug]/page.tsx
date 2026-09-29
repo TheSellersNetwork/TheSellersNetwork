@@ -24,7 +24,10 @@ import { getCurrentUser } from "@/lib/auth";
 import { formatChangeDate } from "@/lib/tools/changes";
 import { KeyFacts } from "@/components/content/key-facts";
 import { ReadingProgress } from "@/components/content/reading-progress";
-import { PathBanner } from "@/components/content/path-banner";
+import { ReadingNav, SeriesPrevNext } from "@/components/content/reading-nav";
+import { PrintButton } from "@/components/content/print-button";
+import { PrintMeta } from "@/components/content/print-meta";
+import { getSeries } from "@/lib/content/series";
 import { ArticleEndTracker } from "@/components/content/path-progress";
 import { extractShortVersion } from "@/lib/content/article-extras";
 import { getPaths } from "@/lib/content/paths";
@@ -81,7 +84,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
   const body = sourcesAt > 0 ? post.content.slice(0, sourcesAt) : post.content;
   const sources = sourcesAt > 0 ? post.content.slice(sourcesAt) : null;
   const keyFacts = extractShortVersion(post.content);
-  const paths = await getPaths();
+  const [paths, series] = await Promise.all([getPaths(), getSeries()]);
   const key = stepKey("blog", post.slug);
   const inPath = pathMemberships(paths, key).length > 0;
 
@@ -102,14 +105,19 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
       <ReadingProgress targetId="article-body" />
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
         <article id="article-body">
-          <PathBanner paths={paths} stepKey={key} />
+          <ReadingNav series={series} paths={paths} stepKey={key} />
           <header>
             {scheduledFor ? (
               <p className="mb-4 flex items-center gap-2 rounded-lg border-2 border-brand/40 bg-brand/10 px-3 py-2 text-sm font-medium">
                 <CalendarClock className="size-4 text-brand" aria-hidden="true" /> Scheduled for {formatChangeDate(scheduledFor)}. Only staff previews show this post until then.
               </p>
             ) : null}
-            <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
+            <PrintMeta
+              path={urls.blogPost(post.slug)}
+              published={post.published ? format(new Date(post.published), "d MMMM yyyy", { locale: enGB }) : null}
+              updated={post.updated && post.updated.slice(0, 10) !== post.published?.slice(0, 10) ? format(new Date(post.updated), "d MMMM yyyy", { locale: enGB }) : null}
+            />
+            <div className="flex flex-wrap gap-1 text-xs text-muted-foreground print:hidden">
               {post.platforms.map((p) => (
                 <span key={p} className="rounded bg-secondary px-1.5 py-0.5 capitalize">
                   {p}
@@ -118,7 +126,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
             </div>
             <h1 className="mt-3 font-serif text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{post.title}</h1>
             <p className="mt-3 max-w-prose text-lg text-muted-foreground">{post.excerpt}</p>
-            <div className="mt-5 flex items-center gap-3 border-y py-3 text-sm">
+            <div className="mt-5 flex flex-wrap items-center gap-3 border-y py-3 text-sm">
               <span className="grid size-9 place-items-center rounded-full bg-secondary font-medium">{byline ? byline.initials : "SN"}</span>
               <div>
                 <Link href={byline ? "/about#who-writes-what" : "/about"} className="font-medium hover:underline">
@@ -129,9 +137,12 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
                   {post.updated && post.updated.slice(0, 10) !== post.published?.slice(0, 10) ? ` · Updated ${format(new Date(post.updated), "d MMMM yyyy", { locale: enGB })}` : ""} · {readingTime(post.content)} min read
                 </div>
               </div>
+              <div className="sm:ml-auto">
+                <PrintButton />
+              </div>
             </div>
           </header>
-          <div className="prose prose-neutral mt-8 max-w-none measure dark:prose-invert prose-headings:font-sans prose-a:text-brand">
+          <div data-glossary className="prose prose-neutral mt-8 max-w-none measure dark:prose-invert prose-headings:font-sans prose-a:text-brand">
             <Mdx source={body} pick={post.pick} anchors />
             {post.debate ? (
               <DebateCard
@@ -147,8 +158,9 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
             {sources ? <Mdx source={sources} pick={post.pick} anchors /> : null}
           </div>
           {inPath ? <ArticleEndTracker stepKey={key} /> : null}
+          <SeriesPrevNext series={series} stepKey={key} />
           <InfoDisclaimer className="mt-10" />
-          <div className="mt-10 flex flex-wrap items-center gap-3 border-t pt-6">
+          <div className="mt-10 flex flex-wrap items-center gap-3 border-t pt-6 print:hidden">
             {thread ? (
               <Button asChild>
                 <Link href={urls.topic(thread)}>
@@ -162,11 +174,11 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
               </Button>
             )}
           </div>
-          <div className="mt-8">
+          <div className="mt-8 print:hidden">
             <EmailSignupCard source={urls.blogPost(post.slug)} variant="inline" />
           </div>
         </article>
-        <aside className="space-y-6 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:max-h-[calc(100vh-var(--header-height)-3rem)] lg:self-start lg:overflow-y-auto">
+        <aside className="space-y-6 print:hidden lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:max-h-[calc(100vh-var(--header-height)-3rem)] lg:self-start lg:overflow-y-auto">
           <KeyFacts bullets={keyFacts} />
           <TableOfContents headings={headings} />
         </aside>

@@ -65,6 +65,10 @@ export type Pickup = {
   photo_url: string | null;
   note: string | null;
   like_count: number;
+  /* The next three exist once migration 20260930000200 is applied; undefined before then. */
+  comment_count?: number;
+  vote_yes_count?: number;
+  vote_no_count?: number;
   created_at: string;
   author: { username: string; display_name: string | null; avatar_url: string | null } | null;
   liked_by_me?: boolean;

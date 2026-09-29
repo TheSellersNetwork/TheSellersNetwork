@@ -7,6 +7,7 @@ export const urls = {
     `/community/t/${t.slug}/${t.short_id}${postNumber && postNumber > 1 ? `#post-${postNumber}` : ""}`,
   newTopic: (categorySlug?: string) =>
     `/community/new${categorySlug ? `?category=${encodeURIComponent(categorySlug)}` : ""}`,
+  tag: (slug: string) => `/community/tag/${slug}`,
   profile: (username: string) => `/community/u/${username}`,
   rules: () => "/community/rules",
   search: (q?: string) => `/community/search${q ? `?q=${encodeURIComponent(q)}` : ""}`,

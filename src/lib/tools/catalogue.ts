@@ -1,6 +1,6 @@
 /* Every tool on /tools, grouped. Icons are names looked up on the page. `includes` lists what is inside a page that holds several tools. */
 
-export type ToolIcon = "calculator" | "clock" | "tags" | "percent" | "tag" | "image" | "truck" | "calendar" | "file" | "coins" | "sheet" | "shield";
+export type ToolIcon = "calculator" | "clock" | "tags" | "percent" | "tag" | "image" | "truck" | "calendar" | "file" | "coins" | "sheet" | "shield" | "boxes" | "message";
 
 export type Tool = { href: string; title: string; description: string; icon: ToolIcon; badge?: string; includes?: string[] };
 
@@ -26,9 +26,9 @@ export const toolGroups: { title: string; tools: Tool[] }[] = [
       {
         href: "/tools/pricing",
         title: "Pricing",
-        description: "What to list at from the sold prices you found, when to drop the price, bulk price changes, Amazon repricer floors and book lookups.",
+        description: "What an item is worth, what to list at from the sold prices you found, when to drop the price, bulk price changes, Amazon repricer floors and book lookups.",
         icon: "tags",
-        includes: ["Sold prices summariser", "Stock ageing and price drops", "Bulk price change", "Amazon repricer floor prices", "ISBN checker"],
+        includes: ["Sold prices summariser", "What's it worth? search links", "Stock ageing and price drops", "Bulk price change", "Amazon repricer floor prices", "ISBN checker"],
       },
       {
         href: "/tools/tax",
@@ -47,9 +47,15 @@ export const toolGroups: { title: string; tools: Tool[] }[] = [
       {
         href: "/tools/postage",
         title: "Postage finder",
-        description: "The cheapest Royal Mail and Evri service for your size and weight, and every Royal Mail, Evri and Parcelforce service your parcel fits.",
+        description: "The cheapest Royal Mail and Evri service for your size and weight, every Royal Mail, Evri and Parcelforce service your parcel fits, and the settings for printing labels.",
         icon: "truck",
-        includes: ["Cheapest service", "Parcel size checker"],
+        includes: ["Cheapest service", "Parcel size checker", "Label printing settings"],
+      },
+      {
+        href: "/tools/buyer-messages",
+        title: "Buyer message templates",
+        description: "Polite replies to low offers, returns, items not received, requests to pay off the platform and more. Fill in the blanks and copy.",
+        icon: "message",
       },
       { href: "/tools/calendar", title: "Reseller calendar", description: "Pokémon and Lego dates, sale days, fee changes and tax deadlines, with a calendar you can subscribe to.", icon: "calendar" },
     ],
@@ -70,6 +76,12 @@ export const toolGroups: { title: string; tools: Tool[] }[] = [
         description: "Find FBA stock lost or damaged in the warehouse and refunds never returned, with the last day to claim for each.",
         icon: "coins",
         includes: ["Reimbursement checker from your reports", "Claim deadline for one date"],
+      },
+      {
+        href: "/tools/stock-tracker",
+        title: "Stock tracker",
+        description: "Your stock list with SKUs, costs, where each item is listed and what it made, with stock value, profit this month and tax year, and how long things have sat. Saved only on your device.",
+        icon: "boxes",
       },
       { href: "/tools/downloads", title: "Free spreadsheets", description: "Bookkeeping, stock tracker and sourcing log.", icon: "sheet" },
       { href: "/tools/scam-check", title: "Is this buyer a scam?", description: "A quick checklist for suspicious messages from buyers.", icon: "shield" },

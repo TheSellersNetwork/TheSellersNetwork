@@ -395,3 +395,141 @@ body {
     animation: none !important;
   }
 }
+
+/*
+  Print and "Save as PDF" (guides and blog posts have a button for it). Site
+  chrome, controls, the poll and signup boxes are left out; the article prints
+  in black on white with the source URL of each outside link after it. The
+  page's own title, URL and dates come from the print-only block in
+  src/components/content/print-meta.tsx.
+*/
+@media print {
+  @page {
+    margin: 16mm 14mm;
+  }
+  :root,
+  :root.dark {
+    color-scheme: light;
+    --background: white !important;
+    --foreground: black !important;
+    --card: white !important;
+    --card-foreground: black !important;
+    --popover: white !important;
+    --popover-foreground: black !important;
+    --muted-foreground: black !important;
+    --secondary: white !important;
+    --brand-soft: white !important;
+    --border: gray !important;
+  }
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+  body * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  .prose {
+    --tw-prose-body: black !important;
+    --tw-prose-headings: black !important;
+    --tw-prose-links: black !important;
+    --tw-prose-bold: black !important;
+    --tw-prose-bullets: black !important;
+    --tw-prose-counters: black !important;
+    --tw-prose-quotes: black !important;
+    --tw-prose-td-borders: gray !important;
+    --tw-prose-th-borders: gray !important;
+    color: black;
+    font-size: 11pt;
+    max-width: none;
+  }
+  .prose a,
+  .prose-a\:text-brand a {
+    color: black !important;
+    text-decoration: underline;
+  }
+
+  /* Site chrome and anything you can only click. */
+  body > header,
+  body > footer,
+  .mobile-tabbar,
+  [data-reading-progress],
+  [role="dialog"],
+  [data-sonner-toaster],
+  a[href="#main"],
+  #glossary-tip,
+  main form,
+  main button:not(table button),
+  main select,
+  [data-print-hide] {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  main .lg\:grid-cols-\[minmax\(0\,1fr\)_280px\] {
+    display: block !important;
+  }
+
+  /* Outside links: print where they go. Internal links and anchors are left alone. */
+  #article-body .prose a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+
+  /* Keep tables, list items and headings with what follows them. */
+  table,
+  tr,
+  li,
+  blockquote,
+  pre,
+  figure,
+  [data-table] {
+    break-inside: avoid;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  [data-table] > div {
+    overflow: visible !important;
+  }
+  [data-table] th,
+  [data-table] td {
+    position: static !important;
+    background: white !important;
+  }
+  [data-table] th button svg {
+    display: none;
+  }
+
+  /* The changelog prints open. */
+  details::details-content {
+    content-visibility: visible;
+    display: block;
+  }
+  details > summary svg {
+    display: none;
+  }
+
+  abbr.gloss {
+    text-decoration: none;
+  }
+  .print-meta {
+    margin-bottom: 8pt;
+    border-bottom: 1px solid gray;
+    padding-bottom: 6pt;
+    font-size: 9pt;
+  }
+}

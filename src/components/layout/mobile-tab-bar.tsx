@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import { getUnreadNotificationCount } from "@/lib/forum/queries";
 import { MobileTabBarClient } from "@/components/layout/mobile-tab-bar-client";
+import { InstallPrompt } from "@/components/layout/install-prompt";
 
 /*
   The bar along the bottom of the screen on phones: Forum, Pickups, New post,
@@ -11,5 +12,11 @@ import { MobileTabBarClient } from "@/components/layout/mobile-tab-bar-client";
 export async function MobileTabBar() {
   const user = await getCurrentUser();
   const unread = user ? await getUnreadNotificationCount(user.id) : 0;
-  return <MobileTabBarClient username={user?.profile.username ?? null} unread={unread} />;
+  return (
+    <>
+      <MobileTabBarClient username={user?.profile.username ?? null} unread={unread} />
+      {/* The add to home screen card is for members; it sits just above this bar on phones. */}
+      {user ? <InstallPrompt /> : null}
+    </>
+  );
 }

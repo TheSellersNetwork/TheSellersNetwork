@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
+  Boxes,
   Calculator,
   CalendarClock,
   Check,
@@ -9,6 +10,7 @@ import {
   FileSpreadsheet,
   FileUp,
   ImageMinus,
+  MessageSquareText,
   Percent,
   ShieldCheck,
   Tag,
@@ -21,7 +23,7 @@ import { toolGroups, type ToolIcon } from "@/lib/tools/catalogue";
 export const metadata: Metadata = {
   title: "Free tools for UK resellers",
   description:
-    "Free calculators and tools for UK resellers: a fee and profit calculator for every platform, pricing, tax and VAT, postage, listing copy, sales reports and Amazon claims. No sign-up.",
+    "Free calculators and tools for UK resellers: a fee and profit calculator for every platform, pricing, tax and VAT, postage, listing copy, buyer message templates, a stock tracker, sales reports and Amazon claims. No sign-up.",
   alternates: { canonical: "/tools" },
 };
 
@@ -38,6 +40,8 @@ const icons: Record<ToolIcon, LucideIcon> = {
   coins: Coins,
   sheet: FileSpreadsheet,
   shield: ShieldCheck,
+  boxes: Boxes,
+  message: MessageSquareText,
 };
 
 export default function ToolsPage() {

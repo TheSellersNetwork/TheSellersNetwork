@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PostageFinder } from "@/components/tools/fee-tools";
+import { LabelHelper } from "@/components/tools/label-helper";
 import { ParcelChecker } from "@/components/tools/parcel-checker";
 import { ToolHeader, ToolIntro } from "@/components/tools/tool-header";
 import { ToolTabs } from "@/components/tools/tool-tabs";
 import { PARCELS_CHECKED } from "@/lib/tools/parcels";
 
 export const metadata: Metadata = {
-  title: "Postage finder: cheapest service and parcel size checker",
-  description: "The cheapest Royal Mail and Evri service for your parcel's size and weight, and every Royal Mail, Evri and Parcelforce service it fits, with links to their price pages. Free.",
+  title: "Postage finder: cheapest service, parcel size checker and label printing",
+  description: "The cheapest Royal Mail and Evri service for your parcel's size and weight, and every Royal Mail, Evri and Parcelforce service it fits, with links to their price pages, and the right settings for printing labels. Free.",
   alternates: { canonical: "/tools/postage" },
 };
 
@@ -58,6 +59,16 @@ export default async function Page({ searchParams }: PageProps<"/tools/postage">
                     .
                   </p>
                 </section>
+              </>
+            ),
+          },
+          {
+            id: "labels",
+            label: "Label printing",
+            content: (
+              <>
+                <ToolIntro>Choose what you print labels on and where the label comes from, and see the size, scaling and orientation to pick, with a link to the platform&rsquo;s own label help.</ToolIntro>
+                <LabelHelper />
               </>
             ),
           },

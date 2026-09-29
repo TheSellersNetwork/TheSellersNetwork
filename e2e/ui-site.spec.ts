@@ -104,7 +104,8 @@ test.describe("instant search", () => {
     await expect(page).toHaveURL(/\/tools\/calculator\/vinted$/);
 
     await page.keyboard.press("Control+k");
-    await expect(page.getByRole("option", { name: "vinted fee" })).toBeVisible();
+    // The recent search, not results that happen to contain the words.
+    await expect(page.getByRole("option", { name: "vinted fee", exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toBeHidden();
     expect(errors).toEqual([]);

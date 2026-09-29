@@ -49,7 +49,7 @@ export default async function sitemap(props: { id: Promise<string> | string | nu
       ...categories.filter((c) => !c.is_private).map((c) => ({ url: `${base}/community/c/${c.slug}`, changeFrequency: "hourly" as const, priority: 0.7 })),
       ...guides.filter((g) => g.published).map((g) => ({ url: `${base}/guides/${g.slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
       ...changes.map((c) => ({ url: `${base}/blog/${c.slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
-      ...[...new Set(["/tools", "/tools/glossary", ...toolGroups.flatMap((g) => g.tools.map((t) => t.href)).filter((h) => h.startsWith("/tools/")), ...calculatorSlugs.map((s) => `/tools/calculator/${s}`)])].map((p) => ({ url: `${base}${p}`, changeFrequency: "monthly" as const, priority: 0.6 })),
+      ...[...new Set(["/tools", "/tools/glossary", ...toolGroups.flatMap((g) => g.tools.map((t) => t.href)).filter((h) => h.startsWith("/tools/")), ...calculatorSlugs.map((s) => `/tools/calculator/${s}`), "/tools/calculator/compare", "/tools/calculator/embed", "/guides/paths", "/guides/series", "/community/badges", "/community/pickups", "/community/pickups/bolo"])].map((p) => ({ url: `${base}${p}`, changeFrequency: "monthly" as const, priority: 0.6 })),
       ...posts.filter((p) => isLive(p.published)).map((p) => ({ url: `${base}/blog/${p.slug}`, lastModified: p.updated ?? p.published ?? undefined, changeFrequency: "monthly" as const, priority: 0.7 })),
     ];
   }

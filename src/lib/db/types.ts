@@ -161,7 +161,8 @@ export type NotificationType =
   | "badge"
   | "moderation"
   | "message"
-  | "digest";
+  | "digest"
+  | "tag_topic";
 
 export type NotificationPayload = {
   topic_id?: string;
@@ -172,6 +173,8 @@ export type NotificationPayload = {
   post_number?: number;
   actor_id?: string;
   message?: string;
+  tag_slug?: string;
+  tag_name?: string;
 };
 
 export type Notification = {

@@ -69,6 +69,7 @@ export function AccountForm({ initial }: { initial: Initial }) {
         <p className="text-sm text-muted-foreground">The bell in the header always shows everything. These control email only.</p>
         <input type="hidden" name="email_on_reply" value={prefs.reply ? "on" : "off"} />
         <input type="hidden" name="email_on_mention" value={prefs.mention ? "on" : "off"} />
+        {/* The weekly digest moved to "Email updates" below (member_email_prefs, opt-in). This keeps the old column as it was. */}
         <input type="hidden" name="email_digest" value={prefs.digest ? "on" : "off"} />
         <div className="space-y-3">
           <label className="flex items-center justify-between gap-4 text-sm">
@@ -78,10 +79,6 @@ export function AccountForm({ initial }: { initial: Initial }) {
           <label className="flex items-center justify-between gap-4 text-sm">
             <span>When someone mentions me</span>
             <Switch checked={prefs.mention} onCheckedChange={(v) => setPrefs((p) => ({ ...p, mention: v }))} />
-          </label>
-          <label className="flex items-center justify-between gap-4 text-sm">
-            <span>Weekly digest</span>
-            <Switch checked={prefs.digest} onCheckedChange={(v) => setPrefs((p) => ({ ...p, digest: v }))} />
           </label>
         </div>
       </section>

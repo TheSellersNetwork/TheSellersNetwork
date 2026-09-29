@@ -37,3 +37,7 @@ in CI. The harness stubs the `auth` schema and the three Supabase roles.
 | 0600_notifications_badges_moderation | `notifications`, `badges`, `user_badges`, `moderation_log` (immutable), `user_stats_daily` |
 | 0700_blog_email | `blog_posts`, `email_subscribers`, `email_sequence_steps`, `email_sends` |
 | 0800_permissions_rls | `can_post()`, `can_reply()`, column-protection triggers, every policy |
+| 20260928002300_house_account | `site_accounts` key allows `house` (The Sellers Network account) |
+| 20260930000100_member_forum_email | `tag_follows`, `member_email_prefs` (opt-in digest and fee alerts), send logs, `tag_topic` notifications |
+| 20260930000200_pickup_talk_milestones_welcome | `pickup_comments`, `pickup_votes` with counters, `profile_milestones`, `profiles.welcome_dismissed_at` |
+| 20260930000300_saved_calculations | `saved_calculations` (own rows only, 200 per member) |

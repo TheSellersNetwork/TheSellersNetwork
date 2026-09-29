@@ -795,6 +795,132 @@ await step("pickups: own edits only, no counters, BOLO needs three sales", async
   );
 });
 
+await step("saved calculations: private to the owner, 200 at most", async () => {
+  const add = (user, name) =>
+    asUser(user, `insert into public.saved_calculations (user_id, name, platform, inputs) values ($1, $2, 'ebay_business', '{"price":20}') returning id`, [user, name]);
+  const mine = await add(ids.member, "£20 on eBay");
+  const id = mine.rows[0].id;
+  // Nobody else can read, rename, delete or add one in another member's name.
+  const seen = await asUser(ids.regular, `select count(*)::int as n from public.saved_calculations`);
+  if (seen.rows[0].n !== 0) throw new Error("another member saw a saved calculation");
+  const anonSeen = await asAnon(`select count(*)::int as n from public.saved_calculations`).catch(() => ({ rows: [{ n: 0 }] }));
+  if (anonSeen.rows[0].n !== 0) throw new Error("anon saw a saved calculation");
+  await asUser(ids.regular, `update public.saved_calculations set name = 'Taken' where id = $1`, [id]);
+  await asUser(ids.regular, `delete from public.saved_calculations where id = $1`, [id]);
+  const still = await db.query(`select name from public.saved_calculations where id = $1`, [id]);
+  if (still.rows[0]?.name !== "£20 on eBay") throw new Error("another member changed a saved calculation");
+  await expectError(asUser(ids.regular, `insert into public.saved_calculations (user_id, name, platform, inputs) values ($1, 'x', 'vinted', '{}')`, [ids.member]), DENIED);
+  // The owner cannot hand it to someone else, and bad platforms are refused.
+  await asUser(ids.member, `update public.saved_calculations set user_id = $2, name = 'Renamed' where id = $1`, [id, ids.regular]);
+  const moved = await db.query(`select user_id, name from public.saved_calculations where id = $1`, [id]);
+  if (moved.rows[0].user_id !== ids.member || moved.rows[0].name !== "Renamed") throw new Error(JSON.stringify(moved.rows[0]));
+  await expectError(asUser(ids.member, `insert into public.saved_calculations (user_id, name, platform, inputs) values ($1, 'x', 'gumtree', '{}')`, [ids.member]), "saved_calculations_platform_valid");
+  // The limit: fill up to 200, then the next one is refused.
+  await db.query(`insert into public.saved_calculations (user_id, name, platform, inputs) select $1, 'Bulk ' || g, 'vinted', '{}' from generate_series(1, 199) g`, [ids.member]);
+  await expectError(add(ids.member, "One too many"), "saved_calculations_limit");
+  await asUser(ids.member, `delete from public.saved_calculations where id = $1`, [id]);
+  await add(ids.member, "Room again");
+});
+
+await step("pickup comments, votes, milestones and welcome dismissal", async () => {
+  const p = await db.query(`insert into public.pickups (user_id, title, category, source_type, paid) values ($1, 'Talking point', 'other', 'car_boot', 2) returning id`, [ids.member]);
+  const pid = p.rows[0].id;
+  // Comments: counted, server-owned fields forced, new members cannot post links.
+  const c = await asUser(ids.regular, `insert into public.pickup_comments (pickup_id, user_id, body, is_hidden, created_at) values ($1, $2, 'Great find', true, '2000-01-01') returning id, is_hidden, created_at > now() - interval '1 minute' as fresh`, [pid, ids.regular]);
+  if (c.rows[0].is_hidden || !c.rows[0].fresh) throw new Error(JSON.stringify(c.rows[0]));
+  await expectError(asUser(ids.newbie, `insert into public.pickup_comments (pickup_id, user_id, body) values ($1, $2, 'see https://x.test')`, [pid, ids.newbie]), "links_not_allowed");
+  await asUser(ids.newbie, `insert into public.pickup_comments (pickup_id, user_id, body) values ($1, $2, 'Nice one')`, [pid, ids.newbie]);
+  await expectError(asUser(ids.newbie, `insert into public.pickup_comments (pickup_id, user_id, body) values ($1, $2, 'as someone else')`, [pid, ids.regular]), DENIED);
+  await asUser(ids.newbie, `update public.pickup_comments set body = 'changed' where id = $1`, [c.rows[0].id]);
+  await asUser(ids.newbie, `delete from public.pickup_comments where id = $1`, [c.rows[0].id]);
+  let counts = await db.query(`select comment_count, vote_yes_count, vote_no_count from public.pickups where id = $1`, [pid]);
+  if (counts.rows[0].comment_count !== 2) throw new Error(`comment_count ${counts.rows[0].comment_count}`);
+  await asUser(ids.regular, `delete from public.pickup_comments where id = $1`, [c.rows[0].id]);
+  // Members cannot write the counters on their own pickup.
+  await asUser(ids.member, `update public.pickups set comment_count = 99, vote_yes_count = 99 where id = $1`, [pid]);
+  counts = await db.query(`select comment_count, vote_yes_count from public.pickups where id = $1`, [pid]);
+  if (counts.rows[0].comment_count !== 1 || counts.rows[0].vote_yes_count !== 0) throw new Error(JSON.stringify(counts.rows[0]));
+  // Votes: one each, not on your own, can change, private to the voter.
+  await expectError(asUser(ids.member, `insert into public.pickup_votes (user_id, pickup_id, would_buy) values ($1, $2, true)`, [ids.member, pid]), DENIED);
+  await asUser(ids.regular, `insert into public.pickup_votes (user_id, pickup_id, would_buy) values ($1, $2, true)`, [ids.regular, pid]);
+  await asUser(ids.newbie, `insert into public.pickup_votes (user_id, pickup_id, would_buy) values ($1, $2, false)`, [ids.newbie, pid]);
+  await expectError(asUser(ids.regular, `insert into public.pickup_votes (user_id, pickup_id, would_buy) values ($1, $2, false)`, [ids.regular, pid]), "duplicate key");
+  await asUser(ids.regular, `update public.pickup_votes set would_buy = false where pickup_id = $1 and user_id = $2`, [pid, ids.regular]);
+  await expectError(asUser(ids.regular, `update public.pickup_votes set pickup_id = $1 where user_id = $2`, [pid, ids.regular]), DENIED);
+  counts = await db.query(`select vote_yes_count, vote_no_count from public.pickups where id = $1`, [pid]);
+  if (counts.rows[0].vote_yes_count !== 0 || counts.rows[0].vote_no_count !== 2) throw new Error(JSON.stringify(counts.rows[0]));
+  const seenVotes = await asUser(ids.regular, `select count(*)::int as n from public.pickup_votes where pickup_id = $1`, [pid]);
+  if (seenVotes.rows[0].n !== 1) throw new Error("votes are not private");
+  await asUser(ids.newbie, `delete from public.pickup_votes where pickup_id = $1 and user_id = $2`, [pid, ids.newbie]);
+  counts = await db.query(`select vote_no_count from public.pickups where id = $1`, [pid]);
+  if (counts.rows[0].vote_no_count !== 1) throw new Error("vote delete not counted");
+  // Comments on a hidden pickup are hidden with it.
+  await db.query(`update public.pickups set is_hidden = true where id = $1`, [pid]);
+  const hiddenComments = await asAnon(`select count(*)::int as n from public.pickup_comments where pickup_id = $1`, [pid]);
+  if (hiddenComments.rows[0].n !== 0) throw new Error("comments on a hidden pickup are visible");
+  // Milestones: own only, 10 at most, no future dates, no links.
+  const m = await asUser(ids.member, `insert into public.profile_milestones (user_id, label, happened_on) values ($1, '100th sale', current_date - 3) returning id`, [ids.member]);
+  await expectError(asUser(ids.member, `insert into public.profile_milestones (user_id, label, happened_on) values ($1, 'Someone else', current_date)`, [ids.regular]), DENIED);
+  await expectError(asUser(ids.member, `insert into public.profile_milestones (user_id, label, happened_on) values ($1, 'Next year', current_date + 30)`, [ids.member]), "milestone_in_future");
+  await expectError(asUser(ids.member, `insert into public.profile_milestones (user_id, label, happened_on) values ($1, 'see www.x.test', current_date)`, [ids.member]), "profile_milestones_no_links");
+  await asUser(ids.regular, `update public.profile_milestones set label = 'Hijacked' where id = $1`, [m.rows[0].id]);
+  await asUser(ids.member, `update public.profile_milestones set user_id = $2, label = '1 year reselling' where id = $1`, [m.rows[0].id, ids.regular]);
+  const ms = await db.query(`select user_id, label from public.profile_milestones where id = $1`, [m.rows[0].id]);
+  if (ms.rows[0].user_id !== ids.member || ms.rows[0].label !== "1 year reselling") throw new Error(JSON.stringify(ms.rows[0]));
+  await db.query(`insert into public.profile_milestones (user_id, label, happened_on) select $1, 'Milestone ' || g, current_date from generate_series(1, 9) g`, [ids.member]);
+  await expectError(asUser(ids.member, `insert into public.profile_milestones (user_id, label, happened_on) values ($1, 'Eleventh', current_date)`, [ids.member]), "too_many_milestones");
+  const publicMs = await asAnon(`select count(*)::int as n from public.profile_milestones where user_id = $1`, [ids.member]);
+  if (publicMs.rows[0].n !== 10) throw new Error("milestones not public");
+  // Welcome checklist dismissal: own profile only.
+  await asUser(ids.member, `update public.profiles set welcome_dismissed_at = now() where id = $1`, [ids.member]);
+  await asUser(ids.member, `update public.profiles set welcome_dismissed_at = now() where id = $1`, [ids.regular]);
+  const w = await db.query(`select id, welcome_dismissed_at is not null as d from public.profiles where id in ($1, $2)`, [ids.member, ids.regular]);
+  const dismissed = Object.fromEntries(w.rows.map((r) => [r.id, r.d]));
+  if (!dismissed[ids.member] || dismissed[ids.regular]) throw new Error(JSON.stringify(dismissed));
+});
+
+await step("member forum and email: tag follows, one notification per topic, opt-in prefs, send records", async () => {
+  const tags = await db.query(`insert into public.tags (slug, name) values ('mf-royal-mail', 'Royal Mail'), ('mf-postage', 'Postage') returning id`);
+  const [tagA, tagB] = tags.rows.map((r) => r.id);
+  // Own follows only.
+  await asUser(ids.regular, `insert into public.tag_follows (user_id, tag_id) values ($1, $2), ($1, $3)`, [ids.regular, tagA, tagB]);
+  await expectError(asUser(ids.regular, `insert into public.tag_follows (user_id, tag_id) values ($1, $2)`, [ids.member, tagA]), DENIED);
+  const seen = await asUser(ids.member, `select count(*)::int as n from public.tag_follows where user_id = $1`, [ids.regular]);
+  if (seen.rows[0].n !== 0) throw new Error("another member's tag follows are visible");
+  // A new topic with two followed tags makes one notification, never for the author.
+  const t = await db.query(`insert into public.topics (title, category_id, author_id) values ('Tracked 48 price rise', $1, $2) returning id`, [ids.cat_ebay, ids.member]);
+  await db.query(`insert into public.topic_tags (topic_id, tag_id) values ($1, $2)`, [t.rows[0].id, tagA]);
+  await db.query(`insert into public.topic_tags (topic_id, tag_id) values ($1, $2)`, [t.rows[0].id, tagB]);
+  const n = await db.query(`select user_id from public.notifications where type = 'tag_topic' and payload ->> 'topic_id' = $1`, [t.rows[0].id]);
+  if (n.rows.length !== 1 || n.rows[0].user_id !== ids.regular) throw new Error(`expected one tag notification, got ${JSON.stringify(n.rows)}`);
+  // Old topics do not notify when tagged later.
+  const old = await db.query(`insert into public.topics (title, category_id, author_id, created_at) values ('An old thread', $1, $2, now() - interval '3 days') returning id`, [ids.cat_ebay, ids.member]);
+  await db.query(`insert into public.topic_tags (topic_id, tag_id) values ($1, $2)`, [old.rows[0].id, tagA]);
+  const oldN = await db.query(`select count(*)::int as n from public.notifications where type = 'tag_topic' and payload ->> 'topic_id' = $1`, [old.rows[0].id]);
+  if (oldN.rows[0].n !== 0) throw new Error("old topic notified followers");
+  // Email preferences start off, consent time is set by the database, own row only.
+  await asUser(ids.member, `insert into public.member_email_prefs (user_id) values ($1)`, [ids.member]);
+  const fresh = await db.query(`select weekly_digest, fee_alerts from public.member_email_prefs where user_id = $1`, [ids.member]);
+  if (fresh.rows[0].weekly_digest || fresh.rows[0].fee_alerts) throw new Error("email preferences should start off");
+  await asUser(ids.member, `update public.member_email_prefs set weekly_digest = true, weekly_digest_changed_at = '2000-01-01', fee_alert_platforms = '{ebay,hmrc}' where user_id = $1`, [ids.member]);
+  const stamped = await db.query(`select weekly_digest, weekly_digest_changed_at > now() - interval '1 minute' as recent from public.member_email_prefs where user_id = $1`, [ids.member]);
+  if (!stamped.rows[0].weekly_digest || !stamped.rows[0].recent) throw new Error("consent time not stamped by the database");
+  await expectError(asUser(ids.member, `update public.member_email_prefs set fee_alert_platforms = '{shopee}' where user_id = $1`, [ids.member]), "member_email_prefs_platforms_valid");
+  await expectError(asUser(ids.member, `insert into public.member_email_prefs (user_id, weekly_digest) values ($1, true)`, [ids.regular]), DENIED);
+  await asUser(ids.regular, `update public.member_email_prefs set weekly_digest = false where user_id = $1`, [ids.member]);
+  const still = await db.query(`select weekly_digest from public.member_email_prefs where user_id = $1`, [ids.member]);
+  if (!still.rows[0].weekly_digest) throw new Error("another member changed email preferences");
+  // Send records are written by the server only.
+  await expectError(asUser(ids.member, `insert into public.digest_sends (user_id, week_start) values ($1, current_date)`, [ids.member]), DENIED);
+  await db.query(`insert into public.fee_changes_seen (slug, platform, status) values ('mf-test-change', 'ebay', 'sending')`);
+  await expectError(asUser(ids.member, `insert into public.fee_alert_sends (user_id, change_slug) values ($1, 'mf-test-change')`, [ids.member]), DENIED);
+  await expectError(asUser(ids.member, `insert into public.fee_changes_seen (slug, platform) values ('mf-other', 'ebay')`), DENIED);
+  await db.query(`insert into public.fee_alert_sends (user_id, change_slug) values ($1, 'mf-test-change')`, [ids.member]);
+  await expectError(db.query(`insert into public.fee_alert_sends (user_id, change_slug) values ($1, 'mf-test-change')`, [ids.member]), "duplicate key");
+  const others = await asUser(ids.regular, `select count(*)::int as n from public.fee_alert_sends`);
+  if (others.rows[0].n !== 0) throw new Error("another member's sends are visible");
+});
+
 await step("every public table has RLS enabled", async () => {
   const r = await db.query(`
     select c.relname from pg_class c

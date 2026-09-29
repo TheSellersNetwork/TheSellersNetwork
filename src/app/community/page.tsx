@@ -15,8 +15,11 @@ import { recordHomeVisit } from "@/app/community/presence-actions";
 import { ExploreForums } from "@/components/forum/explore-forums";
 import { ActivityTabs } from "@/components/forum/activity-tabs";
 import { PromoCard } from "@/components/marketing/promo-card";
+import { WelcomeChecklist } from "@/components/onboarding/welcome-checklist";
 import { getRecentReplies, getRecentTopics } from "@/lib/forum/overview-queries";
 import { urls } from "@/lib/forum/urls";
+import { parseStatus } from "@/lib/forum/status";
+import { StatusFilter } from "@/components/forum/status-filter";
 import type { TopicListView, TopPeriod } from "@/lib/db/types";
 
 export const metadata: Metadata = {
@@ -37,6 +40,7 @@ export default async function CommunityPage({ searchParams }: PageProps<"/commun
   const requested = parseView(params.view);
   const period = parsePeriod(params.period);
   const cursor = typeof params.cursor === "string" ? params.cursor : null;
+  const status = parseStatus(params.status);
 
   const [categories, user] = await Promise.all([getCategories(), getCurrentUser()]);
   const groups = groupCategories(categories);
@@ -55,7 +59,7 @@ export default async function CommunityPage({ searchParams }: PageProps<"/commun
     view === "following" ? followedIds : mutedIds.size > 0 ? categories.map((c) => c.id).filter((id) => !mutedIds.has(id)) : undefined;
 
   const [page, online, replies, recentTopics] = await Promise.all([
-    explore ? Promise.resolve({ topics: [], nextCursor: null }) : getTopics({ view: view === "following" ? "latest" : view, period, cursor, categoryIds }),
+    explore ? Promise.resolve({ topics: [], nextCursor: null }) : getTopics({ view: view === "following" ? "latest" : view, period, cursor, categoryIds, status }),
     getOnlineMembers(50),
     explore ? getRecentReplies(8) : Promise.resolve([]),
     explore ? getRecentTopics(8) : Promise.resolve([]),
@@ -77,6 +81,7 @@ export default async function CommunityPage({ searchParams }: PageProps<"/commun
     >
       {explore ? (
         <div className="space-y-6">
+          <WelcomeChecklist />
           <QuickAsk
             viewer={user ? { username: user.profile.username, display_name: user.profile.display_name, avatar_url: user.profile.avatar_url, trust_level: user.profile.trust_level } : null}
             categories={categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name, parent_id: c.parent_id, min_trust_to_post: c.min_trust_to_post, layout: c.layout }))}
@@ -139,16 +144,19 @@ export default async function CommunityPage({ searchParams }: PageProps<"/commun
           </h1>
         </div>
         <ViewTabs basePath={urls.community()} view={view} period={period} showFollowing={!!user} />
+        <StatusFilter href={`${urls.community()}?view=${view}${view === "top" ? `&period=${period}` : ""}`} status={status} />
         <LiveBar kind="topics" categoryIds={categoryIds} />
         <TopicList
           newSince={newSince}
           onlineIds={onlineIds}
           topics={page.topics}
           nextCursor={page.nextCursor}
-          moreHref={(c) => `${urls.community()}?view=${view}&period=${period}&cursor=${encodeURIComponent(c)}`}
+          moreHref={(c) => `${urls.community()}?view=${view}&period=${period}${status ? `&status=${status}` : ""}&cursor=${encodeURIComponent(c)}`}
           sponsorPage={urls.community()}
           emptyMessage={
-            view === "unanswered"
+            status
+              ? "No topics with that status here yet."
+              : view === "unanswered"
               ? "Every topic has a reply. Nice work, everyone."
               : view === "following"
                 ? "Nothing yet from the categories you follow. Follow a category from its page to build your feed."

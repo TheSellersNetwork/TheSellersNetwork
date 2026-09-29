@@ -7,7 +7,9 @@ import { MapPin, Package } from "lucide-react";
 import { DeletePickup, MarkSold, NiceFind } from "@/components/pickups/pickup-actions";
 import { UserAvatar } from "@/components/forum/user-avatar";
 import { getCurrentUser } from "@/lib/auth";
-import { getPickup } from "@/lib/pickups-queries";
+import { getMyPickupVote, getPickup, getPickupComments } from "@/lib/pickups-queries";
+import { PickupComments } from "@/components/pickups/pickup-comments";
+import { PickupVote } from "@/components/pickups/pickup-vote";
 import { gbp, multiple, pickupCategories, pickupPlatforms, pickupSources } from "@/lib/pickups";
 import { displayName, longDate } from "@/lib/format";
 import { siteConfig } from "@/lib/site";
@@ -28,8 +30,11 @@ export default async function PickupPage({ params }: PageProps<"/community/picku
   const p = await getPickup(id, viewer?.id);
   if (!p) notFound();
   const own = viewer?.id === p.user_id;
+  const [talk, myVote] = await Promise.all([getPickupComments(p.id), viewer && !own ? getMyPickupVote(p.id, viewer.id) : Promise.resolve(null)]);
+  // Votes need the 20260930000200 migration. Before it the counters are missing and the question stays hidden.
+  const votesReady = typeof p.vote_yes_count === "number";
   const x = multiple(p.paid, p.sold_price);
-  const reportUrl = `/report?url=${encodeURIComponent(`${siteConfig.url}/pickups/${p.id}`)}`;
+  const reportUrl = `/report?url=${encodeURIComponent(`${siteConfig.url}/community/pickups/${p.id}`)}`;
 
   return (
     <ForumShell source="/community/pickups" activeNav="pickups">
@@ -122,6 +127,10 @@ export default async function PickupPage({ params }: PageProps<"/community/picku
             ) : null}
           </div>
 
+          {votesReady ? (
+            <PickupVote id={p.id} price={gbp(p.paid)} yes={p.vote_yes_count ?? 0} no={p.vote_no_count ?? 0} mine={myVote} mode={own ? "own" : viewer ? "member" : "signed-out"} />
+          ) : null}
+
           {own && p.sold_price === null ? (
             <div className="mt-6">
               <MarkSold id={p.id} />
@@ -129,6 +138,13 @@ export default async function PickupPage({ params }: PageProps<"/community/picku
           ) : null}
         </div>
       </div>
+      {talk.available ? (
+        <PickupComments
+          pickupId={p.id}
+          comments={talk.comments}
+          viewer={viewer ? { id: viewer.id, isStaff: viewer.profile.is_staff, canComment: viewer.emailConfirmed && !!viewer.profile.onboarded_at && !viewer.profile.is_suspended } : null}
+        />
+      ) : null}
     </ForumShell>
   );
 }

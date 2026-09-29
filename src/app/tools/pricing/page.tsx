@@ -5,11 +5,12 @@ import { BulkPrice, IsbnLookup, StockAgeing } from "@/components/tools/small-too
 import { SoldComps } from "@/components/tools/sold-comps";
 import { ToolHeader, ToolIntro } from "@/components/tools/tool-header";
 import { ToolTabs } from "@/components/tools/tool-tabs";
+import { WorthHelper } from "@/components/tools/worth-helper";
 
 export const metadata: Metadata = {
-  title: "Pricing tools: sold prices, markdowns, bulk changes and Amazon floors",
+  title: "Pricing tools: what it is worth, sold prices, markdowns, bulk changes and Amazon floors",
   description:
-    "Summarise the sold prices you found, plan when to drop the price on stale stock, change prices across a listings file, set Amazon repricer minimum and maximum prices, and look up a book by ISBN. Free, and your files never leave your browser.",
+    "Find what an item is worth with ready-made sold price searches, summarise the sold prices you found, plan when to drop the price on stale stock, change prices across a listings file, set Amazon repricer minimum and maximum prices, and look up a book by ISBN. Free, and your files never leave your browser.",
   alternates: { canonical: "/tools/pricing" },
 };
 
@@ -29,7 +30,7 @@ export default async function Page({ searchParams }: PageProps<"/tools/pricing">
   const { tab } = await searchParams;
   return (
     <main id="main" className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
-      <ToolHeader title="Pricing" intro="What to list at, when to bring the price down, how to change a whole file of prices at once, and the lowest price an Amazon repricer should go to." />
+      <ToolHeader title="Pricing" intro="What something is worth, what to list at, when to bring the price down, how to change a whole file of prices at once, and the lowest price an Amazon repricer should go to." />
       <ToolTabs
         initial={typeof tab === "string" ? tab : undefined}
         label="Pricing tools"
@@ -65,6 +66,18 @@ export default async function Page({ searchParams }: PageProps<"/tools/pricing">
                     <li>Whole numbers in the middle of text, like &ldquo;size 10&rdquo; or &ldquo;3 bids&rdquo;, are ignored because they are rarely prices.</li>
                   </ul>
                 </section>
+              </>
+            ),
+          },
+          {
+            id: "worth",
+            label: "What's it worth?",
+            content: (
+              <>
+                <ToolIntro>
+                  Type the brand and item and get ready-made searches for eBay sold listings, Vinted, Depop and Facebook Marketplace, plus price guides for records, Lego, games and collectables. We only build the links; you open them and read the prices yourself.
+                </ToolIntro>
+                <WorthHelper />
               </>
             ),
           },

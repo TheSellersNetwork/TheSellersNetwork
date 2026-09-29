@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { track } from "@/lib/analytics/client";
 import { landingContext } from "@/components/analytics/landing-tracker";
 
-export function SignupForm({ turnstileSiteKey }: { turnstileSiteKey: string | null }) {
+export function SignupForm({ turnstileSiteKey, next = "/community" }: { turnstileSiteKey: string | null; next?: string }) {
   const [token, setToken] = useState("");
   const [email, setEmail] = useState("");
   const [state, action, pending] = useActionState<SignupState, FormData>(
@@ -23,7 +23,7 @@ export function SignupForm({ turnstileSiteKey }: { turnstileSiteKey: string | nu
   );
 
   if (state.ok) {
-    return <VerifyCode email={email} type="signup" next="/community" />;
+    return <VerifyCode email={email} type="signup" next={next} />;
   }
 
   return (
