@@ -9,6 +9,12 @@ import { test, expect } from "@playwright/test";
 */
 
 const solvedTopic = process.env.E2E_SOLVED_TOPIC;
+
+// CI runs without a database, so there are no topics to hover or open.
+test.beforeEach(async ({ page }) => {
+  await page.goto("/community?view=latest");
+  test.skip((await page.locator(".topic-row a.topic-title").count()) === 0, "No topics in this database");
+});
 const storageState = process.env.E2E_STORAGE_STATE;
 
 async function firstTopicPath(page: import("@playwright/test").Page): Promise<string> {

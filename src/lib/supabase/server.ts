@@ -11,6 +11,11 @@ export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    // Pages wait for these reads. Supabase retries a failed read three times
+    // (1s, 2s, 4s), so a page with a few reads took half a minute when the
+    // database could not be reached. Fail fast and let the page show its
+    // empty states; the browser client and cron jobs keep the retries.
+    db: { retry: false, timeout: 10_000 },
     cookies: {
       getAll() {
         return cookieStore.getAll();

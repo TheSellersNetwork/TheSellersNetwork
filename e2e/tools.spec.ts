@@ -376,7 +376,7 @@ test.describe("chromium only", () => {
   test("contact form: choosing a topic changes the guidance", async ({ page }) => {
     const errors = await open(page, "/contact");
     await page.getByLabel("What is it about?").selectOption("defamation");
-    await expect(page.getByText(/Defamation \(Operators of Websites\) Regulations 2013/)).toBeVisible();
+    await expect(page.getByText(/Defamation Act 2013 and its regulations/)).toBeVisible();
     expect(errors).toEqual([]);
   });
 });
