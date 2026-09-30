@@ -51,6 +51,21 @@ Legal and privacy pages and flows: privacy policy, terms, cookies, about (with f
 - Site-wide stats and streak counts include topics in private forums (there are none yet).
 - Sign-up falls back to the email's first part as username if none is given (the form always gives one).
 
+## Defamation complaints (Defamation Act 2013 s5, added 30 September 2026)
+
+To keep the website operator defence in s5, a defamation complaint must be handled as the Defamation (Operators of Websites) Regulations 2013 (SI 2013/3028) set out. A solicitor should review this process and the copy before launch.
+
+- **Notice.** `/report?kind=defamation` asks for everything s5(6) and reg 2 need: name, email, the statement, where it is (a link on this site), its meaning, what is inaccurate or unsupported opinion, confirmation the complainant cannot identify the poster, and consent (yes or no) to sharing their name and their email with the poster. It also asks about earlier removals (Schedule para 9). The server checks it all; notices are stored in `defamation_notices` (migration 20260930002300, staff only, complaint fields cannot be edited). A flag with the defamation reason is not a notice, and the flag dialog points to the form.
+- **Incomplete notice (reg 4).** Without the confirmation the notice is stored but marked invalid, and the receipt email tells the complainant what is missing and what a notice must contain.
+- **Deadlines.** "Within 48 hours" leaves out weekends, Good Friday, Christmas Day and England and Wales bank holidays (reg 1(3)). The poster has until midnight at the end of the 5th day after the day they are notified. Both are worked out in UK time in `src/lib/defamation/deadlines.ts` (tested, including clock changes). Special one-off bank holidays must be added there when announced.
+- **Staff steps** at `/admin/messages`, each recorded with its time and logged in `moderation_log`:
+  1. Check we can contact the poster privately (account email or private message). If not, remove the statement within 48 hours of receipt (para 3).
+  2. Otherwise, within 48 hours of receipt, send the poster the notification (copy the template on the notice; it hides the complainant's name and email unless they agreed) and acknowledge the complainant (paras 2 and 4).
+  3. No reply by the poster's deadline, or a reply that agrees to removal, or a refusal without full name and postal address: remove within 48 hours and tell the complainant (paras 5 to 7).
+  4. Refusal with full name and postal address: tell the complainant within 48 hours; give the poster's details only if the poster agreed (para 8).
+  5. Repeat posting after two or more earlier removals for the same complainant: remove within 48 hours without contacting the poster (para 9).
+- Nothing is emailed to posters automatically. Notices that arrive by email or post are not in the inbox and must be tracked by hand with the same deadlines. [TOM: decide who checks the inbox on working days so 48 hours is never missed]
+
 ## Needs the owner (cannot be done in code)
 
 1. Pay the ICO data protection fee: https://ico.org.uk/for-organisations/data-protection-fee/ . Put the registration number in `NEXT_PUBLIC_ICO_NUMBER`.
