@@ -62,13 +62,13 @@ export default async function ChristmasPostingPage() {
               <h3 className="font-semibold">{c.name}</h3>
               {c.note ? <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{c.note}</p> : null}
               <div className="mt-3 overflow-x-auto rounded-xl border bg-card">
-                <table className="w-full text-left text-sm">
+                <table className="w-full table-fixed text-left text-sm">
                   <caption className="sr-only">
                     {c.name} last recommended posting dates for Christmas {data.year}
                   </caption>
                   <thead className="border-b text-xs uppercase tracking-wide text-muted-foreground">
                     <tr>
-                      <th scope="col" className="px-4 py-2 font-medium">
+                      <th scope="col" className="w-3/5 px-4 py-2 font-medium">
                         Service
                       </th>
                       <th scope="col" className="px-4 py-2 font-medium">
