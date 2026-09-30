@@ -225,7 +225,7 @@
   min-width: 1.25rem;
   padding: 0 0.35rem;
   border-radius: 9999px;
-  background: var(--brand);
+  background: var(--primary);
   color: var(--primary-foreground);
   font-size: 0.7rem;
   font-weight: 600;
@@ -264,6 +264,9 @@
   --secondary-foreground: #e2e8f0;
   --muted-foreground: #94a3b8;
   --primary-foreground: #ffffff;
+  /* Readable blue text on the dark band, and a deeper blue for filled buttons (white text passes AA on both). */
+  --brand: #3b82f6;
+  --primary: #2563eb;
   --accent: #172033;
   --accent-foreground: #e2e8f0;
   color-scheme: dark;

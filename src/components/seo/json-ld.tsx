@@ -128,3 +128,42 @@ export function ArticleJsonLd({ title, description, url, datePublished, dateModi
     />
   );
 }
+
+/* A free tool that runs in the browser. Price 0 in pounds; nothing else is claimed (no ratings, no user counts). */
+export function WebApplicationJsonLd({ name, description, url, category = "UtilitiesApplication" }: { name: string; description: string; url: string; category?: "UtilitiesApplication" | "BusinessApplication" }) {
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name,
+        description,
+        url: abs(url),
+        applicationCategory: category,
+        operatingSystem: "Any (web browser)",
+        browserRequirements: "Requires JavaScript",
+        isAccessibleForFree: true,
+        inLanguage: "en-GB",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
+        publisher: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
+      }}
+    />
+  );
+}
+
+/* FAQPage for questions answered on the page itself. Answers must match the visible text. */
+export function FaqJsonLd({ items }: { items: { question: string; answer: string }[] }) {
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: items.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
+        })),
+      }}
+    />
+  );
+}

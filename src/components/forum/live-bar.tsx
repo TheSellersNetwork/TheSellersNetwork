@@ -53,7 +53,7 @@ export function LiveBar(props: Props) {
           setCount(0);
           router.refresh();
         }}
-        className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-primary-foreground shadow-md hover:bg-brand-deep"
+        className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground shadow-md hover:bg-primary/85"
       >
         <ArrowUp className="size-4" />
         {label}, show

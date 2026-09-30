@@ -43,7 +43,7 @@ export async function PickupsStrip() {
           <p className="mt-1 text-sm text-muted-foreground">
             Found something good at a car boot or charity shop? Post a photo, what you paid and, once it sells, what it went for. Sold comps from real finds are what make the BOLO list.
           </p>
-          <Link href="/community/pickups/new" className="mt-4 inline-flex h-9 items-center rounded-md bg-brand px-4 text-sm font-medium text-primary-foreground hover:bg-brand-deep">
+          <Link href="/community/pickups/new" className="mt-4 inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/85">
             Post the first pickup
           </Link>
         </div>

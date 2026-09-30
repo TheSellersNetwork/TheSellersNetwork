@@ -89,7 +89,7 @@ export function HeroSlides({ slides, className }: { slides: Slide[]; className?:
             {slide.detail ? <span className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{slide.detail}</span> : null}
             <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
               {slide.pill ? (
-                <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", slide.urgent ? "bg-brand text-primary-foreground" : "bg-secondary text-foreground")}>{slide.pill}</span>
+                <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", slide.urgent ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground")}>{slide.pill}</span>
               ) : null}
               <span className="inline-flex items-center gap-1 text-brand">
                 {slide.cta}
@@ -113,14 +113,14 @@ export function HeroSlides({ slides, className }: { slides: Slide[]; className?:
               onClick={() => setIndex(i)}
               aria-label={`Show ${i + 1} of ${slides.length}`}
               aria-current={i === index}
-              className={cn("h-1.5 rounded-full transition-all motion-reduce:transition-none", i === index ? "w-4 bg-brand" : "w-1.5 bg-muted-foreground/40 hover:bg-muted-foreground")}
+              className={cn("h-1.5 rounded-full transition-all motion-reduce:transition-none", i === index ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/40 hover:bg-muted-foreground")}
             />
           ))}
         </span>
       </div>
 
       {/* Time until the next slide */}
-      {running ? <span key={`bar-${index}`} className="slide-progress absolute inset-x-0 bottom-0 h-0.5 origin-left bg-brand" style={{ animationDuration: `${SLIDE_MS}ms` }} aria-hidden="true" /> : null}
+      {running ? <span key={`bar-${index}`} className="slide-progress absolute inset-x-0 bottom-0 h-0.5 origin-left bg-primary" style={{ animationDuration: `${SLIDE_MS}ms` }} aria-hidden="true" /> : null}
     </section>
   );
 }

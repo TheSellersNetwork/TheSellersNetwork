@@ -74,14 +74,14 @@ export function MobileTabBarClient({ username, unread }: { username: string | nu
                 )}
               >
                 {t.primary ? (
-                  <span className={cn("grid size-8 place-items-center rounded-full bg-brand text-primary-foreground", here && "ring-2 ring-brand/30 ring-offset-2 ring-offset-background")}>
+                  <span className={cn("grid size-8 place-items-center rounded-full bg-primary text-primary-foreground", here && "ring-2 ring-brand/30 ring-offset-2 ring-offset-background")}>
                     <Icon className="size-5" aria-hidden="true" />
                   </span>
                 ) : (
                   <span className="relative grid size-8 place-items-center">
                     <Icon className="size-5" aria-hidden="true" />
                     {t.badge && t.badge > 0 ? (
-                      <span className="absolute -right-1 top-0 grid min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-4 text-primary-foreground" aria-hidden="true">
+                      <span className="absolute -right-1 top-0 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground" aria-hidden="true">
                         {t.badge > 99 ? "99+" : t.badge}
                       </span>
                     ) : null}

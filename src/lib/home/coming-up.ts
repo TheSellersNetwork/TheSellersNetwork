@@ -36,7 +36,7 @@ const inDays = (days: number) => (days === 0 ? "Today" : days === 1 ? "Tomorrow"
 const agoDays = (days: number) => (days < 14 ? `${days} days ago` : days < 60 ? `${Math.round(days / 7)} weeks ago` : `${Math.round(days / 30)} months ago`);
 
 /* Tools worth a spotlight. One is chosen each day. */
-const spotlightTools = ["/tools/calculator", "/tools/scam-check", "/tools/sales-reports", "/tools/listing-builder", "/tools/postage", "/tools/pricing", "/tools/worth-it", "/tools/amazon-claims", "/tools/tax", "/tools/background-remover", "/tools/calendar"];
+const spotlightTools = ["/tools/calculator", "/tools/scam-check", "/tools/sales-reports", "/tools/listing-builder", "/tools/postage", "/tools/pricing", "/tools/worth-it", "/tools/amazon-claims", "/tools/tax", "/tools/background-remover", "/tools/calendar", "/tools/vinted-label-cropper"];
 
 /*
   The revolving card at the top of the home page. A mix of things worth a

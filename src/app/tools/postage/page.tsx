@@ -69,6 +69,17 @@ export default async function Page({ searchParams }: PageProps<"/tools/postage">
               <>
                 <ToolIntro>Choose what you print labels on and where the label comes from, and see the size, scaling and orientation to pick, with a link to the platform&rsquo;s own label help.</ToolIntro>
                 <LabelHelper />
+                <p className="mt-8 rounded-xl border bg-card p-4 text-sm">
+                  Got an A4 label PDF and a 4x6 printer? The{" "}
+                  <Link href="/tools/label-cropper" className="font-medium underline">
+                    shipping label cropper
+                  </Link>{" "}
+                  crops the label out of each page and makes a PDF the right size, on your device. For Vinted labels, the{" "}
+                  <Link href="/tools/vinted-label-cropper" className="font-medium underline">
+                    Vinted label cropper
+                  </Link>{" "}
+                  also says which Vinted carriers need no printer.
+                </p>
               </>
             ),
           },

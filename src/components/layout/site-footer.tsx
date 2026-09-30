@@ -22,6 +22,7 @@ const columns = [
       { href: "/newsletter", label: "Newsletter" },
       { href: "/tools", label: "Tools" },
       { href: "/tools/postage?tab=size", label: "Parcel size checker" },
+      { href: "/tools/vinted-label-cropper", label: "Vinted label cropper" },
       { href: "/blog?type=changes", label: "Fee and policy changes" },
     ],
   },

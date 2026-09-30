@@ -54,7 +54,7 @@ export async function PickupsSection({ pickups: given }: { pickups?: Pickup[] } 
               </li>
             ))}
           </ol>
-          <Link href="/community/pickups/new" className="mt-4 inline-flex min-h-11 items-center rounded-md bg-brand px-4 text-sm font-medium text-primary-foreground hover:bg-brand-deep sm:min-h-9">
+          <Link href="/community/pickups/new" className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/85 sm:min-h-9">
             Post a pickup
           </Link>
         </div>

@@ -77,6 +77,8 @@
 :root.dark,
 :root[data-brand="slate"].dark {
   --brand: #3b82f6;
+  /* Filled buttons and badges need a deeper blue than text: white on #2563eb is 5.2:1, on #3b82f6 only 3.7:1. */
+  --brand-fill: #2563eb;
   --brand-deep: #60a5fa;
   --brand-soft: #172033;
   --background: #0b1220;
@@ -137,7 +139,8 @@
 
 /* Dark mode: same mapping, surfaces lifted off the background */
 :root.dark {
-  --primary: var(--brand);
+  /* Palettes can set --brand-fill when their text blue is too light for white text on a button. */
+  --primary: var(--brand-fill, var(--brand));
   --primary-foreground: #06100f;
   --card: color-mix(in oklab, var(--background) 85%, #ffffff);
   --card-foreground: var(--foreground);

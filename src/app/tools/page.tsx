@@ -7,6 +7,7 @@ import {
   Check,
   Clock,
   Coins,
+  Crop,
   FileSpreadsheet,
   FileUp,
   ImageMinus,
@@ -42,6 +43,7 @@ const icons: Record<ToolIcon, LucideIcon> = {
   shield: ShieldCheck,
   boxes: Boxes,
   message: MessageSquareText,
+  crop: Crop,
 };
 
 export default function ToolsPage() {

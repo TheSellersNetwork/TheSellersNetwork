@@ -96,7 +96,7 @@ export function WelcomeCard({ userId, steps }: { userId: string; steps: WelcomeS
           <li key={s.id}>
             {s.done ? (
               <p className="flex items-start gap-2.5 rounded-md px-2 py-1.5 text-sm text-muted-foreground">
-                <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-brand text-primary-foreground">
+                <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
                   <Check className="size-3" aria-hidden="true" />
                 </span>
                 <span className="line-through decoration-muted-foreground/60">
