@@ -50,6 +50,13 @@ export default async function CalendarPage() {
           page lists sets that are going but gives no end dates. Retirement lists on other sites are predictions, however confident they sound, so we do not show them as dates here.
         </p>
         <p>
+          Christmas last posting dates appear once each carrier publishes them on its own website, and link to{" "}
+          <Link href="/tools/postage/christmas-last-posting-dates" className="underline">
+            every carrier&rsquo;s Christmas dates
+          </Link>
+          .
+        </p>
+        <p>
           Release dates can move. Check the source before you buy stock around one. Not financial or tax advice.
         </p>
         <p>
