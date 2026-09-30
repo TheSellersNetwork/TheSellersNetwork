@@ -159,9 +159,21 @@ export default async function ChristmasPostingPage() {
             Tips for Christmas orders
           </h2>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
-            {tips.map((t) => (
-              <li key={t}>{t}</li>
-            ))}
+            {tips.map((t) => {
+              // The first sentence reads as the tip's heading.
+              const cut = t.indexOf(". ");
+              return (
+                <li key={t}>
+                  {cut > 0 ? (
+                    <>
+                      <strong className="font-medium text-foreground">{t.slice(0, cut + 1)}</strong> {t.slice(cut + 2)}
+                    </>
+                  ) : (
+                    t
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
       ) : null}
