@@ -5,7 +5,7 @@
   server actions and unit tests can all use it.
 */
 
-import { calculate, fbaFees, feeData, platforms, type PlatformId, type Sale } from "@/lib/tools/fees";
+import { calculate, ebayDestinations, fbaFees, feeData, platforms, type EbayDestination, type PlatformId, type Sale } from "@/lib/tools/fees";
 import { calculatorPages, readAmount, sharedQuery, type SharedInputs } from "@/lib/og/calculator-share";
 import type { CalculatorSlug } from "@/lib/tools/catalogue";
 
@@ -25,6 +25,10 @@ export type PlatformExtras = {
   offsite: boolean;
   reduced: boolean;
   individual: boolean;
+  /* eBay: where the buyer is, whether eBay International Shipping carries it, and whether eBay converts the currency. */
+  destination: EbayDestination;
+  eis: boolean;
+  fx: boolean;
 };
 
 export type PlatformInputs = SharedInputs & PlatformExtras;
@@ -59,11 +63,14 @@ const r2 = (n: number) => Math.round(n * 100) / 100;
 const clamp = (n: unknown, lo: number, hi: number, fallback: number) => (typeof n === "number" && Number.isFinite(n) && n >= lo && n <= hi ? r2(n) : fallback);
 const categoryOk = (c: unknown): c is string => typeof c === "string" && /^[a-z0-9_-]{1,40}$/.test(c);
 
-export const noExtras: PlatformExtras = { promoted: 0, boost: false, offsite: false, reduced: false, individual: false };
+export const noExtras: PlatformExtras = { promoted: 0, boost: false, offsite: false, reduced: false, individual: false, destination: "uk", eis: false, fx: false };
+
+const isEbay = (p: PlatformId) => p === "ebay_business" || p === "ebay_private";
+const destinationOk = (d: unknown): d is EbayDestination => typeof d === "string" && ebayDestinations.some((x) => x.id === d);
 
 /* ---- Links ---- */
 
-export const extraKeys = { promoted: "promo", boost: "boost", offsite: "offsite", reduced: "reduced", individual: "indiv" } as const;
+export const extraKeys = { promoted: "promo", boost: "boost", offsite: "offsite", reduced: "reduced", individual: "indiv", destination: "dest", eis: "eis", fx: "fx" } as const;
 
 /* The platform-only options carried in a link (?promo=5&boost=1). */
 export function readExtras(q: QueryLike): PlatformExtras {
@@ -74,6 +81,9 @@ export function readExtras(q: QueryLike): PlatformExtras {
     offsite: flag(q, extraKeys.offsite),
     reduced: flag(q, extraKeys.reduced),
     individual: flag(q, extraKeys.individual),
+    destination: destinationOk(read(q, extraKeys.destination)) ? (read(q, extraKeys.destination) as EbayDestination) : "uk",
+    eis: flag(q, extraKeys.eis),
+    fx: flag(q, extraKeys.fx),
   };
 }
 
@@ -85,6 +95,11 @@ export function extrasQuery(platform: PlatformId, e: PlatformExtras): string {
   if (platform === "etsy" && e.offsite) p.set(extraKeys.offsite, "1");
   if ((platform === "whatnot" || platform === "ebay_live") && e.reduced) p.set(extraKeys.reduced, "1");
   if (platform === "amazon_fbm" && e.individual) p.set(extraKeys.individual, "1");
+  if (isEbay(platform) && e.destination !== "uk") {
+    p.set(extraKeys.destination, e.destination);
+    if (e.eis) p.set(extraKeys.eis, "1");
+  }
+  if (isEbay(platform) && e.fx) p.set(extraKeys.fx, "1");
   return p.toString();
 }
 
@@ -190,6 +205,9 @@ export function toPlatformSale(platform: PlatformId, i: PlatformInputs): Sale {
     etsyOffsiteAds: platform === "etsy" && i.offsite,
     reducedRate: (platform === "whatnot" || platform === "ebay_live") && i.reduced,
     amazonIndividual: platform === "amazon_fbm" && i.individual,
+    ebayDestination: isEbay(platform) ? i.destination : "uk",
+    ebayIntlShipping: isEbay(platform) && i.eis,
+    ebayCurrencyConversion: isEbay(platform) && i.fx,
   };
 }
 
@@ -260,6 +278,9 @@ export function cleanInputs(kind: CalcKind, raw: unknown): CalcInputs | null {
     offsite: o.offsite === true,
     reduced: o.reduced === true,
     individual: o.individual === true,
+    destination: destinationOk(o.destination) ? o.destination : "uk",
+    eis: o.eis === true,
+    fx: o.fx === true,
   };
 }
 

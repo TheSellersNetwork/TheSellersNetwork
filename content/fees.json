@@ -1,9 +1,10 @@
 {
-  "checked": "2026-09-29",
+  "checked": "2026-09-30",
   "vatRate": 20,
   "ebayPrivate": {
     "source": "https://www.ebay.co.uk/help/selling/fees-credits-invoices/selling-fees?id=4822",
     "internationalPercent": 3,
+    "internationalNote": "Charged on the total amount of the sale when the buyer's delivery address is outside the UK. Private seller fees are shown including VAT.",
     "freeListings": 300,
     "extraListingFee": 0.35,
     "shopFreeListings": 400,
@@ -15,6 +16,11 @@
     "perOrder10OrUnder": 0.3,
     "regulatoryPercent": 0.35,
     "feesExcludeVat": true,
+    "international": [
+      { "id": "europe", "name": "Eurozone and Northern Europe", "percent": 1.05 },
+      { "id": "us_ca", "name": "US and Canada", "percent": 1.8 },
+      { "id": "other", "name": "All other countries", "percent": 2 }
+    ],
     "categories": [
       { "id": "general", "name": "Antiques, art, baby, collectables, garden, health and beauty, sporting goods, toys", "percent": 10.9 },
       { "id": "media", "name": "Books, films, music, video games, computers, cameras, sound and vision", "percent": 9.9 },
@@ -32,6 +38,14 @@
       { "id": "business", "name": "Business, office and industrial", "percent": 12.5 },
       { "id": "other", "name": "Everything else, crafts, pet supplies, wholesale and job lots", "percent": 12.9 }
     ]
+  },
+  "ebayInternational": {
+    "shippingSource": "https://www.ebay.co.uk/sellercentre/postage/ebay-international-shipping",
+    "shippingNote": "Orders sent through eBay International Shipping have the international fee waived.",
+    "currencyConversionSource": "https://www.ebay.co.uk/help/selling/fees-credits-invoices/business-selling-fees?id=4809",
+    "currencyConversionPercent": 2.5,
+    "currencyConversionChanges": [{ "from": "2026-12-01", "percent": 2.75 }],
+    "currencyConversionNote": "Charged when eBay converts your money for an item listed or sold on another eBay site, such as eBay.com. For sellers registered in the UK."
   },
   "ebayLive": {
     "source": "https://www.ebay.co.uk/help/selling/ebay-live/ebay-live-selling-fees?id=5870",

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ChevronDown, ExternalLink, Trophy } from "lucide-react";
-import { calculate, fbaFees, feeData, minimumPrice, platforms, type PlatformId, type Result, type Sale } from "@/lib/tools/fees";
+import { calculate, ebayDestinations, fbaFees, feeData, minimumPrice, platforms, type EbayDestination, type PlatformId, type Result, type Sale } from "@/lib/tools/fees";
 import { checkParcel } from "@/lib/tools/parcels";
 import { CLAIM_KINDS } from "@/lib/tools/claims";
 import { Input } from "@/components/ui/input";
@@ -190,9 +190,12 @@ export function PlatformCalculator({ platform, shared, extras = noExtras, saving
   const [offsite, setOffsite] = useState(extras.offsite);
   const [reduced, setReduced] = useState(extras.reduced);
   const [individual, setIndividual] = useState(extras.individual);
+  const [destination, setDestination] = useState<EbayDestination>(extras.destination);
+  const [eis, setEis] = useState(extras.eis);
+  const [fx, setFx] = useState(extras.fx);
   const [vatOnFees, setVatOnFees] = useState(!shared?.noVat);
   const [target, setTarget] = useState("5");
-  const full: Sale = { ...sale, ebayCategory, amazonCategory, promotedPercent: num(promoted), depopBoost: boost, etsyOffsiteAds: offsite, reducedRate: reduced, amazonIndividual: individual, vatOnFees };
+  const full: Sale = { ...sale, ebayCategory, amazonCategory, promotedPercent: num(promoted), depopBoost: boost, etsyOffsiteAds: offsite, reducedRate: reduced, amazonIndividual: individual, ebayDestination: destination, ebayIntlShipping: eis, ebayCurrencyConversion: fx, vatOnFees };
   const r = calculate(platform, full);
   const min = minimumPrice(platform, full, num(target));
   const meta = platforms.find((p) => p.id === platform)!;
@@ -204,7 +207,7 @@ export function PlatformCalculator({ platform, shared, extras = noExtras, saving
     category: platform === "ebay_business" && ebayCategory !== "general" ? ebayCategory : platform === "amazon_fbm" && amazonCategory !== "other" ? amazonCategory : null,
     noVat: !vatOnFees,
   };
-  const chosenExtras: PlatformExtras = { promoted: Math.min(100, Math.max(0, num(promoted))), boost, offsite, reduced, individual };
+  const chosenExtras: PlatformExtras = { promoted: Math.min(100, Math.max(0, num(promoted))), boost, offsite, reduced, individual, destination, eis, fx };
 
   return (
     <div className="space-y-6">
@@ -223,6 +226,28 @@ export function PlatformCalculator({ platform, shared, extras = noExtras, saving
               </select>
             </div>
             <Field id="pc-promo" label="Promoted Listings ad rate" value={promoted} onChange={setPromoted} suffix="%" hint="The rate you chose, if any" />
+          </>
+        ) : null}
+        {platform === "ebay_business" || platform === "ebay_private" ? (
+          <>
+            <div className="space-y-1">
+              <Label htmlFor="pc-dest">Buyer&apos;s delivery address</Label>
+              <select id="pc-dest" value={destination} onChange={(e) => setDestination(e.target.value as EbayDestination)} className={selectCls}>
+                {ebayDestinations.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {destination !== "uk" ? (
+              <label className="flex items-center gap-2 self-end pb-2 text-sm">
+                <input type="checkbox" checked={eis} onChange={(e) => setEis(e.target.checked)} className="size-4" /> Sent with eBay International Shipping (no international fee)
+              </label>
+            ) : null}
+            <label className="flex items-center gap-2 self-end pb-2 text-sm">
+              <input type="checkbox" checked={fx} onChange={(e) => setFx(e.target.checked)} className="size-4" /> Listed or sold on another eBay site, such as eBay.com (currency conversion)
+            </label>
           </>
         ) : null}
         {platform === "amazon_fbm" ? (
