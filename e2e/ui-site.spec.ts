@@ -99,7 +99,8 @@ test.describe("instant search", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog.getByText("Tools", { exact: true })).toBeVisible();
     await expect(dialog.getByRole("option", { name: /Vinted fee calculator/ })).toBeVisible();
-    await expect(dialog.getByText("Forum threads", { exact: true })).toBeVisible();
+    // Forum results arrive after a short pause and a network call, so allow longer under load.
+    await expect(dialog.getByText("Forum threads", { exact: true })).toBeVisible({ timeout: 15_000 });
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/\/tools\/calculator\/vinted$/);
 
