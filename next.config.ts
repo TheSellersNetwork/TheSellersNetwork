@@ -15,7 +15,11 @@ const posthog = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.co
   compile ONNX Runtime's WebAssembly, served from this site. It allows only
   WebAssembly compilation, not JavaScript eval. Its Web Worker is a same-origin
   module file, which the existing worker-src 'self' already covers, and its
-  previews are blob: images, which img-src already allows.
+  previews are blob: images, which img-src already allows. The label cropper
+  (/tools/label-cropper) needs nothing more: its PDF.js worker, fonts and
+  WebAssembly decoders are same-origin files under /vendor/pdfjs-dist
+  (worker-src, connect-src 'self' and 'wasm-unsafe-eval'), and its previews
+  are blob: images.
 */
 const csp = [
   "default-src 'self'",
@@ -126,6 +130,11 @@ const nextConfig: NextConfig = {
         { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
       ],
+    },
+    {
+      // Label cropper's PDF.js files, in a folder named for the version, so they can be kept a year too.
+      source: "/vendor/pdfjs-dist/:path*",
+      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
     },
     {
       source: "/models/:path*",

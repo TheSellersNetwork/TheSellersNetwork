@@ -1,6 +1,6 @@
 /* Every tool on /tools, grouped. Icons are names looked up on the page. `includes` lists what is inside a page that holds several tools. */
 
-export type ToolIcon = "calculator" | "clock" | "tags" | "percent" | "tag" | "image" | "truck" | "calendar" | "file" | "coins" | "sheet" | "shield" | "boxes" | "message";
+export type ToolIcon = "calculator" | "clock" | "tags" | "percent" | "tag" | "image" | "truck" | "calendar" | "file" | "coins" | "sheet" | "shield" | "boxes" | "message" | "crop";
 
 export type Tool = { href: string; title: string; description: string; icon: ToolIcon; badge?: string; includes?: string[] };
 
@@ -50,6 +50,12 @@ export const toolGroups: { title: string; tools: Tool[] }[] = [
         description: "The cheapest Royal Mail and Evri service for your size and weight, every Royal Mail, Evri and Parcelforce service your parcel fits, and the settings for printing labels.",
         icon: "truck",
         includes: ["Cheapest service", "Parcel size checker", "Label printing settings"],
+      },
+      {
+        href: "/tools/label-cropper",
+        title: "Shipping label cropper",
+        description: "Crop the label out of A4 label PDFs, screenshots or photos and print it on 4x6, A6 or 100 x 150 mm labels, or 2 or 4 to an A4 sheet. Done on your device, so addresses never leave it.",
+        icon: "crop",
       },
       {
         href: "/tools/buyer-messages",
