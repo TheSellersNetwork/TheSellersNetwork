@@ -39,10 +39,27 @@ describe("renderMarkdown", () => {
     expect(html).not.toContain("tracker.test");
   });
 
-  it("allows https images only", async () => {
-    const html = await renderMarkdown("![a](https://x.test/a.png) ![b](http://x.test/b.png)");
-    expect(html).toContain('src="https://x.test/a.png"');
-    expect(html).not.toContain("http://x.test/b.png");
+  it("allows https images only when no Supabase URL is set", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    try {
+      const html = await renderMarkdown("![a](https://x.test/a.png) ![b](http://x.test/b.png)");
+      expect(html).toContain('src="https://x.test/a.png"');
+      expect(html).not.toContain("http://x.test/b.png");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("only allows images from the project's own storage once a Supabase URL is set", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://abc.supabase.co");
+    try {
+      const own = "https://abc.supabase.co/storage/v1/object/public/uploads/a.png";
+      const html = await renderMarkdown(`![a](${own}) ![b](https://x.test/b.png)`);
+      expect(html).toContain(`src="${own}"`);
+      expect(html).not.toContain("x.test/b.png");
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
 
