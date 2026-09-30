@@ -3,12 +3,19 @@ import Link from "next/link";
 import { LabelCropper } from "@/components/tools/label-cropper";
 import { ToolHeader } from "@/components/tools/tool-header";
 import { MAX_FILE_MB, MAX_PAGES } from "@/lib/tools/label-crop";
+import { BreadcrumbJsonLd, WebApplicationJsonLd } from "@/components/seo/json-ld";
+import { siteConfig } from "@/lib/site";
+
+const title = "Free shipping label cropper: A4 label PDFs to 4x6 or A6";
+const description =
+  "Crop the label out of A4 shipping label PDFs, screenshots or photos and print it on 4x6, A6 or 100 x 150 mm labels, or 2 or 4 to an A4 sheet. Works in your browser, so names and addresses never leave your device. Free.";
 
 export const metadata: Metadata = {
-  title: "Shipping label cropper: A4 label PDFs to 4x6",
-  description:
-    "Crop the label out of A4 shipping label PDFs, screenshots or photos and print it on 4x6, A6 or 100 x 150 mm labels, or 2 or 4 to an A4 sheet. Works in your browser, so names and addresses never leave your device. Free.",
+  title: { absolute: title },
+  description,
   alternates: { canonical: "/tools/label-cropper" },
+  openGraph: { title, description, url: "/tools/label-cropper", siteName: siteConfig.name, locale: "en_GB", type: "website" },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 const tips = [
@@ -21,11 +28,26 @@ const tips = [
 export default function LabelCropperPage() {
   return (
     <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6">
+      <WebApplicationJsonLd name="Shipping label cropper" description={description} url="/tools/label-cropper" />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Tools", url: "/tools" },
+          { name: "Shipping label cropper", url: "/tools/label-cropper" },
+        ]}
+      />
       <ToolHeader
         title="Shipping label cropper"
         intro="Add the A4 label PDFs, screenshots or photos from your selling apps. The label is found on each page and cropped out, and you can adjust the crop before downloading them ready to print on 4x6, A6 or 100 x 150 mm labels, or 2 or 4 to an A4 sheet."
         parent={{ href: "/tools/postage", label: "Postage finder" }}
-      />
+      >
+        <p className="mt-2 text-sm text-muted-foreground">
+          For label PDFs and pictures from any selling app or carrier. Selling on Vinted? The{" "}
+          <Link href="/tools/vinted-label-cropper" className="font-medium text-brand underline underline-offset-2">
+            Vinted label cropper
+          </Link>{" "}
+          has the same tool with notes on each Vinted carrier.
+        </p>
+      </ToolHeader>
       <LabelCropper />
       <section className="mt-12">
         <h2 className="text-lg font-semibold">Printing the labels</h2>

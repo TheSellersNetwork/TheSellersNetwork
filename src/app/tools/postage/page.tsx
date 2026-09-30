@@ -74,7 +74,11 @@ export default async function Page({ searchParams }: PageProps<"/tools/postage">
                   <Link href="/tools/label-cropper" className="font-medium underline">
                     shipping label cropper
                   </Link>{" "}
-                  crops the label out of each page and makes a PDF the right size, on your device.
+                  crops the label out of each page and makes a PDF the right size, on your device. For Vinted labels, the{" "}
+                  <Link href="/tools/vinted-label-cropper" className="font-medium underline">
+                    Vinted label cropper
+                  </Link>{" "}
+                  also says which Vinted carriers need no printer.
                 </p>
               </>
             ),

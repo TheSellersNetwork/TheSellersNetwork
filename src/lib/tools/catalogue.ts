@@ -2,7 +2,8 @@
 
 export type ToolIcon = "calculator" | "clock" | "tags" | "percent" | "tag" | "image" | "truck" | "calendar" | "file" | "coins" | "sheet" | "shield" | "boxes" | "message" | "crop";
 
-export type Tool = { href: string; title: string; description: string; icon: ToolIcon; badge?: string; includes?: string[] };
+/* `keywords` are extra words for instant search only; they are not shown. */
+export type Tool = { href: string; title: string; description: string; icon: ToolIcon; badge?: string; includes?: string[]; keywords?: string };
 
 export const toolGroups: { title: string; tools: Tool[] }[] = [
   {
@@ -56,6 +57,14 @@ export const toolGroups: { title: string; tools: Tool[] }[] = [
         title: "Shipping label cropper",
         description: "Crop the label out of A4 label PDFs, screenshots or photos and print it on 4x6, A6 or 100 x 150 mm labels, or 2 or 4 to an A4 sheet. Done on your device, so addresses never leave it.",
         icon: "crop",
+        keywords: "crop resize shipping postage label pdf 4x6 6x4 a6 thermal printer",
+      },
+      {
+        href: "/tools/vinted-label-cropper",
+        title: "Vinted label cropper",
+        description: "Turn a Vinted Evri or InPost label PDF or screenshot into a 4x6 thermal label, A6, or A4 sheets, with notes on which Vinted carriers need no printer at all.",
+        icon: "crop",
+        keywords: "vinted label print crop resize 4x6 6x4 a6 thermal printer evri inpost royal mail qr code",
       },
       {
         href: "/tools/buyer-messages",

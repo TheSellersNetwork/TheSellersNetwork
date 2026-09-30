@@ -23,7 +23,7 @@ export async function GET() {
 
   const tools: IndexEntry[] = [
     ...toolGroups.flatMap((g) =>
-      g.tools.map((t) => ({ kind: "tool" as const, title: t.title, href: t.href, text: clip(t.description, 140), label: g.title, keywords: (t.includes ?? []).join(" ") })),
+      g.tools.map((t) => ({ kind: "tool" as const, title: t.title, href: t.href, text: clip(t.description, 140), label: g.title, keywords: [...(t.includes ?? []), t.keywords ?? ""].join(" ").trim() })),
     ),
     ...calculatorSlugs.map((slug) => ({
       kind: "tool" as const,

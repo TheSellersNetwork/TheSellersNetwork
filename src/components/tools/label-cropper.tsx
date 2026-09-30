@@ -32,16 +32,16 @@ const DEFAULT_SETTINGS: BuildSettings = { size: "4x6", marginMm: DEFAULT_MARGIN_
 /* 44px touch targets on phones, the usual small buttons on bigger screens. */
 const tap = "max-sm:h-11 max-sm:min-w-11";
 
-function parseSettings(raw: string | null): BuildSettings {
+function parseSettings(raw: string | null, defaults: BuildSettings = DEFAULT_SETTINGS): BuildSettings {
   try {
     const s = JSON.parse(raw ?? "{}") as Partial<BuildSettings>;
     return {
-      size: OUTPUT_SIZES.some((o) => o.id === s.size) ? (s.size as OutputSizeId) : DEFAULT_SETTINGS.size,
-      marginMm: typeof s.marginMm === "number" && s.marginMm >= 0 && s.marginMm <= MAX_MARGIN_MM ? s.marginMm : DEFAULT_SETTINGS.marginMm,
+      size: OUTPUT_SIZES.some((o) => o.id === s.size) ? (s.size as OutputSizeId) : defaults.size,
+      marginMm: typeof s.marginMm === "number" && s.marginMm >= 0 && s.marginMm <= MAX_MARGIN_MM ? s.marginMm : defaults.marginMm,
       mode: s.mode === "separate" ? "separate" : "combined",
     };
   } catch {
-    return DEFAULT_SETTINGS;
+    return defaults;
   }
 }
 
@@ -69,10 +69,20 @@ const sameRect = (a: Rect | null, b: Rect) => !!a && Math.abs(a.x - b.x) < 1e-6 
 
 type Reading = { filesDone: number; filesTotal: number };
 
-export function LabelCropper() {
+type LabelCropperProps = {
+  /* Label size to start on when nothing is remembered in this browser. */
+  defaultSize?: OutputSizeId;
+  /* The first line in the drop area, for pages about one platform's labels. */
+  dropTitle?: string;
+  /* Shown under the result once a download has worked, such as a quiet invitation to the forum. Never shown before. */
+  afterDownload?: React.ReactNode;
+};
+
+export function LabelCropper({ defaultSize = DEFAULT_SETTINGS.size, dropTitle = "Drop label PDFs or pictures here, or paste one", afterDownload }: LabelCropperProps = {}) {
   const [pages, setPages] = useState<LabelPage[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [settings, setSettings] = useState<BuildSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<BuildSettings>(() => ({ ...DEFAULT_SETTINGS, size: defaultSize }));
+  const [downloaded, setDownloaded] = useState(false);
   const [reading, setReading] = useState<Reading | null>(null);
   const [building, setBuilding] = useState<{ done: number; total: number } | null>(null);
   const [notices, setNotices] = useState<string[]>([]);
@@ -101,14 +111,14 @@ export function LabelCropper() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (typeof Worker === "undefined" || typeof createImageBitmap === "undefined") setUnsupported(true);
     try {
-      setSettings(parseSettings(localStorage.getItem(STORAGE_KEY)));
+      setSettings(parseSettings(localStorage.getItem(STORAGE_KEY), { ...DEFAULT_SETTINGS, size: defaultSize }));
     } catch {
       // Storage blocked: keep the defaults.
     }
     return () => {
       for (const p of pagesRef.current) URL.revokeObjectURL(p.previewUrl);
     };
-  }, []);
+  }, [defaultSize]);
 
   function update(s: Partial<BuildSettings>) {
     setSettings((prev) => {
@@ -276,6 +286,7 @@ export function LabelCropper() {
       const sheets = size.slots.length > 1 ? ` on ${out.sheets} A4 sheet${out.sheets === 1 ? "" : "s"}` : "";
       const locked = out.rastered ? ` ${out.rastered} came from a locked PDF, so ${out.rastered === 1 ? "it was" : "they were"} copied as a picture at 300 dpi. Check the barcode is sharp before you print.` : "";
       setResult(`Downloaded ${labels}${sheets}.${locked}`);
+      setDownloaded(true);
     } catch (err) {
       setResult((err as Error)?.name === "AbortError" ? "Stopped. Nothing was downloaded." : "Something went wrong making the PDF. Try again, or remove the page that last showed in the progress.");
     } finally {
@@ -325,7 +336,7 @@ export function LabelCropper() {
       >
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed p-6 text-center text-sm">
           <FileUp className="size-6 text-muted-foreground" aria-hidden />
-          <p className="font-medium">Drop label PDFs or pictures here, or paste one</p>
+          <p className="font-medium">{dropTitle}</p>
           <p className="text-muted-foreground">
             PDF, PNG, JPEG or WebP. Up to {MAX_PAGES} pages in total and {MAX_FILE_MB} MB a file.
           </p>
@@ -570,6 +581,7 @@ export function LabelCropper() {
         </div>
         <p className="text-xs text-muted-foreground">Print at &ldquo;Actual size&rdquo; or 100%, not &ldquo;Fit to page&rdquo;, so the label comes out the size it should be.</p>
       </section>
+      {downloaded && afterDownload ? <div data-testid="lc-after-download">{afterDownload}</div> : null}
     </div>
   );
 }
