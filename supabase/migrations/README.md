@@ -41,3 +41,4 @@ in CI. The harness stubs the `auth` schema and the three Supabase roles.
 | 20260930000100_member_forum_email | `tag_follows`, `member_email_prefs` (opt-in digest and fee alerts), send logs, `tag_topic` notifications |
 | 20260930000200_pickup_talk_milestones_welcome | `pickup_comments`, `pickup_votes` with counters, `profile_milestones`, `profiles.welcome_dismissed_at` |
 | 20260930000300_saved_calculations | `saved_calculations` (own rows only, 200 per member) |
+| 20260930000400_defamation_notices | `defamation_notices` (s5 notices of complaint, staff only), `contact_message` allowed in `moderation_log` |
