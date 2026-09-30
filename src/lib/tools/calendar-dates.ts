@@ -12,13 +12,14 @@ import type { ChangeMeta } from "@/lib/tools/changes";
 import { platformLabels } from "@/lib/tools/changes";
 import type { TaxDate } from "@/lib/tools/tax";
 
-export type CalendarCategory = "pokemon" | "lego" | "sale" | "changes" | "tax" | "other";
+export type CalendarCategory = "pokemon" | "lego" | "sale" | "postage" | "changes" | "tax" | "other";
 
 /* Display order for the filter chips and for events on the same day. */
 export const calendarCategories: { id: CalendarCategory; label: string }[] = [
   { id: "pokemon", label: "Pokémon" },
   { id: "lego", label: "Lego" },
   { id: "sale", label: "Sales" },
+  { id: "postage", label: "Last posting dates" },
   { id: "changes", label: "Fee and policy changes" },
   { id: "tax", label: "Tax" },
   { id: "other", label: "Bank holidays" },

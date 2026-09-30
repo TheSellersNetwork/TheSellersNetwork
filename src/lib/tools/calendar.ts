@@ -1,7 +1,9 @@
 import "server-only";
 import calendarData from "../../../content/calendar.json";
 import bankHolidayFallback from "../../../content/bank-holidays.json";
+import christmasPostingData from "../../../content/christmas-posting.json";
 import { getChanges } from "@/lib/content/changes";
+import { postingEvents, readPostingData } from "@/lib/tools/christmas-posting";
 import { upcomingTaxDates } from "@/lib/tools/tax";
 import {
   addDays,
@@ -23,6 +25,7 @@ import {
   - researched dates in content/calendar.json (each with an official source),
   - fee and policy changes from content/changes,
   - UK tax dates from src/lib/tools/tax.ts,
+  - Christmas last posting dates from content/christmas-posting.json (known dates only),
   - Black Friday, Cyber Monday and Boxing Day, worked out from their rules,
   - UK bank holidays from the GOV.UK feed, with a stored copy if it is down.
 */
@@ -60,6 +63,7 @@ export async function getCalendar(now = new Date()): Promise<CalendarEvent[]> {
   const all = mergeEvents(
     entryEvents(calendarData.entries),
     changeEvents(changes),
+    postingEvents(readPostingData(christmasPostingData)),
     taxEvents(tax),
     ruleBasedSales([year - 1, year, year + 1]),
     holidays,

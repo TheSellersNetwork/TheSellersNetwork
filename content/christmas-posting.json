@@ -1,0 +1,62 @@
+{
+  "year": 2026,
+  "checked": "2026-09-30",
+  "lastYear": 2025,
+  "carriers": [
+    {
+      "id": "royal-mail",
+      "name": "Royal Mail",
+      "page": "https://www.royalmail.com/christmas/last-posting-dates",
+      "services": [
+        { "id": "first-class", "name": "1st Class", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates", "lastYear": { "date": "2025-12-20", "source": "https://www.royalmail.com/christmas/last-posting-dates" } },
+        { "id": "second-class", "name": "2nd Class", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates", "lastYear": { "date": "2025-12-17", "source": "https://www.royalmail.com/christmas/last-posting-dates" } },
+        { "id": "tracked-24", "name": "Tracked 24", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates", "lastYear": { "date": "2025-12-21", "source": "https://www.royalmail.com/christmas/last-posting-dates" } },
+        { "id": "tracked-48", "name": "Tracked 48", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates", "lastYear": { "date": "2025-12-19", "source": "https://www.royalmail.com/christmas/last-posting-dates" } },
+        { "id": "special-delivery", "name": "Special Delivery Guaranteed", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates", "lastYear": { "date": "2025-12-23", "source": "https://www.royalmail.com/christmas/last-posting-dates" } }
+      ]
+    },
+    {
+      "id": "parcelforce",
+      "name": "Parcelforce Worldwide",
+      "page": "https://www.parcelforce.com/christmas-dates",
+      "services": [
+        { "id": "express48", "name": "express48", "date": null, "source": "https://www.parcelforce.com/christmas-dates", "lastYear": { "date": "2025-12-19", "source": "https://www.royalmail.com/christmas/last-posting-dates" } },
+        { "id": "express24", "name": "express24", "date": null, "source": "https://www.parcelforce.com/christmas-dates", "lastYear": { "date": "2025-12-22", "source": "https://www.royalmail.com/christmas/last-posting-dates" } }
+      ]
+    },
+    {
+      "id": "evri",
+      "name": "Evri",
+      "page": "https://www.evri.com/news",
+      "note": "Evri publishes its Christmas dates as a news article each year.",
+      "services": [
+        { "id": "standard", "name": "Standard delivery", "date": null, "source": "https://www.evri.com/news", "lastYear": { "date": "2025-12-19", "source": "https://www.evri.com/news/last-posting-dates-for-christmas-2025", "note": "Drop off by 11am at a ParcelShop or Evri Locker." } },
+        { "id": "next-day", "name": "Next day delivery", "date": null, "source": "https://www.evri.com/news", "lastYear": { "date": "2025-12-20", "source": "https://www.evri.com/news/last-posting-dates-for-christmas-2025", "note": "Drop off by 11am at a ParcelShop or Evri Locker." } }
+      ]
+    },
+    {
+      "id": "inpost",
+      "name": "InPost",
+      "page": "https://inpost.co.uk/resources",
+      "note": "Yodel is now InPost. InPost says Yodel by InPost moved fully under the InPost name on 17 July 2026.",
+      "services": [
+        { "id": "standard", "name": "Locker, shop and home delivery", "date": null, "source": "https://inpost.co.uk/resources", "lastYear": { "date": "2025-12-20", "source": "https://inpost.co.uk/blog/do-they-know-its-xs-mas-time" } }
+      ]
+    },
+    {
+      "id": "dpd",
+      "name": "DPD",
+      "page": "https://www.dpd.co.uk/content/about_dpd/delivery_schedule.jsp",
+      "note": "DPD's delivery schedule lists 25, 26 and 28 December 2026 as closed days in England, Scotland and Wales.",
+      "services": [
+        { "id": "next-day", "name": "Next day", "date": null, "source": "https://www.dpd.co.uk/content/about_dpd/delivery_schedule.jsp" }
+      ]
+    }
+  ],
+  "platforms": [],
+  "tips": [
+    "Post a few days early, not on the last day. Last posting dates are recommendations that can change, and most services only aim to arrive in time: Royal Mail's Special Delivery Guaranteed is the one with a guaranteed delivery time. Check your drop-off cut-off too, as last Christmas Evri parcels had to be dropped off by 11am.",
+    "Tell buyers when you will post, not when it will arrive. Set a handling time you can always meet, and put your last dispatch day before Christmas in your listings. For days you will not be posting, use eBay's Time Away, Vinted's vacation mode or Etsy's vacation mode. Orders placed before a break still have to be sent, and on Vinted you have 5 working days to post each order.",
+    "Use tracking and keep your proof. On eBay, tracking only protects you against \"item not received\" claims if you upload it before the latest estimated delivery date, and orders of £450 or more also need a signature. Keep your certificate of posting or drop-off receipt: Royal Mail loss claims must be made within 80 days of posting."
+  ]
+}
