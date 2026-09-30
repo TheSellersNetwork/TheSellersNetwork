@@ -48,11 +48,31 @@ export type Sale = {
   ebayIntlShipping?: boolean;
   /* eBay: listed or sold on another eBay site, so eBay converts the money and takes a charge. */
   ebayCurrencyConversion?: boolean;
+  /* Whatnot: the category of the show or listing, and your tier (0 = Standard) from your last four weeks of sales. */
+  whatnotCategory?: string;
+  whatnotTier?: number;
+  /* Whatnot: the order is in a category covered by the no-commission-above-£1,500 offer. */
+  whatnotHighValue?: boolean;
   /* The day the sale happens, for fees that change on a set date. Defaults to today. */
   on?: Date;
 };
 
 export type EbayDestination = "uk" | "europe" | "us_ca" | "other";
+
+export const whatnotTiers = fees.whatnot.tiers.map((t, i, all) => ({
+  index: i,
+  name: t.name,
+  /* "£10,000 to £19,999 in four weeks" */
+  range: i === all.length - 1 ? `£${t.from.toLocaleString("en-GB")} or more` : `£${t.from.toLocaleString("en-GB")} to £${(all[i + 1].from - 1).toLocaleString("en-GB")}`,
+}));
+
+/* Whatnot's commission rate for a category and tier. Unknown categories use "Other", unknown tiers use Standard. */
+export function whatnotRate(category?: string, tier?: number): { percent: number; category: string; tier: string } {
+  const cats = fees.whatnot.categories;
+  const cat = cats.find((c) => c.id === category) ?? cats[0];
+  const t = Number.isInteger(tier) && tier! >= 0 && tier! < fees.whatnot.tiers.length ? tier! : 0;
+  return { percent: cat.rates[t], category: cat.name, tier: fees.whatnot.tiers[t].name };
+}
 export const ebayDestinations: { id: EbayDestination; name: string }[] = [
   { id: "uk", name: "UK" },
   ...fees.ebayBusiness.international.map((r) => ({ id: r.id as EbayDestination, name: r.name })),
@@ -183,8 +203,12 @@ export function calculate(platform: PlatformId, s: Sale): Result {
       lines.push({ label: `Commission (${fees.tiktokShop.commissionPercent}%, VAT included)`, amount: pct(total, fees.tiktokShop.commissionPercent) });
       break;
     case "whatnot": {
-      const rate = s.reducedRate ? fees.whatnot.commissionPercentCoins : fees.whatnot.commissionPercent;
-      lines.push({ label: `Commission (${rate}%, on the item price)`, amount: pct(s.price, rate) });
+      // Older links used "reduced" for coins.
+      const w = whatnotRate(s.whatnotCategory ?? (s.reducedRate ? "coins" : undefined), s.whatnotTier);
+      const hv = fees.whatnot.highValue.threshold;
+      const commissionable = s.whatnotHighValue ? Math.min(s.price, hv) : s.price;
+      lines.push({ label: `Commission (${w.category}, ${w.tier}, ${w.percent}% on the item price)`, amount: pct(commissionable, w.percent) });
+      if (s.whatnotHighValue && s.price > hv) notes.push(`No commission on the £${(s.price - hv).toLocaleString("en-GB", { maximumFractionDigits: 2 })} above £${hv.toLocaleString("en-GB")} (Whatnot's high-value offer, which can end at any time).`);
       lines.push({ label: "Payment processing", amount: pct(total, fees.whatnot.processingPercent) + fees.whatnot.processingFixed });
       vatable = lines.reduce((t, l) => t + l.amount, 0);
       break;
