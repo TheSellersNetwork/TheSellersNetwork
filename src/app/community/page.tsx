@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { listIndexing } from "@/lib/forum/seo";
 import Link from "next/link";
 import { ForumShell } from "@/components/layout/forum-shell";
 import { TopicList } from "@/components/forum/topic-list";
@@ -22,11 +23,17 @@ import { parseStatus } from "@/lib/forum/status";
 import { StatusFilter } from "@/components/forum/status-filter";
 import type { TopicListView, TopPeriod } from "@/lib/db/types";
 
-export const metadata: Metadata = {
-  title: "Community",
-  description: "The forum for UK resellers on eBay, Amazon, Vinted, Facebook Marketplace and beyond.",
-  alternates: { canonical: "/community" },
-};
+const communityTitle = "UK reseller forum: eBay, Vinted, Amazon and more";
+const communityDescription = "The free forum for UK resellers on eBay, Amazon, Vinted, Depop, Facebook Marketplace and beyond: ask questions, share finds and learn what sells.";
+
+export async function generateMetadata({ searchParams }: PageProps<"/community">): Promise<Metadata> {
+  return {
+    title: communityTitle,
+    description: communityDescription,
+    ...listIndexing(urls.community(), await searchParams),
+    openGraph: { title: communityTitle, description: communityDescription, url: urls.community(), type: "website" },
+  };
+}
 
 function parseView(v: unknown): TopicListView | null {
   return v === "top" || v === "unanswered" || v === "following" || v === "latest" ? v : null;

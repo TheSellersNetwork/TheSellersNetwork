@@ -74,6 +74,16 @@ export const getRecentTopics = cache(async (limit = 8): Promise<RecentTopic[]> =
 });
 
 /*
+  The site's own accounts (the house account that posts fee changes and weekly
+  threads, and the placeholder for deleted members), as profile ids.
+*/
+export const getSiteAccountIds = cache(async (): Promise<Set<string>> => {
+  const supabase = await createClient();
+  const { data } = await supabase.from("site_accounts").select("profile_id").in("key", ["house", "deleted"]);
+  return new Set((data ?? []).map((r) => r.profile_id as string));
+});
+
+/*
   Newest real member questions nobody has replied to. Threads the site posts
   itself (the house, anonymous-holder and deleted accounts: fee change
   discussions, weekly threads, starters) are not questions, so they are left out,

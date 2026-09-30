@@ -18,18 +18,23 @@ import { createClient } from "@/lib/supabase/server";
 import { getCoverImages, getDealOrder } from "@/lib/forum/extras-queries";
 import { GalleryGrid } from "@/components/forum/gallery-grid";
 import { urls } from "@/lib/forum/urls";
+import { categoryDescription, categoryHasTopics, categoryTitle, listIndexing } from "@/lib/forum/seo";
 import { parseStatus } from "@/lib/forum/status";
 import { StatusFilter } from "@/components/forum/status-filter";
 import type { TopicListView, TopPeriod } from "@/lib/db/types";
 
-export async function generateMetadata({ params }: PageProps<"/community/c/[slug]">): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({ params, searchParams }: PageProps<"/community/c/[slug]">): Promise<Metadata> {
+  const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const category = await getCategoryBySlug(slug);
   if (!category) return {};
+  const title = categoryTitle(category.name);
+  const description = categoryDescription(category.name, category.description);
+  const hasTopics = categoryHasTopics(category, await getCategories());
   return {
-    title: category.name,
-    description: category.description ?? undefined,
-    alternates: { canonical: urls.category(category.slug) },
+    title,
+    description,
+    ...listIndexing(urls.category(category.slug), sp, hasTopics && !category.is_private),
+    openGraph: { title, description, url: urls.category(category.slug), type: "website" },
   };
 }
 

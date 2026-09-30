@@ -11,15 +11,20 @@ import { getFollowedTagIds, getTagBySlug, getTopicIdsForTag, tagFollowsAvailable
 import { parseStatus } from "@/lib/forum/status";
 import { plural } from "@/lib/format";
 import { urls } from "@/lib/forum/urls";
+import { listIndexing, tagDescription, tagIsIndexable } from "@/lib/forum/seo";
 
-export async function generateMetadata({ params }: PageProps<"/community/tag/[slug]">): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({ params, searchParams }: PageProps<"/community/tag/[slug]">): Promise<Metadata> {
+  const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const tag = await getTagBySlug(slug);
   if (!tag) return {};
+  const title = `${tag.name}: forum topics for UK sellers`;
+  const description = tagDescription(tag.name, tag.topic_count);
   return {
-    title: `Topics tagged ${tag.name}`,
-    description: `Forum topics tagged ${tag.name} on The Sellers Network.`,
-    alternates: { canonical: urls.tag(tag.slug) },
+    title,
+    description,
+    // A tag on only a topic or two is a thin page; it is indexed once it has a few.
+    ...listIndexing(urls.tag(tag.slug), sp, tagIsIndexable(tag)),
+    openGraph: { title, description, url: urls.tag(tag.slug), type: "website" },
   };
 }
 
