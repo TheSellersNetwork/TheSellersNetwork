@@ -23,7 +23,7 @@ export const views: Record<CalculatorSlug, View> = {
     description: "Amazon FBA UK fees, profit, ROI and maximum buy price in one place. Free.",
   },
   "tiktok-shop": { switcher: "TikTok Shop", id: "tiktok_shop", name: "TikTok Shop fee calculator", intro: "TikTok Shop UK commission on your sale, including postage the buyer pays." },
-  whatnot: { switcher: "Whatnot", id: "whatnot", showPlanner: true, name: "Whatnot fee calculator", intro: "Whatnot UK commission and payment processing on one sale, with VAT on fees." },
+  whatnot: { switcher: "Whatnot", id: "whatnot", showPlanner: true, name: "Whatnot fee calculator", intro: "Whatnot UK commission by category and sales tier, payment processing and VAT on fees, on one sale." },
   "ebay-live": { switcher: "eBay Live", id: "ebay_live", showPlanner: true, name: "eBay Live fee calculator", intro: "eBay Live commission (capped per item) and payment processing on one sale." },
 };
 

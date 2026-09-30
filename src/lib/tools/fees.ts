@@ -42,7 +42,82 @@ export type Sale = {
   vatOnFees?: boolean;
   /* eBay Promoted Listings: the ad rate you chose, as a percentage of the total. */
   promotedPercent?: number;
+  /* eBay: where the buyer's delivery address is. Anywhere but "uk" adds the international fee. */
+  ebayDestination?: EbayDestination;
+  /* eBay: sent through eBay International Shipping, which waives the international fee. */
+  ebayIntlShipping?: boolean;
+  /* eBay: listed or sold on another eBay site, so eBay converts the money and takes a charge. */
+  ebayCurrencyConversion?: boolean;
+  /* Whatnot: the category of the show or listing, and your tier (0 = Standard) from your last four weeks of sales. */
+  whatnotCategory?: string;
+  whatnotTier?: number;
+  /* Whatnot: the order is in a category covered by the no-commission-above-£1,500 offer. */
+  whatnotHighValue?: boolean;
+  /* The day the sale happens, for fees that change on a set date. Defaults to today. */
+  on?: Date;
 };
+
+export type EbayDestination = "uk" | "europe" | "us_ca" | "other";
+
+export const whatnotTiers = fees.whatnot.tiers.map((t, i, all) => ({
+  index: i,
+  name: t.name,
+  /* "£10,000 to £19,999 in four weeks" */
+  range: i === all.length - 1 ? `£${t.from.toLocaleString("en-GB")} or more` : `£${t.from.toLocaleString("en-GB")} to £${(all[i + 1].from - 1).toLocaleString("en-GB")}`,
+}));
+
+/* Whatnot's commission rate for a category and tier. Unknown categories use "Other", unknown tiers use Standard. */
+export function whatnotRate(category?: string, tier?: number): { percent: number; category: string; tier: string } {
+  const cats = fees.whatnot.categories;
+  const cat = cats.find((c) => c.id === category) ?? cats[0];
+  const t = Number.isInteger(tier) && tier! >= 0 && tier! < fees.whatnot.tiers.length ? tier! : 0;
+  return { percent: cat.rates[t], category: cat.name, tier: fees.whatnot.tiers[t].name };
+}
+export const ebayDestinations: { id: EbayDestination; name: string }[] = [
+  { id: "uk", name: "UK" },
+  ...fees.ebayBusiness.international.map((r) => ({ id: r.id as EbayDestination, name: r.name })),
+];
+
+/* Today's date in the UK as YYYY-MM-DD, so a fee change lands at midnight London time. */
+function londonDay(d: Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+}
+
+/* eBay's seller currency conversion charge on a given day (2.5%, rising to 2.75% on 1 December 2026). */
+export function ebayCurrencyConversionPercent(on: Date = new Date()): number {
+  const day = londonDay(on);
+  let percent = fees.ebayInternational.currencyConversionPercent;
+  for (const c of [...fees.ebayInternational.currencyConversionChanges].sort((a, b) => a.from.localeCompare(b.from))) {
+    if (day >= c.from) percent = c.percent;
+  }
+  return percent;
+}
+
+/* The international fee and currency conversion lines for an eBay sale, private or business. */
+function ebayAbroadLines(s: Sale, total: number, business: boolean): { lines: Line[]; vatable: number; notes: string[] } {
+  const lines: Line[] = [];
+  const notes: string[] = [];
+  let vatable = 0;
+  const dest = s.ebayDestination ?? "uk";
+  if (dest !== "uk") {
+    if (s.ebayIntlShipping) {
+      notes.push("International fee waived: the order goes through eBay International Shipping.");
+    } else if (business) {
+      const region = fees.ebayBusiness.international.find((r) => r.id === dest) ?? fees.ebayBusiness.international[fees.ebayBusiness.international.length - 1];
+      const fee = pct(total, region.percent);
+      lines.push({ label: `International fee (${region.name}, ${region.percent}%)`, amount: fee });
+      vatable += fee;
+    } else {
+      lines.push({ label: `International fee (${fees.ebayPrivate.internationalPercent}%)`, amount: pct(total, fees.ebayPrivate.internationalPercent) });
+    }
+  }
+  if (s.ebayCurrencyConversion) {
+    const rate = ebayCurrencyConversionPercent(s.on);
+    lines.push({ label: `Currency conversion charge (${rate}%)`, amount: pct(total, rate) });
+    notes.push("eBay takes the currency conversion charge inside its exchange rate, so it shows as a lower payout rather than a separate fee.");
+  }
+  return { lines, vatable, notes };
+}
 
 export type Line = { label: string; amount: number };
 export type Result = {
@@ -73,9 +148,13 @@ export function calculate(platform: PlatformId, s: Sale): Result {
   let received = total;
 
   switch (platform) {
-    case "ebay_private":
+    case "ebay_private": {
       notes.push("No selling fee for private sellers in most categories; buyers pay a Buyer Protection fee on top.");
+      const abroad = ebayAbroadLines(s, total, false);
+      lines.push(...abroad.lines);
+      notes.push(...abroad.notes);
       break;
+    }
     case "ebay_business": {
       const cats = fees.ebayBusiness.categories as { id: string; name: string; percent: number; wholeSaleThreshold?: number; percentAtThreshold?: number; tierThreshold?: number; percentAbove?: number }[];
       const cat = cats.find((c) => c.id === s.ebayCategory) ?? cats[0];
@@ -85,6 +164,10 @@ export function calculate(platform: PlatformId, s: Sale): Result {
       lines.push({ label: "Regulatory operating fee", amount: pct(total, fees.ebayBusiness.regulatoryPercent) });
       if (s.promotedPercent) lines.push({ label: `Promoted Listings (${s.promotedPercent}%)`, amount: pct(total, s.promotedPercent) });
       vatable = lines.reduce((t, l) => t + l.amount, 0);
+      const abroad = ebayAbroadLines(s, total, true);
+      lines.push(...abroad.lines);
+      vatable += abroad.vatable;
+      notes.push(...abroad.notes);
       break;
     }
     case "ebay_live": {
@@ -120,8 +203,12 @@ export function calculate(platform: PlatformId, s: Sale): Result {
       lines.push({ label: `Commission (${fees.tiktokShop.commissionPercent}%, VAT included)`, amount: pct(total, fees.tiktokShop.commissionPercent) });
       break;
     case "whatnot": {
-      const rate = s.reducedRate ? fees.whatnot.commissionPercentCoins : fees.whatnot.commissionPercent;
-      lines.push({ label: `Commission (${rate}%, on the item price)`, amount: pct(s.price, rate) });
+      // Older links used "reduced" for coins.
+      const w = whatnotRate(s.whatnotCategory ?? (s.reducedRate ? "coins" : undefined), s.whatnotTier);
+      const hv = fees.whatnot.highValue.threshold;
+      const commissionable = s.whatnotHighValue ? Math.min(s.price, hv) : s.price;
+      lines.push({ label: `Commission (${w.category}, ${w.tier}, ${w.percent}% on the item price)`, amount: pct(commissionable, w.percent) });
+      if (s.whatnotHighValue && s.price > hv) notes.push(`No commission on the £${(s.price - hv).toLocaleString("en-GB", { maximumFractionDigits: 2 })} above £${hv.toLocaleString("en-GB")} (Whatnot's high-value offer, which can end at any time).`);
       lines.push({ label: "Payment processing", amount: pct(total, fees.whatnot.processingPercent) + fees.whatnot.processingFixed });
       vatable = lines.reduce((t, l) => t + l.amount, 0);
       break;

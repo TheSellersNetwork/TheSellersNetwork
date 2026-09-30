@@ -21,6 +21,7 @@ import {
   readExtras,
   readFba,
   readTheme,
+  toPlatformSale,
   type PlatformInputs,
 } from "./model";
 
@@ -47,6 +48,28 @@ describe("saved calculation names and links", () => {
     const q = new URLSearchParams(extrasQuery("ebay_business", { ...noExtras, promoted: 7.5 }));
     expect(readExtras(q).promoted).toBe(7.5);
     expect(readExtras({ promo: "500", boost: "1" })).toEqual({ ...noExtras, boost: true });
+  });
+
+  it("carries eBay's buyer region, International Shipping and currency options in the link", () => {
+    const e = { ...noExtras, destination: "us_ca" as const, eis: true, fx: true };
+    const q = extrasQuery("ebay_business", e);
+    expect(q).toBe("dest=us_ca&eis=1&fx=1");
+    expect(readExtras(new URLSearchParams(q))).toEqual(e);
+    expect(extrasQuery("ebay_business", { ...noExtras, eis: true })).toBe("");
+    expect(extrasQuery("vinted", e)).toBe("");
+    expect(readExtras({ dest: "mars" }).destination).toBe("uk");
+    expect(cleanInputs("ebay_business", { price: 10, destination: "europe", eis: true, fx: "yes" })).toMatchObject({ destination: "europe", eis: true, fx: false });
+  });
+
+  it("carries Whatnot's tier and high-value offer in the link, and the category as the shared category", () => {
+    const i = { ...base, category: "fashion", tier: 3, hv: true };
+    expect(openHref("whatnot", i)).toBe("/tools/calculator/whatnot?price=20&postage=3.5&postcost=3.2&cost=5&cat=fashion&tier=3&hv=1");
+    expect(readExtras({ tier: "3", hv: "1" })).toMatchObject({ tier: 3, hv: true });
+    expect(readExtras({ tier: "9" }).tier).toBe(0);
+    expect(readExtras({ tier: "1.5" }).tier).toBe(0);
+    expect(cleanInputs("whatnot", { price: 10, tier: 7 })).toMatchObject({ tier: 0 });
+    // Fashion at Tier 3 is 5.25% of the £20 item price.
+    expect(calculate("whatnot", toPlatformSale("whatnot", { ...i, noVat: true, hv: false })).lines[0].amount).toBeCloseTo(1.05, 2);
   });
 
   it("round-trips FBA figures and refuses a link with no price", () => {
