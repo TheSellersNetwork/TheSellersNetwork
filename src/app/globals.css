@@ -48,6 +48,9 @@
     @apply font-sans;
     font-size: var(--text-body);
     line-height: var(--leading-body);
+    /* Scrollbars in the palette rather than the system grey (Windows shows them; phones and Macs mostly hide them).
+       Inherited, so every scrolling area follows, in light and dark. */
+    scrollbar-color: color-mix(in oklab, var(--muted-foreground) 40%, transparent) transparent;
   }
   body {
     @apply bg-background text-foreground;
