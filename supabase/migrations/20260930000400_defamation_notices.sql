@@ -3,7 +3,7 @@
 -- a contact_messages row (kind 'defamation') and records what the
 -- complainant told us and what staff did, with times, so we can show we met
 -- the deadlines that keep the website operator defence.
--- Down: supabase/migrations/down/20260930002300_defamation_notices.sql
+-- Down: supabase/migrations/down/20260930000400_defamation_notices.sql
 
 create table public.defamation_notices (
   id uuid primary key default gen_random_uuid(),

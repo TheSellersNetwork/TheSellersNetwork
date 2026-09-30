@@ -1,4 +1,4 @@
--- Reverses 20260930002300_defamation_notices.sql
+-- Reverses 20260930000400_defamation_notices.sql
 -- The moderation log is immutable, so rows already logged against contact
 -- messages stay; the old check is restored without re-checking them.
 alter table public.moderation_log drop constraint moderation_log_target_type_valid;
