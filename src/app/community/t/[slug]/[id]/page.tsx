@@ -20,6 +20,7 @@ import { PollCard } from "@/components/forum/poll-card";
 import { getPoll } from "@/lib/forum/polls";
 import { getAnonymousAuthors } from "@/lib/forum/anonymous";
 import { getDealOrder, getMyDealVote } from "@/lib/forum/extras-queries";
+import { getSiteAccountIds } from "@/lib/forum/overview-queries";
 import { WEEKLY_THREADS_SLUG } from "@/lib/rituals";
 import { EmailSignupCard } from "@/components/marketing/email-signup-card";
 import { BreadcrumbJsonLd, TopicJsonLd } from "@/components/seo/json-ld";
@@ -37,12 +38,14 @@ export async function generateMetadata({ params }: PageProps<"/community/t/[slug
   const data = await getTopicByShortId(id);
   if (!data) return {};
   const first = data.posts[0];
-  const description = first ? excerpt(first.body_md) : undefined;
+  // A removed opening post leaves nothing worth indexing, even if replies remain.
+  const removed = !first || first.is_deleted || first.is_hidden;
+  const description = removed ? undefined : excerpt(first.body_md);
   return {
     title: data.topic.title,
     description,
     alternates: { canonical: urls.topic(data.topic) },
-    robots: data.topic.is_unlisted ? { index: false, follow: false } : undefined,
+    robots: data.topic.is_unlisted ? { index: false, follow: false } : removed ? { index: false, follow: true } : undefined,
     openGraph: {
       title: data.topic.title,
       description,
@@ -84,20 +87,23 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
   const dealMeta = isDeal ? (await getDealOrder(category!.id)).get(topic.id) : undefined;
   const myVote = isDeal && viewer ? await getMyDealVote(viewer.id, topic.id) : null;
   const canReply = !!viewer && (!topic.is_locked || viewer.profile.is_staff);
-  const [poll, anonymousAuthors] = await Promise.all([
+  const [poll, anonymousAuthors, siteAccounts] = await Promise.all([
     getPoll(topic.id, viewer?.id),
     viewer ? getAnonymousAuthors(posts.filter((p) => p.is_anonymous).map((p) => p.id)) : Promise.resolve(new Map<string, { user_id: string; username: string }>()),
+    getSiteAccountIds(),
   ]);
+  // Google's forum markup is for posts by members, not for what the site itself publishes.
+  const memberTopic = !!opening && !opening.is_anonymous ? !siteAccounts.has(opening.author_id) : !!opening;
   const isAnonymousOwner = !!viewer && !!opening?.is_anonymous && anonymousAuthors.get(opening.id)?.user_id === viewer.id;
   const canMarkSolution = !!viewer && (viewer.id === topic.author_id || isAnonymousOwner || viewer.profile.is_staff || viewer.profile.trust_level >= 3);
 
   const toLd = (p: (typeof posts)[number]) => ({
     text: excerpt(p.body_md, 500),
-    dateCreated: p.created_at,
+    datePublished: p.created_at,
     author: p.is_anonymous
       ? { name: "Anonymous member", url: siteConfig.url }
       : { name: displayName(p.author), url: p.author ? `${siteConfig.url}${urls.profile(p.author.username)}` : siteConfig.url },
-    upvoteCount: p.like_count,
+    likeCount: p.like_count,
     url: urls.topic(topic, p.post_number),
   });
 
@@ -120,14 +126,15 @@ export default async function TopicPage({ params }: PageProps<"/community/t/[slu
           { name: topic.title, url: urls.topic(topic) },
         ]}
       />
-      {opening ? (
+      {opening && memberTopic ? (
         <TopicJsonLd
           title={topic.title}
           url={urls.topic(topic)}
-          question={toLd(opening)}
-          answers={replies.filter((p) => !p.is_deleted && !p.is_hidden).map(toLd)}
+          opening={toLd(opening)}
+          replies={replies.filter((p) => !p.is_deleted && !p.is_hidden).map(toLd)}
           accepted={solution ? toLd(solution) : null}
           dateModified={topic.last_post_at}
+          forum={category ? { name: category.name, url: urls.category(category.slug) } : null}
         />
       ) : null}
       <ReadTracker postCount={posts.length} />

@@ -1,4 +1,5 @@
 import { siteConfig } from "@/lib/site";
+import { topicStructuredData } from "@/lib/forum/seo";
 
 function abs(url: string): string {
   return url.startsWith("http") ? url : `${siteConfig.url}${url}`;
@@ -26,88 +27,10 @@ export function BreadcrumbJsonLd({ items }: { items: { name: string; url: string
 }
 
 type Person = { name: string; url: string };
-type PostLd = { text: string; dateCreated: string; author: Person; upvoteCount: number; url: string };
 
-/* QAPage with acceptedAnswer for solved topics, DiscussionForumPosting otherwise. */
-export function TopicJsonLd({
-  title,
-  url,
-  question,
-  answers,
-  accepted,
-  dateModified,
-}: {
-  title: string;
-  url: string;
-  question: PostLd;
-  answers: PostLd[];
-  accepted: PostLd | null;
-  dateModified: string;
-}) {
-  if (accepted) {
-    return (
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "QAPage",
-          mainEntity: {
-            "@type": "Question",
-            name: title,
-            text: question.text,
-            dateCreated: question.dateCreated,
-            author: { "@type": "Person", ...question.author },
-            answerCount: answers.length,
-            upvoteCount: question.upvoteCount,
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: accepted.text,
-              dateCreated: accepted.dateCreated,
-              upvoteCount: accepted.upvoteCount,
-              url: abs(accepted.url),
-              author: { "@type": "Person", ...accepted.author },
-            },
-            suggestedAnswer: answers
-              .filter((a) => a.url !== accepted.url)
-              .slice(0, 10)
-              .map((a) => ({
-                "@type": "Answer",
-                text: a.text,
-                dateCreated: a.dateCreated,
-                upvoteCount: a.upvoteCount,
-                url: abs(a.url),
-                author: { "@type": "Person", ...a.author },
-              })),
-          },
-        }}
-      />
-    );
-  }
-  return (
-    <JsonLd
-      data={{
-        "@context": "https://schema.org",
-        "@type": "DiscussionForumPosting",
-        headline: title,
-        url: abs(url),
-        text: question.text,
-        datePublished: question.dateCreated,
-        dateModified,
-        author: { "@type": "Person", ...question.author },
-        interactionStatistic: {
-          "@type": "InteractionCounter",
-          interactionType: "https://schema.org/CommentAction",
-          userInteractionCount: answers.length,
-        },
-        comment: answers.slice(0, 10).map((a) => ({
-          "@type": "Comment",
-          text: a.text,
-          dateCreated: a.dateCreated,
-          url: abs(a.url),
-          author: { "@type": "Person", ...a.author },
-        })),
-      }}
-    />
-  );
+/* Google's forum markup for a topic: QAPage once an answer is accepted, DiscussionForumPosting otherwise. The rules live in lib/forum/seo. */
+export function TopicJsonLd(props: Parameters<typeof topicStructuredData>[0]) {
+  return <JsonLd data={topicStructuredData(props)} />;
 }
 
 export function ArticleJsonLd({ title, description, url, datePublished, dateModified, author, image }: { title: string; description: string; url: string; datePublished: string; dateModified?: string; author: Person; image?: string }) {
