@@ -1,0 +1,61 @@
+{
+  "year": 2026,
+  "checked": "2026-09-30",
+  "carriers": [
+    {
+      "id": "royal-mail",
+      "name": "Royal Mail",
+      "page": "https://www.royalmail.com/christmas/last-posting-dates",
+      "services": [
+        { "id": "first-class", "name": "1st Class", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates" },
+        { "id": "second-class", "name": "2nd Class", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates" },
+        { "id": "tracked-24", "name": "Tracked 24", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates" },
+        { "id": "tracked-48", "name": "Tracked 48", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates" },
+        { "id": "special-delivery", "name": "Special Delivery Guaranteed", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates" }
+      ]
+    },
+    {
+      "id": "parcelforce",
+      "name": "Parcelforce Worldwide",
+      "page": "https://www.parcelforce.com/christmas-dates",
+      "services": [
+        { "id": "express48", "name": "express48", "date": null, "source": "https://www.parcelforce.com/christmas-dates" },
+        { "id": "express24", "name": "express24", "date": null, "source": "https://www.parcelforce.com/christmas-dates" }
+      ]
+    },
+    {
+      "id": "evri",
+      "name": "Evri",
+      "page": "https://www.evri.com/news",
+      "note": "Evri publishes its Christmas dates as a news article each year.",
+      "services": [
+        { "id": "standard", "name": "Standard delivery", "date": null, "source": "https://www.evri.com/news" },
+        { "id": "next-day", "name": "Next day delivery", "date": null, "source": "https://www.evri.com/news" }
+      ]
+    },
+    {
+      "id": "inpost",
+      "name": "InPost",
+      "page": "https://inpost.co.uk/resources",
+      "note": "Yodel is now InPost. InPost says Yodel by InPost moved fully under the InPost name on 17 July 2026.",
+      "services": [
+        { "id": "standard", "name": "Locker, shop and home delivery", "date": null, "source": "https://inpost.co.uk/resources" }
+      ]
+    },
+    {
+      "id": "dpd",
+      "name": "DPD",
+      "page": "https://www.dpd.co.uk/content/about_dpd/delivery_schedule.jsp",
+      "note": "DPD's delivery schedule lists 25, 26 and 28 December 2026 as closed days in England, Scotland and Wales.",
+      "services": [
+        { "id": "next-day", "name": "Next day", "date": null, "source": "https://www.dpd.co.uk/content/about_dpd/delivery_schedule.jsp" }
+      ]
+    }
+  ],
+  "platforms": [],
+  "tips": [
+    "[TOM: tip on posting early in the week before the cut-off, and why]",
+    "[TOM: tip on what to tell buyers in listings and messages about Christmas delivery]",
+    "[TOM: tip on tracked services and proof of posting for Christmas orders]"
+  ]
+}
