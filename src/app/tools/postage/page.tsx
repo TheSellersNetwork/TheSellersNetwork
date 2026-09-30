@@ -17,7 +17,15 @@ export default async function Page({ searchParams }: PageProps<"/tools/postage">
   const { tab } = await searchParams;
   return (
     <main id="main" className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
-      <ToolHeader title="Postage finder" intro="Enter the packed size and weight to find the cheapest Royal Mail or Evri service, or to see every service your parcel fits." />
+      <ToolHeader title="Postage finder" intro="Enter the packed size and weight to find the cheapest Royal Mail or Evri service, or to see every service your parcel fits.">
+        <p className="mt-3 text-sm">
+          Sending for Christmas? See the{" "}
+          <Link href="/tools/postage/christmas-last-posting-dates" className="font-medium underline">
+            Christmas last posting dates
+          </Link>{" "}
+          for each carrier.
+        </p>
+      </ToolHeader>
       <ToolTabs
         initial={typeof tab === "string" ? tab : undefined}
         label="Postage tools"

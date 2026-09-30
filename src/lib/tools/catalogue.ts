@@ -53,6 +53,13 @@ export const toolGroups: { title: string; tools: Tool[] }[] = [
         includes: ["Cheapest service", "Parcel size checker", "Label printing settings"],
       },
       {
+        href: "/tools/postage/christmas-last-posting-dates",
+        title: "Christmas last posting dates",
+        description: "The last day to post with Royal Mail, Parcelforce, Evri, InPost and DPD for delivery before Christmas, from each carrier's own website, with a countdown to the next cut-off.",
+        icon: "calendar",
+        keywords: "christmas xmas last posting dates cut-off deadline royal mail evri inpost yodel dpd parcelforce december",
+      },
+      {
         href: "/tools/label-cropper",
         title: "Shipping label cropper",
         description: "Crop the label out of A4 label PDFs, screenshots or photos and print it on 4x6, A6 or 100 x 150 mm labels, or 2 or 4 to an A4 sheet. Done on your device, so addresses never leave it.",

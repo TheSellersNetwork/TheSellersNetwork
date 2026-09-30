@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ChevronDown, ExternalLink, Trophy } from "lucide-react";
-import { calculate, fbaFees, feeData, minimumPrice, platforms, type PlatformId, type Result, type Sale } from "@/lib/tools/fees";
+import { calculate, ebayDestinations, fbaFees, feeData, minimumPrice, platforms, whatnotTiers, type EbayDestination, type PlatformId, type Result, type Sale } from "@/lib/tools/fees";
 import { checkParcel } from "@/lib/tools/parcels";
 import { CLAIM_KINDS } from "@/lib/tools/claims";
 import { Input } from "@/components/ui/input";
@@ -190,9 +190,17 @@ export function PlatformCalculator({ platform, shared, extras = noExtras, saving
   const [offsite, setOffsite] = useState(extras.offsite);
   const [reduced, setReduced] = useState(extras.reduced);
   const [individual, setIndividual] = useState(extras.individual);
+  const [destination, setDestination] = useState<EbayDestination>(extras.destination);
+  const [eis, setEis] = useState(extras.eis);
+  const [fx, setFx] = useState(extras.fx);
+  const [whatnotCategory, setWhatnotCategory] = useState(
+    platform === "whatnot" && shared?.category && feeData.whatnot.categories.some((c) => c.id === shared.category) ? shared.category : extras.reduced ? "coins" : "other",
+  );
+  const [tier, setTier] = useState(extras.tier);
+  const [hv, setHv] = useState(extras.hv);
   const [vatOnFees, setVatOnFees] = useState(!shared?.noVat);
   const [target, setTarget] = useState("5");
-  const full: Sale = { ...sale, ebayCategory, amazonCategory, promotedPercent: num(promoted), depopBoost: boost, etsyOffsiteAds: offsite, reducedRate: reduced, amazonIndividual: individual, vatOnFees };
+  const full: Sale = { ...sale, ebayCategory, amazonCategory, promotedPercent: num(promoted), depopBoost: boost, etsyOffsiteAds: offsite, reducedRate: reduced, amazonIndividual: individual, ebayDestination: destination, ebayIntlShipping: eis, ebayCurrencyConversion: fx, whatnotCategory, whatnotTier: tier, whatnotHighValue: hv, vatOnFees };
   const r = calculate(platform, full);
   const min = minimumPrice(platform, full, num(target));
   const meta = platforms.find((p) => p.id === platform)!;
@@ -201,10 +209,17 @@ export function PlatformCalculator({ platform, shared, extras = noExtras, saving
     postage: sale.postageCharged,
     postageCost: sale.postageCost,
     cost: sale.itemCost,
-    category: platform === "ebay_business" && ebayCategory !== "general" ? ebayCategory : platform === "amazon_fbm" && amazonCategory !== "other" ? amazonCategory : null,
+    category:
+      platform === "ebay_business" && ebayCategory !== "general"
+        ? ebayCategory
+        : platform === "amazon_fbm" && amazonCategory !== "other"
+          ? amazonCategory
+          : platform === "whatnot" && whatnotCategory !== "other"
+            ? whatnotCategory
+            : null,
     noVat: !vatOnFees,
   };
-  const chosenExtras: PlatformExtras = { promoted: Math.min(100, Math.max(0, num(promoted))), boost, offsite, reduced, individual };
+  const chosenExtras: PlatformExtras = { promoted: Math.min(100, Math.max(0, num(promoted))), boost, offsite, reduced: platform === "whatnot" ? false : reduced, individual, destination, eis, fx, tier, hv };
 
   return (
     <div className="space-y-6">
@@ -223,6 +238,28 @@ export function PlatformCalculator({ platform, shared, extras = noExtras, saving
               </select>
             </div>
             <Field id="pc-promo" label="Promoted Listings ad rate" value={promoted} onChange={setPromoted} suffix="%" hint="The rate you chose, if any" />
+          </>
+        ) : null}
+        {platform === "ebay_business" || platform === "ebay_private" ? (
+          <>
+            <div className="space-y-1">
+              <Label htmlFor="pc-dest">Buyer&apos;s delivery address</Label>
+              <select id="pc-dest" value={destination} onChange={(e) => setDestination(e.target.value as EbayDestination)} className={selectCls}>
+                {ebayDestinations.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {destination !== "uk" ? (
+              <label className="flex items-center gap-2 self-end pb-2 text-sm">
+                <input type="checkbox" checked={eis} onChange={(e) => setEis(e.target.checked)} className="size-4" /> Sent with eBay International Shipping (no international fee)
+              </label>
+            ) : null}
+            <label className="flex items-center gap-2 self-end pb-2 text-sm">
+              <input type="checkbox" checked={fx} onChange={(e) => setFx(e.target.checked)} className="size-4" /> Listed or sold on another eBay site, such as eBay.com (currency conversion)
+            </label>
           </>
         ) : null}
         {platform === "amazon_fbm" ? (
@@ -252,9 +289,40 @@ export function PlatformCalculator({ platform, shared, extras = noExtras, saving
             <input type="checkbox" checked={offsite} onChange={(e) => setOffsite(e.target.checked)} className="size-4" /> Sold through Offsite Ads
           </label>
         ) : null}
-        {platform === "whatnot" || platform === "ebay_live" ? (
+        {platform === "whatnot" ? (
+          <>
+            <div className="space-y-1">
+              <Label htmlFor="pc-wcat">Category of the show or listing</Label>
+              <select id="pc-wcat" value={whatnotCategory} onChange={(e) => setWhatnotCategory(e.target.value)} className={selectCls}>
+                {feeData.whatnot.categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="pc-wtier">Your sales in the last four weeks</Label>
+              <select id="pc-wtier" value={tier} onChange={(e) => setTier(Number(e.target.value))} className={selectCls}>
+                {whatnotTiers.map((t) => (
+                  <option key={t.index} value={t.index}>
+                    {t.range} ({t.name})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <label className="flex items-center gap-2 self-end pb-2 text-sm">
+              <input type="checkbox" checked={hv} onChange={(e) => setHv(e.target.checked)} className="size-4" /> In a category with no commission above £{feeData.whatnot.highValue.threshold.toLocaleString("en-GB")}
+            </label>
+            <p className="text-xs text-muted-foreground sm:col-span-3">
+              {feeData.whatnot.note} Seller Hub shows your tier and the rate on each order.
+              {hv ? <> {feeData.whatnot.highValue.note}</> : null}
+            </p>
+          </>
+        ) : null}
+        {platform === "ebay_live" ? (
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={reduced} onChange={(e) => setReduced(e.target.checked)} className="size-4" /> {platform === "whatnot" ? "Coins (lower rate)" : "Coins, bullion or trainers (lower rate)"}
+            <input type="checkbox" checked={reduced} onChange={(e) => setReduced(e.target.checked)} className="size-4" /> Coins, bullion or trainers (lower rate)
           </label>
         ) : null}
         {["ebay_business", "ebay_live", "etsy", "whatnot", "amazon_fbm"].includes(platform) ? (
