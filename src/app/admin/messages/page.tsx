@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { longDate } from "@/lib/format";
+import { DefamationNoticePanel, type StoredNotice } from "@/components/admin/defamation-notice-panel";
 import { updateMessage } from "./actions";
 
 export const metadata: Metadata = { title: "Messages", robots: { index: false } };
@@ -17,12 +18,19 @@ type Message = {
   status: string;
   staff_note: string | null;
   created_at: string;
+  // One-to-one; PostgREST may return it as an object or a one-item array.
+  defamation_notices?: StoredNotice | StoredNotice[] | null;
 };
+
+function noticeOf(m: Message): StoredNotice | null {
+  const n = m.defamation_notices;
+  return Array.isArray(n) ? (n[0] ?? null) : (n ?? null);
+}
 
 /* Which kinds have a legal clock, shown first and marked. */
 const urgent: Record<string, string> = {
   report: "Illegal content: act promptly",
-  defamation: "Defamation notice: pass to the poster within 48 hours",
+  defamation: "Defamation notice: see the deadlines below",
   copyright: "Copyright notice: act promptly",
   data: "Data request: reply within one month",
   complaint: "Complaint: acknowledge within 30 days",
@@ -34,7 +42,7 @@ export default async function MessagesPage({ searchParams }: PageProps<"/admin/m
   const sp = await searchParams;
   const showClosed = sp.show === "closed";
   const supabase = await createClient();
-  const query = supabase.from("contact_messages").select("*").order("created_at", { ascending: false }).limit(200);
+  const query = supabase.from("contact_messages").select("*, defamation_notices(*)").order("created_at", { ascending: false }).limit(200);
   const { data } = await (showClosed ? query.eq("status", "closed") : query.neq("status", "closed"));
   const messages = ((data ?? []) as Message[]).sort((a, b) => Number(b.kind in urgent) - Number(a.kind in urgent));
 
@@ -76,7 +84,7 @@ export default async function MessagesPage({ searchParams }: PageProps<"/admin/m
                 </>
               ) : null}
             </p>
-            <p className="mt-2 whitespace-pre-wrap">{m.message}</p>
+            {noticeOf(m) ? <DefamationNoticePanel notice={noticeOf(m)!} /> : <p className="mt-2 whitespace-pre-wrap">{m.message}</p>}
             <form action={updateMessage} className="mt-3 flex flex-wrap items-end gap-2">
               <input type="hidden" name="id" value={m.id} />
               <label className="flex-1 text-xs">

@@ -74,6 +74,15 @@ function FlagCard({ flag }: { flag: QueueFlag }) {
         {flag.post?.is_hidden ? <span className="text-destructive">Post is hidden</span> : null}
       </div>
       {flag.note ? <p className="mt-2 italic">Reporter note: {flag.note}</p> : null}
+      {flag.reason === "defamation" ? (
+        <p className="mt-2 text-muted-foreground">
+          A flag is not a defamation notice and starts no legal deadline. If the person the post is about complains, their notice arrives in{" "}
+          <Link href="/admin/messages" className="text-brand underline underline-offset-2 hover:text-brand-deep">
+            messages
+          </Link>{" "}
+          with its deadlines.
+        </p>
+      ) : null}
       {flag.post ? (
         <div className="mt-3 rounded-md border bg-background p-3">
           <p className="text-xs text-muted-foreground">

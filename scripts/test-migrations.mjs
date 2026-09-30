@@ -734,6 +734,32 @@ await step("site accounts: the house account key is allowed, members cannot add 
   await expectError(asUser(ids.member, `insert into public.site_accounts (key, profile_id) values ('anonymous', $1)`, [ids.member]), DENIED);
 });
 
+await step("security: defamation notices are staff-only and the complaint cannot be edited", async () => {
+  const m = await db.query(`insert into public.contact_messages (kind, name, email, url, message) values ('defamation', 'Sam', 'sam@example.test', 'https://example.test/x', 'Defamation notice about a post') returning id`);
+  const notice = await db.query(
+    `insert into public.defamation_notices (message_id, complainant_name, complainant_email, statement, statement_url, meaning, inaccuracies, insufficient_info_confirmed, consent_share_name, consent_share_email)
+     values ($1, 'Sam', 'sam@example.test', 'The words', 'https://example.test/x', 'That I sell fakes', 'All of it', true, false, false) returning id`,
+    [m.rows[0].id],
+  );
+  const id = notice.rows[0].id;
+  const seen = await asUser(ids.member, `select count(*)::int as n from public.defamation_notices`);
+  if (seen.rows[0].n !== 0) throw new Error("member saw defamation notices");
+  const anonSeen = await asAnon(`select count(*)::int as n from public.defamation_notices`).catch(() => ({ rows: [{ n: 0 }] }));
+  if (anonSeen.rows[0].n !== 0) throw new Error("anon saw defamation notices");
+  await expectError(
+    asUser(ids.member, `insert into public.defamation_notices (message_id, complainant_name, complainant_email, statement, statement_url, meaning, inaccuracies, insufficient_info_confirmed, consent_share_name, consent_share_email) values ($1, 'x', 'x@example.test', 'x', 'https://x.test', 'x', 'x', true, true, true)`, [m.rows[0].id]),
+    DENIED,
+  );
+  await asUser(ids.member, `update public.defamation_notices set outcome = 'kept', outcome_at = now() where id = $1`, [id]);
+  let row = await db.query(`select outcome from public.defamation_notices where id = $1`, [id]);
+  if (row.rows[0].outcome !== null) throw new Error("member recorded an outcome");
+  await asUser(ids.staff, `update public.defamation_notices set poster_notified_at = now(), updated_by = $2 where id = $1`, [id, ids.staff]);
+  row = await db.query(`select poster_notified_at from public.defamation_notices where id = $1`, [id]);
+  if (!row.rows[0].poster_notified_at) throw new Error("staff could not record notifying the poster");
+  await expectError(asUser(ids.staff, `update public.defamation_notices set statement = 'changed' where id = $1`, [id]), DENIED);
+  await asUser(ids.staff, `insert into public.moderation_log (actor_id, action, target_type, target_id) values ($1, 'defamation_update', 'contact_message', $2)`, [ids.staff, m.rows[0].id]);
+});
+
 await step("account deletion: posts move to the deleted account, the rest goes", async () => {
   const u = await db.query(`insert into auth.users (email, raw_user_meta_data) values ('leaver@example.test', '{"username":"leaver"}') returning id`);
   const d = await db.query(`insert into auth.users (email, raw_user_meta_data) values ('deleted@example.test', '{"username":"deleted_member"}') returning id`);
