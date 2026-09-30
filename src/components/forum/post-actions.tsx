@@ -158,13 +158,14 @@ export function PostActions(props: Props) {
         </Button>
       ) : null}
 
-      <FlagDialog open={flagOpen} onOpenChange={setFlagOpen} postId={props.postId} />
+      <FlagDialog open={flagOpen} onOpenChange={setFlagOpen} postId={props.postId} postPath={`${props.topicUrl}${props.postNumber > 1 ? `#post-${props.postNumber}` : ""}`} />
       <EditDialog open={editOpen} onOpenChange={setEditOpen} postId={props.postId} bodyMd={props.bodyMd} />
     </footer>
   );
 }
 
-function FlagDialog({ open, onOpenChange, postId }: { open: boolean; onOpenChange: (o: boolean) => void; postId: string }) {
+function FlagDialog({ open, onOpenChange, postId, postPath }: { open: boolean; onOpenChange: (o: boolean) => void; postId: string; postPath: string }) {
+  const [reason, setReason] = useState(reasons[0].value);
   const [state, action, pending] = useActionState<ActionState, FormData>(
     async (prev, formData) => {
       const result = await flagPost(prev, formData);
@@ -185,8 +186,8 @@ function FlagDialog({ open, onOpenChange, postId }: { open: boolean; onOpenChang
             <DialogTitle>Report this post</DialogTitle>
             <DialogDescription>
               Staff review every report and nobody else sees who sent it. If it is about you and needs a reply, such as a defamation or copyright complaint, use the{" "}
-              <Link href="/contact" className="underline">
-                contact form
+              <Link href="/report" className="underline">
+                report form
               </Link>{" "}
               instead.
             </DialogDescription>
@@ -194,13 +195,24 @@ function FlagDialog({ open, onOpenChange, postId }: { open: boolean; onOpenChang
           <input type="hidden" name="post_id" value={postId} />
           <fieldset className="my-4 space-y-2">
             <legend className="sr-only">Reason</legend>
-            {reasons.map((r, i) => (
+            {reasons.map((r) => (
               <label key={r.value} className="flex cursor-pointer items-center gap-2 text-sm">
-                <input type="radio" name="reason" value={r.value} defaultChecked={i === 0} className="accent-brand" />
+                <input type="radio" name="reason" value={r.value} checked={reason === r.value} onChange={() => setReason(r.value)} className="accent-brand" />
                 {r.label}
               </label>
             ))}
           </fieldset>
+          {reason === "defamation" ? (
+            <div className="mb-4 rounded-lg border bg-muted/40 p-3 text-sm" role="note">
+              <p>
+                A flag lets staff review the post under the house rules. If the post is about you, it is not a legal complaint. For that, use the{" "}
+                <Link href={`/report?kind=defamation&url=${encodeURIComponent(`${typeof window === "undefined" ? "" : window.location.origin}${postPath}`)}`} className="underline">
+                  defamation complaint form
+                </Link>
+                , which asks for what the law needs so we can pass it to the person who posted it.
+              </p>
+            </div>
+          ) : null}
           <div className="space-y-1.5">
             <Label htmlFor={`flag-note-${postId}`}>Anything staff should know (optional)</Label>
             <Textarea id={`flag-note-${postId}`} name="note" maxLength={1000} rows={3} />

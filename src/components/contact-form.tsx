@@ -23,7 +23,7 @@ const kinds: { id: string; label: string; help: string; needsUrl?: boolean }[] =
   {
     id: "defamation",
     label: "A post is defamatory about me",
-    help: "So we can act under the Defamation (Operators of Websites) Regulations 2013, include: your full name, the exact words you complain about, what you think they mean, which parts are untrue or are opinion not supported by fact, and whether you agree to your name being passed to the person who posted them.",
+    help: "For a post on this site that you say is untrue and harms your reputation. The questions below are what the Defamation Act 2013 and its regulations ask for, so we can deal with it properly.",
     needsUrl: true,
   },
   {
@@ -49,6 +49,11 @@ export function ContactForm({ initialKind = "general", initialUrl, signedIn, tur
       <div className="rounded-xl border bg-card p-6" role="status">
         <p className="font-semibold">{state.message}</p>
         <p className="mt-1 text-sm text-muted-foreground">Your reference is {state.reference}. We have emailed you a copy.</p>
+        {kind === "defamation" ? (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Within two working days we will send your complaint to the person who posted it, or remove the post if we have no way to contact them, and let you know. We will tell you what happens after that.
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -78,26 +83,32 @@ export function ContactForm({ initialKind = "general", initialUrl, signedIn, tur
         </div>
       ) : null}
 
-      <div className="space-y-1.5">
-        <Label htmlFor="url">Link to the post or page{current.needsUrl ? "" : " (optional)"}</Label>
-        <Input id="url" name="url" type="url" required={current.needsUrl} placeholder="https://..." defaultValue={initialUrl} />
-      </div>
+      {kind === "defamation" ? (
+        <DefamationFields initialUrl={initialUrl} />
+      ) : (
+        <>
+          <div className="space-y-1.5">
+            <Label htmlFor="url">Link to the post or page{current.needsUrl ? "" : " (optional)"}</Label>
+            <Input id="url" name="url" type="url" required={current.needsUrl} placeholder="https://..." defaultValue={initialUrl} />
+          </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="name">Your name (optional)</Label>
-          <Input id="name" name="name" autoComplete="name" />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="email">Your email{signedIn ? " (optional, we use your account email)" : ""}</Label>
-          <Input id="email" name="email" type="email" autoComplete="email" required={!signedIn} />
-        </div>
-      </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="name">Your name (optional)</Label>
+              <Input id="name" name="name" autoComplete="name" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Your email{signedIn ? " (optional, we use your account email)" : ""}</Label>
+              <Input id="email" name="email" type="email" autoComplete="email" required={!signedIn} />
+            </div>
+          </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="message">Message</Label>
-        <Textarea id="message" name="message" required minLength={10} maxLength={5000} rows={7} />
-      </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="message">Message</Label>
+            <Textarea id="message" name="message" required minLength={10} maxLength={5000} rows={7} />
+          </div>
+        </>
+      )}
 
       {!signedIn && turnstileSiteKey ? <Turnstile siteKey={turnstileSiteKey} onSuccess={setToken} onExpire={() => setToken("")} options={{ theme: "auto" }} /> : null}
       <input type="hidden" name="turnstile_token" value={token} />
@@ -118,5 +129,110 @@ export function ContactForm({ initialKind = "general", initialUrl, signedIn, tur
         .
       </p>
     </form>
+  );
+}
+
+/*
+  Everything a notice of complaint must contain under the Defamation Act 2013
+  s5(6) and the Defamation (Operators of Websites) Regulations 2013 reg 2.
+  The server checks the same things.
+*/
+function DefamationFields({ initialUrl }: { initialUrl?: string }) {
+  const [previous, setPrevious] = useState("no");
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="name">Your full name</Label>
+          <Input id="name" name="name" autoComplete="name" required maxLength={200} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email address we can contact you at</Label>
+          <Input id="email" name="email" type="email" autoComplete="email" required maxLength={254} />
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="url">Link to the post where the statement appears</Label>
+        <Input id="url" name="url" type="url" required placeholder="https://..." defaultValue={initialUrl} maxLength={500} aria-describedby="url-help" />
+        <p id="url-help" className="text-sm text-muted-foreground">
+          Use the Share button on the post to copy its link. If the same words appear in more than one post, send a separate form for each.
+        </p>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="statement">The exact words you are complaining about</Label>
+        <Textarea id="statement" name="statement" required minLength={3} maxLength={5000} rows={4} />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="meaning">What you take those words to mean, and why they are defamatory of you</Label>
+        <Textarea id="meaning" name="meaning" required minLength={10} maxLength={5000} rows={4} aria-describedby="meaning-help" />
+        <p id="meaning-help" className="text-sm text-muted-foreground">
+          For example, what a reader would understand them to say about you, and how that harms your reputation.
+        </p>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="inaccuracies">Which parts are factually inaccurate, or are opinions not supported by fact</Label>
+        <Textarea id="inaccuracies" name="inaccuracies" required minLength={3} maxLength={5000} rows={4} />
+      </div>
+
+      <label className="flex items-start gap-2 text-sm">
+        <input type="checkbox" name="insufficient_info" value="yes" className="mt-1 accent-brand" />
+        <span>I confirm that I do not have enough information about the person who posted the statement to bring legal proceedings against them.</span>
+      </label>
+
+      <YesNo name="consent_name" legend="May we give your name to the person who posted it?" />
+      <YesNo name="consent_email" legend="May we give your email address to the person who posted it?" />
+      <p className="-mt-2 text-sm text-muted-foreground">If you say no, we send them your complaint with your name or email address removed.</p>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium">Have we removed this statement, or one substantially the same, after your complaints on two or more earlier occasions?</legend>
+        <div className="flex gap-4 text-sm">
+          {["no", "yes"].map((v) => (
+            <label key={v} className="flex items-center gap-2">
+              <input type="radio" name="previous_removals" value={v} checked={previous === v} onChange={() => setPrevious(v)} className="accent-brand" />
+              {v === "yes" ? "Yes" : "No"}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      {previous === "yes" ? (
+        <div className="space-y-1.5">
+          <Label htmlFor="previous_details">Your earlier references or dates, if you have them</Label>
+          <Textarea id="previous_details" name="previous_details" maxLength={2000} rows={2} />
+        </div>
+      ) : null}
+
+      <div className="rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
+        <p className="font-medium text-foreground">What happens next</p>
+        <p className="mt-1">
+          Within two working days we will send your complaint to the person who posted the statement, or remove it if we have no way to contact them. They have until midnight at the end of the fifth day after that
+          to reply. If they do not reply in time, agree to removal, or object without giving their full name and postal address, we remove it. If they object and give those details, we tell you, and pass their
+          details on only if they agree or a court orders us to.
+        </p>
+        <p className="mt-2">If you did not tick the confirmation above, we will still look at the post under our house rules, but this legal process does not apply.</p>
+        <p className="mt-2">[TOM: any extra wording on what we do alongside this process, reviewed by a solicitor]</p>
+      </div>
+    </div>
+  );
+}
+
+function YesNo({ name, legend }: { name: string; legend: string }) {
+  return (
+    <fieldset className="space-y-2">
+      <legend className="text-sm font-medium">{legend}</legend>
+      <div className="flex gap-4 text-sm">
+        <label className="flex items-center gap-2">
+          <input type="radio" name={name} value="yes" required className="accent-brand" />
+          Yes
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="radio" name={name} value="no" required className="accent-brand" />
+          No
+        </label>
+      </div>
+    </fieldset>
   );
 }
