@@ -1,4 +1,4 @@
-import { calculate, ebayCurrencyConversionPercent, fbaFees, minimumPrice, solveMinimum } from "./fees";
+import { calculate, ebayCurrencyConversionPercent, whatnotRate, fbaFees, minimumPrice, solveMinimum } from "./fees";
 
 const sale = { price: 20, postageCharged: 3.5, postageCost: 3.2, itemCost: 5, vatOnFees: false };
 
@@ -112,5 +112,31 @@ describe("fee engine", () => {
     const base = { price: 100, postageCharged: 0, postageCost: 0, itemCost: 0, ebayCategory: "general", on: new Date("2026-10-01T12:00:00Z") };
     const diff = calculate("ebay_business", { ...base, vatOnFees: true, ebayCurrencyConversion: true }).fees - calculate("ebay_business", { ...base, vatOnFees: true }).fees;
     expect(diff).toBeCloseTo(2.5, 2);
+  });
+
+  it("uses Whatnot's UK rate card by category and tier", () => {
+    expect(whatnotRate().percent).toBe(6.67);
+    expect(whatnotRate("coins", 0).percent).toBe(4);
+    expect(whatnotRate("fashion", 5).percent).toBe(4.25);
+    expect(whatnotRate("other", 6).percent).toBe(4);
+    expect(whatnotRate("tcg", 99).percent).toBe(6.67);
+    const r = calculate("whatnot", { price: 100, postageCharged: 5, postageCost: 0, itemCost: 0, vatOnFees: false, whatnotCategory: "sports", whatnotTier: 2 });
+    expect(r.lines[0].amount).toBeCloseTo(6.25, 2);
+    // Processing is on the whole order: 2.42% of 105 + 25p.
+    expect(r.lines[1].amount).toBeCloseTo(2.79, 2);
+  });
+
+  it("keeps old Whatnot links with the coins box working", () => {
+    const r = calculate("whatnot", { price: 100, postageCharged: 0, postageCost: 0, itemCost: 0, vatOnFees: false, reducedRate: true });
+    expect(r.lines[0].amount).toBeCloseTo(4, 2);
+  });
+
+  it("charges no Whatnot commission above £1,500 when the high-value offer applies", () => {
+    const base = { price: 2000, postageCharged: 0, postageCost: 0, itemCost: 0, vatOnFees: false, whatnotCategory: "tcg" };
+    expect(calculate("whatnot", base).lines[0].amount).toBeCloseTo(133.4, 2);
+    const hv = calculate("whatnot", { ...base, whatnotHighValue: true });
+    expect(hv.lines[0].amount).toBeCloseTo(100.05, 2);
+    expect(hv.lines[1].amount).toBeCloseTo(2000 * 0.0242 + 0.25, 2);
+    expect(hv.notes.join(" ")).toContain("£500");
   });
 });
