@@ -67,8 +67,12 @@ test.describe("glossary", () => {
     await page.goto("/blog/every-amazon-fee-on-one-sale");
     const term = page.locator("#article-body abbr.gloss").first();
     await expect(term).toBeVisible();
-    await term.click();
-    await expect(page.getByRole("tooltip")).toBeVisible();
+    // A tap before the page has hydrated does nothing, so tap again until it opens (only while shut: a tap also closes it).
+    const tip = page.getByRole("tooltip");
+    await expect(async () => {
+      if (!(await tip.isVisible())) await term.click();
+      await expect(tip).toBeVisible({ timeout: 1000 });
+    }).toPass();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("tooltip")).toHaveCount(0);
   });

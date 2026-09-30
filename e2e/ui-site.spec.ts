@@ -90,21 +90,27 @@ test.describe("instant search", () => {
   test("Ctrl+K finds a tool, opens it and remembers the search", async ({ page }) => {
     const errors = await open(page, "/");
     const input = page.getByPlaceholder("Search tools, guides and the forum");
-    // The shortcut works once the page has hydrated; retry until it does.
-    await expect(async () => {
-      await page.keyboard.press("Control+k");
-      await expect(input).toBeFocused({ timeout: 1000 });
-    }).toPass();
-    await input.fill("vinted fee");
     const dialog = page.getByRole("dialog");
+    // The shortcut works once the page has hydrated, so retry until it does, but
+    // only press when the dialog is shut: Ctrl+K toggles it, so a second press closes it.
+    const openSearch = () =>
+      expect(async () => {
+        if (!(await dialog.isVisible())) await page.keyboard.press("Control+k");
+        await expect(input).toBeFocused({ timeout: 1000 });
+      }).toPass();
+    await openSearch();
+    await input.fill("vinted fee");
     await expect(dialog.getByText("Tools", { exact: true })).toBeVisible();
     await expect(dialog.getByRole("option", { name: /Vinted fee calculator/ })).toBeVisible();
     // Forum results arrive after a short pause and a network call, so allow longer under load.
     await expect(dialog.getByText("Forum threads", { exact: true })).toBeVisible({ timeout: 15_000 });
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/\/tools\/calculator\/vinted$/);
+    // Let the calculator finish loading, or the page swap can close the search again.
+    await expect(page.getByRole("heading", { level: 1, name: /Vinted fee calculator/ })).toBeVisible();
+    await page.waitForLoadState("networkidle");
 
-    await page.keyboard.press("Control+k");
+    await openSearch();
     // The recent search, not results that happen to contain the words.
     await expect(page.getByRole("option", { name: "vinted fee", exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
