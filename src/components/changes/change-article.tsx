@@ -141,7 +141,7 @@ export async function ChangeArticle({ change }: { change: Change }) {
             ) : null}
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Link href={joinUrl} className="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-deep">
+              <Link href={joinUrl} className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/85">
                 <MessageCircle className="size-4" aria-hidden="true" />
                 {discussion ? (discussion.replies > 0 ? "Join the discussion" : "Be the first to reply") : "Start the discussion"}
               </Link>

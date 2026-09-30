@@ -69,7 +69,7 @@ export default async function NotificationsPage() {
         <ul className="divide-y rounded-lg border bg-card">
           {notifications.map((n) => (
             <li key={n.id} className={cn("flex items-center gap-3 p-4 text-sm", !n.read_at && "bg-brand-soft/40")}>
-              <span className={cn("size-2 shrink-0 rounded-full", n.read_at ? "bg-transparent" : "bg-brand")} aria-hidden="true" />
+              <span className={cn("size-2 shrink-0 rounded-full", n.read_at ? "bg-transparent" : "bg-primary")} aria-hidden="true" />
               <Link href={href(n)} className="min-w-0 flex-1 hover:underline">
                 {describe(n)}
               </Link>

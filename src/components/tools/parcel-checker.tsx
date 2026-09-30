@@ -43,7 +43,7 @@ export function ParcelChecker() {
               role="radio"
               aria-checked={shape === s}
               onClick={() => setShape(s)}
-              className={cn("rounded px-3 py-1", shape === s ? "bg-brand text-white" : "text-muted-foreground hover:text-foreground")}
+              className={cn("rounded px-3 py-1", shape === s ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground")}
             >
               {s === "box" ? "Box or bag" : "Tube or roll"}
             </button>

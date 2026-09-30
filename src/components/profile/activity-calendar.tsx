@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { activityLevel, describeCounts, type Activity, type ActivityDay } from "@/lib/badges-activity";
 import { cn } from "@/lib/utils";
 
-const shade = ["bg-secondary", "bg-brand/25", "bg-brand/50", "bg-brand/75", "bg-brand"] as const;
+const shade = ["bg-secondary", "bg-brand/25", "bg-brand/50", "bg-brand/75", "bg-primary"] as const;
 /* Phones show the most recent half year so each square stays tappable; wider screens show the full year. */
 const PHONE_WEEKS = 26;
 

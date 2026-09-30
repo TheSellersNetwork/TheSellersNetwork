@@ -37,7 +37,7 @@ export function QuickAsk({ viewer, categories }: { viewer: Viewer; categories: C
       >
         <UserAvatar profile={viewer} size="sm" link={false} />
         <span className="flex-1 text-muted-foreground">Ask the community anything about selling</span>
-        <span className="rounded-md bg-brand px-3 py-1 text-xs font-medium text-primary-foreground">New topic</span>
+        <span className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">New topic</span>
       </button>
     );
   }

@@ -71,7 +71,7 @@ export function FeeTimelineView({ timeline }: { timeline: Timeline }) {
           {nodes.slice(0, timeline.pastCount)}
           <li ref={today} className="flex w-16 shrink-0 snap-center flex-col items-center" data-testid="fee-timeline-today">
             <span className="grid h-11 place-items-center" aria-hidden="true">
-              <span className="block h-7 w-0.5 rounded-full bg-brand" />
+              <span className="block h-7 w-0.5 rounded-full bg-primary" />
             </span>
             <span className="text-xs font-semibold text-brand">Today</span>
           </li>

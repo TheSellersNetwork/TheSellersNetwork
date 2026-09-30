@@ -16,7 +16,7 @@ export function NotificationBell({ initialUnread }: { initialUnread: number }) {
       <Link href={urls.notifications()}>
         <Bell />
         {initialUnread > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-4 text-primary-foreground">
+          <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground">
             {initialUnread > 99 ? "99+" : initialUnread}
           </span>
         ) : null}

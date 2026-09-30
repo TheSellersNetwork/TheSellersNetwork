@@ -77,7 +77,7 @@ export function PickupVote({ id, price, yes: initialYes, no: initialNo, mine: in
                   </span>
                 </div>
                 <div className="mt-1 h-2 overflow-hidden rounded-full bg-secondary" aria-hidden="true">
-                  <div className="h-full rounded-full bg-brand transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${row.pct}%` }} />
+                  <div className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${row.pct}%` }} />
                 </div>
               </div>
             ))}

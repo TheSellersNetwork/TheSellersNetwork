@@ -741,7 +741,7 @@ export function BackgroundRemover() {
               Downloading the background remover, up to about {DOWNLOAD_MB} MB. This happens once, and your browser usually keeps a copy for next time.
             </p>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Model download" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
-              <div className="h-full bg-brand transition-all" style={{ width: `${pct}%` }} />
+              <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
             </div>
           </div>
         )}
@@ -762,7 +762,7 @@ export function BackgroundRemover() {
               {paused ? ", paused" : running ? ", working" : ""}
             </p>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Photos done" aria-valuemin={0} aria-valuemax={total} aria-valuenow={counts.done}>
-              <div className="h-full bg-brand transition-all" style={{ width: `${total ? (counts.done / total) * 100 : 0}%` }} />
+              <div className="h-full bg-primary transition-all" style={{ width: `${total ? (counts.done / total) * 100 : 0}%` }} />
             </div>
             <p className="mt-2 text-muted-foreground">
               {elapsed > 0 && <>{c.ended ? "Finished in" : "Time taken:"} {formatDuration(elapsed)}. </>}
@@ -996,7 +996,7 @@ function PhotoDialog({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={urls.before} alt="Before: the original photo" className="absolute inset-0 block size-full" style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }} />
               )}
-              {urls.before && <div className="pointer-events-none absolute inset-y-0 w-0.5 bg-brand" style={{ left: `${split}%` }} aria-hidden />}
+              {urls.before && <div className="pointer-events-none absolute inset-y-0 w-0.5 bg-primary" style={{ left: `${split}%` }} aria-hidden />}
             </div>
             {urls.before && (
               <label className="mx-auto block max-w-lg text-sm">

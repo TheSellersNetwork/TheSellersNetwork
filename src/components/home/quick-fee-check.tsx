@@ -89,7 +89,7 @@ export function QuickFeeCheck() {
                 </span>
               </div>
               <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-secondary" aria-hidden="true">
-                <div className={cn("h-full rounded-full transition-[width] duration-300 motion-reduce:transition-none", top ? "bg-brand" : "bg-muted-foreground/40")} style={{ width: `${share * 100}%` }} />
+                <div className={cn("h-full rounded-full transition-[width] duration-300 motion-reduce:transition-none", top ? "bg-primary" : "bg-muted-foreground/40")} style={{ width: `${share * 100}%` }} />
               </div>
             </li>
           );

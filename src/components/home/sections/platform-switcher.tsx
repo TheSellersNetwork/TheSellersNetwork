@@ -46,7 +46,7 @@ export function PlatformSwitcher({ value, className }: { value: HomePlatform; cl
               onClick={() => choose(p.id)}
               className={cn(
                 "min-h-11 shrink-0 whitespace-nowrap rounded-md px-2.5 text-sm sm:px-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none sm:min-h-9",
-                on ? "bg-brand text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                on ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground",
               )}
             >
               {p.label}

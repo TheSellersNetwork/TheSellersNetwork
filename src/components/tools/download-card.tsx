@@ -22,7 +22,7 @@ export function DownloadCard({ file, showGuide = true, className }: { file: Down
           </p>
         ) : null}
       </div>
-      <a href={d.file} download className="inline-flex shrink-0 items-center justify-center rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-deep">
+      <a href={d.file} download className="inline-flex shrink-0 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/85">
         Download (.xlsx)
       </a>
     </div>

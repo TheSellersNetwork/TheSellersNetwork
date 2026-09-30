@@ -37,7 +37,7 @@ export function ReadingProgress({ targetId }: { targetId: string }) {
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-[var(--header-height)] z-40 h-0.5" data-reading-progress>
-      <div ref={bar} className="h-full origin-left bg-brand" style={{ transform: "scaleX(0)" }} />
+      <div ref={bar} className="h-full origin-left bg-primary" style={{ transform: "scaleX(0)" }} />
     </div>
   );
 }

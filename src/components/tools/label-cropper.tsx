@@ -372,7 +372,7 @@ export function LabelCropper({ defaultSize = DEFAULT_SETTINGS.size, dropTitle = 
               Reading file {Math.min(reading.filesDone + 1, reading.filesTotal)} of {reading.filesTotal}, {pages.length} page{pages.length === 1 ? "" : "s"} so far
             </p>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Files read" aria-valuemin={0} aria-valuemax={reading.filesTotal} aria-valuenow={reading.filesDone}>
-              <div className="h-full bg-brand transition-[width] motion-reduce:transition-none" style={{ width: `${(reading.filesDone / Math.max(1, reading.filesTotal)) * 100}%` }} />
+              <div className="h-full bg-primary transition-[width] motion-reduce:transition-none" style={{ width: `${(reading.filesDone / Math.max(1, reading.filesTotal)) * 100}%` }} />
             </div>
             <Button type="button" size="sm" variant="outline" className={cn("mt-3", tap)} onClick={() => (stopRead.current = true)}>
               <Square aria-hidden /> Stop reading
@@ -569,7 +569,7 @@ export function LabelCropper({ defaultSize = DEFAULT_SETTINGS.size, dropTitle = 
                 Making label {Math.min(building.done + 1, building.total)} of {building.total}
               </p>
               <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Labels made" aria-valuemin={0} aria-valuemax={building.total} aria-valuenow={building.done}>
-                <div className="h-full bg-brand transition-[width] motion-reduce:transition-none" style={{ width: `${(building.done / Math.max(1, building.total)) * 100}%` }} />
+                <div className="h-full bg-primary transition-[width] motion-reduce:transition-none" style={{ width: `${(building.done / Math.max(1, building.total)) * 100}%` }} />
               </div>
             </div>
           )}

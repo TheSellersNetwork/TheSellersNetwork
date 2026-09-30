@@ -49,7 +49,7 @@ export default async function PickupsPage({ searchParams }: PageProps<"/communit
           <Link href="/community/pickups/bolo" className="inline-flex min-h-11 items-center gap-2 rounded-md border px-3 py-2 text-sm sm:min-h-0 font-medium hover:bg-secondary">
             <Search className="size-4" aria-hidden="true" /> BOLO list
           </Link>
-          <Link href="/community/pickups/new" className="inline-flex min-h-11 items-center gap-2 rounded-md bg-brand px-3 py-2 sm:min-h-0 text-sm font-medium text-primary-foreground hover:bg-brand-deep">
+          <Link href="/community/pickups/new" className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-3 py-2 sm:min-h-0 text-sm font-medium text-primary-foreground hover:bg-primary/85">
             <Plus className="size-4" aria-hidden="true" /> Post a pickup
           </Link>
         </div>
@@ -72,7 +72,7 @@ export default async function PickupsPage({ searchParams }: PageProps<"/communit
           <div className="mt-8 rounded-xl border border-dashed p-10 text-center">
             <p className="font-medium">No pickups here yet.</p>
             <p className="mt-1 text-sm text-muted-foreground">Been to a car boot or charity shop lately? Share what you found and what you paid.</p>
-            <Link href="/community/pickups/new" className="mt-4 inline-flex min-h-11 items-center rounded-md bg-brand px-4 text-sm font-medium text-primary-foreground hover:bg-brand-deep sm:min-h-9">
+            <Link href="/community/pickups/new" className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/85 sm:min-h-9">
               Post the first one
             </Link>
           </div>
