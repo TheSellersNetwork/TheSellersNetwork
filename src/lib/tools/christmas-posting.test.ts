@@ -1,4 +1,5 @@
 import postingData from "../../../content/christmas-posting.json";
+import { toolGroups } from "./catalogue";
 import {
   CHRISTMAS_POSTING_PATH,
   christmasPostingPage,
@@ -196,3 +197,8 @@ describe("reseller calendar", () => {
   });
 });
 
+describe("discovery", () => {
+  it("is listed with the tools, so it reaches the sitemap and search", () => {
+    expect(toolGroups.flatMap((g) => g.tools.map((t) => t.href))).toContain(CHRISTMAS_POSTING_PATH);
+  });
+});
