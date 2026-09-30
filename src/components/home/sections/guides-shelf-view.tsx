@@ -77,7 +77,7 @@ export function GuidesShelfView({ groups, paths, byPath }: { groups: ShelfGroup[
         </div>
       </div>
 
-      <ul ref={rowRef} onScroll={measure} aria-label={group.title} className="mt-3 flex snap-x gap-3 overflow-x-auto pb-3 motion-safe:scroll-smooth">
+      <ul ref={rowRef} onScroll={measure} aria-label={group.title} className="mt-3 flex snap-x gap-3 overflow-x-auto pb-3 [scrollbar-width:thin] motion-safe:scroll-smooth">
         {resume ? (
           <li className="w-56 shrink-0 snap-start" data-testid="shelf-continue">
             <Link
