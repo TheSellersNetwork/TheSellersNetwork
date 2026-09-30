@@ -47,7 +47,7 @@ export default async function ChristmasPostingPage() {
         {checked ? <p className="mt-2 text-sm text-muted-foreground">Correct as of {checked}.</p> : null}
       </ToolHeader>
 
-      <ChristmasCountdown cutOffs={cutOffs(data)} year={data.year} serverNow={serverNow} />
+      <ChristmasCountdown cutOffs={cutOffs(data)} year={data.year} lastYear={data.lastYear} serverNow={serverNow} />
 
       <section aria-labelledby="dates-heading" className="mt-12">
         <h2 id="dates-heading" className="text-xl font-semibold tracking-tight">
@@ -55,6 +55,7 @@ export default async function ChristmasPostingPage() {
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           These are the carriers&rsquo; own last recommended dates for delivery within the UK before Christmas. Post before the last collection on the day. Where a carrier has not announced its {data.year} dates yet, the link goes to the page where they will appear.
+          {data.lastYear ? <> The {data.lastYear} column shows the same carrier&rsquo;s date last Christmas as a rough guide only: dates move each year with the calendar.</> : null}
         </p>
         <div className="mt-6 space-y-8">
           {data.carriers.map((c) => (
@@ -68,12 +69,17 @@ export default async function ChristmasPostingPage() {
                   </caption>
                   <thead className="border-b text-xs uppercase tracking-wide text-muted-foreground">
                     <tr>
-                      <th scope="col" className="w-3/5 px-4 py-2 font-medium">
+                      <th scope="col" className={data.lastYear ? "w-1/3 px-4 py-2 font-medium sm:w-2/5" : "w-3/5 px-4 py-2 font-medium"}>
                         Service
                       </th>
                       <th scope="col" className="px-4 py-2 font-medium">
-                        Last posting date
+                        {data.year} date
                       </th>
+                      {data.lastYear ? (
+                        <th scope="col" className="px-4 py-2 font-medium">
+                          Last year ({data.lastYear})
+                        </th>
+                      ) : null}
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -100,6 +106,21 @@ export default async function ChristmasPostingPage() {
                             </>
                           )}
                         </td>
+                        {data.lastYear ? (
+                          <td className="px-4 py-3 align-top text-muted-foreground">
+                            {s.lastYear ? (
+                              <>
+                                <span>{formatPostingDate(s.lastYear.date)}</span>
+                                {s.lastYear.note ? <span className="mt-0.5 block text-xs">{s.lastYear.note}</span> : null}
+                                <a href={s.lastYear.source} className="mt-0.5 block text-xs underline" rel="noopener noreferrer" target="_blank">
+                                  Source: {hostname(s.lastYear.source)}
+                                </a>
+                              </>
+                            ) : (
+                              <span>No date published</span>
+                            )}
+                          </td>
+                        ) : null}
                       </tr>
                     ))}
                   </tbody>

@@ -41,6 +41,8 @@ export type PostingService = {
   /* The carrier's own page for this date. */
   source: string;
   note?: string;
+  /* The same service's date last Christmas, from the carrier's own page, shown for guidance only. */
+  lastYear?: { date: string; source: string; note?: string };
 };
 
 export type PostingCarrier = {
@@ -58,6 +60,8 @@ export type ChristmasPostingData = {
   year: number;
   /* When the dates were last checked against the carriers' own pages. */
   checked: string;
+  /* The year the lastYear dates belong to, or 0 when none are given. */
+  lastYear: number;
   carriers: PostingCarrier[];
   platforms: PlatformNote[];
   tips: string[];
@@ -84,7 +88,12 @@ export function readPostingData(raw: unknown): ChristmasPostingData {
       const source = typeof service.source === "string" && HTTPS.test(service.source) ? service.source : carrier.page;
       const sourced = typeof service.source === "string" && HTTPS.test(service.source);
       const date = sourced && isYmd(service.date) ? service.date : null;
-      services.push({ id: service.id, name: service.name, date, source, ...(service.note ? { note: String(service.note) } : {}) });
+      const ly = service.lastYear as Partial<NonNullable<PostingService["lastYear"]>> | undefined;
+      const lastYear =
+        ly && isYmd(ly.date) && typeof ly.source === "string" && HTTPS.test(ly.source)
+          ? { date: ly.date, source: ly.source, ...(ly.note ? { note: String(ly.note) } : {}) }
+          : undefined;
+      services.push({ id: service.id, name: service.name, date, source, ...(service.note ? { note: String(service.note) } : {}), ...(lastYear ? { lastYear } : {}) });
     }
     carriers.push({ id: carrier.id, name: carrier.name, page: carrier.page, ...(carrier.note ? { note: String(carrier.note) } : {}), services });
   }
@@ -96,7 +105,9 @@ export function readPostingData(raw: unknown): ChristmasPostingData {
     platforms.push({ id: platform.id, name: platform.name, note: platform.note, source: platform.source });
   }
   const tips = (Array.isArray(r.tips) ? r.tips : []).filter((t): t is string => typeof t === "string" && t.trim() !== "");
-  return { year, checked, carriers, platforms, tips };
+  const lastYear = typeof r.lastYear === "number" && Number.isInteger(r.lastYear) && r.lastYear < year ? r.lastYear : 0;
+  if (!lastYear) for (const c of carriers) for (const s of c.services) delete s.lastYear;
+  return { year, checked, lastYear, carriers, platforms, tips };
 }
 
 /* Tips still waiting to be written are not shown on the public page. */

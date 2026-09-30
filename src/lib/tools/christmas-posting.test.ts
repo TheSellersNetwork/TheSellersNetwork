@@ -86,6 +86,31 @@ describe("reading the data file", () => {
     expect(data.carriers[0].services[0].source).toBe("https://example.com/x");
   });
 
+  it("keeps last year's dates only from the carriers' own sites, in last year, and never counts them down", () => {
+    const official = /(^|\.)(royalmail\.com|parcelforce\.com|evri\.com|inpost\.co\.uk|dpd\.co\.uk)$/;
+    const data = readPostingData(postingData);
+    expect(data.lastYear).toBe(data.year - 1);
+    const withLast = data.carriers.flatMap((c) => c.services).filter((s) => s.lastYear);
+    expect(withLast.length).toBeGreaterThan(0);
+    for (const s of withLast) {
+      expect(new URL(s.lastYear!.source).hostname).toMatch(official);
+      expect(s.lastYear!.date.slice(0, 4)).toBe(String(data.lastYear));
+    }
+    // A last-year date alone never starts the countdown or adds a calendar event.
+    const onlyLast = readPostingData({ ...postingData, carriers: postingData.carriers.map((c) => ({ ...c, services: c.services.map((s) => ({ ...s, date: null })) })) });
+    expect(cutOffs(onlyLast)).toEqual([]);
+    expect(postingEvents(onlyLast)).toEqual([]);
+  });
+
+  it("drops last year's dates without a source, and all of them when lastYear is missing", () => {
+    const base = { year: 2026, checked: "2026-09-30", carriers: [{ id: "x", name: "X", page: "https://example.com/x", services: [
+      { id: "a", name: "A", date: null, source: "https://example.com/a", lastYear: { date: "2025-12-20", source: "https://example.com/a" } },
+      { id: "b", name: "B", date: null, source: "https://example.com/b", lastYear: { date: "2025-12-20", source: "nope" } },
+    ] }] };
+    expect(readPostingData({ ...base, lastYear: 2025 }).carriers[0].services.map((s) => s.lastYear?.date ?? null)).toEqual(["2025-12-20", null]);
+    expect(readPostingData(base).carriers[0].services.every((s) => !s.lastYear)).toBe(true);
+  });
+
   it("hides tips that are still placeholders", () => {
     expect(publishedTips(sample)).toEqual(["A written tip."]);
     expect(publishedTips(readPostingData(postingData)).join(" ")).not.toMatch(/\[TOM:/);

@@ -30,11 +30,13 @@ const minuteNow = () => (reducedMotion() ? loadMinute : Math.floor(Date.now() / 
 type Props = {
   cutOffs: CutOff[];
   year: number;
+  /* The year of the guide dates in the table, or 0 when there are none. */
+  lastYear?: number;
   /* The server's clock when the page was built, used until the browser takes over. */
   serverNow: number;
 };
 
-export function ChristmasCountdown({ cutOffs, year, serverNow }: Props) {
+export function ChristmasCountdown({ cutOffs, year, lastYear = 0, serverNow }: Props) {
   const minute = useSyncExternalStore(subscribe, minuteNow, () => Math.floor(serverNow / MINUTE));
   const next = nextCutOff(cutOffs, new Date(minute * MINUTE));
 
@@ -58,7 +60,7 @@ export function ChristmasCountdown({ cutOffs, year, serverNow }: Props) {
       ) : (
         <>
           <p className="mt-1 text-xl font-semibold tracking-tight">No carrier has announced its {year} dates yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">Carriers usually publish them in the autumn. Each one is added here once it appears on the carrier&rsquo;s own website, and the countdown starts then.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Carriers usually publish them in the autumn. Each one is added here once it appears on the carrier&rsquo;s own website, and the countdown starts then.{lastYear ? <> Until then, the table shows each carrier&rsquo;s {lastYear} dates as a guide.</> : null}</p>
         </>
       )}
     </section>

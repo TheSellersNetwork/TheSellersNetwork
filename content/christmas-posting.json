@@ -1,17 +1,18 @@
 {
   "year": 2026,
   "checked": "2026-09-30",
+  "lastYear": 2025,
   "carriers": [
     {
       "id": "royal-mail",
       "name": "Royal Mail",
       "page": "https://www.royalmail.com/christmas/last-posting-dates",
       "services": [
-        { "id": "first-class", "name": "1st Class", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates" },
-        { "id": "second-class", "name": "2nd Class", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates" },
-        { "id": "tracked-24", "name": "Tracked 24", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates" },
-        { "id": "tracked-48", "name": "Tracked 48", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates" },
-        { "id": "special-delivery", "name": "Special Delivery Guaranteed", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates" }
+        { "id": "first-class", "name": "1st Class", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates", "lastYear": { "date": "2025-12-20", "source": "https://www.royalmail.com/christmas/last-posting-dates" } },
+        { "id": "second-class", "name": "2nd Class", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates", "lastYear": { "date": "2025-12-17", "source": "https://www.royalmail.com/christmas/last-posting-dates" } },
+        { "id": "tracked-24", "name": "Tracked 24", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates", "lastYear": { "date": "2025-12-21", "source": "https://www.royalmail.com/christmas/last-posting-dates" } },
+        { "id": "tracked-48", "name": "Tracked 48", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates", "lastYear": { "date": "2025-12-19", "source": "https://www.royalmail.com/christmas/last-posting-dates" } },
+        { "id": "special-delivery", "name": "Special Delivery Guaranteed", "date": null, "source": "https://www.royalmail.com/christmas/last-posting-dates", "lastYear": { "date": "2025-12-23", "source": "https://www.royalmail.com/christmas/last-posting-dates" } }
       ]
     },
     {
@@ -19,8 +20,8 @@
       "name": "Parcelforce Worldwide",
       "page": "https://www.parcelforce.com/christmas-dates",
       "services": [
-        { "id": "express48", "name": "express48", "date": null, "source": "https://www.parcelforce.com/christmas-dates" },
-        { "id": "express24", "name": "express24", "date": null, "source": "https://www.parcelforce.com/christmas-dates" }
+        { "id": "express48", "name": "express48", "date": null, "source": "https://www.parcelforce.com/christmas-dates", "lastYear": { "date": "2025-12-19", "source": "https://www.royalmail.com/christmas/last-posting-dates" } },
+        { "id": "express24", "name": "express24", "date": null, "source": "https://www.parcelforce.com/christmas-dates", "lastYear": { "date": "2025-12-22", "source": "https://www.royalmail.com/christmas/last-posting-dates" } }
       ]
     },
     {
@@ -29,8 +30,8 @@
       "page": "https://www.evri.com/news",
       "note": "Evri publishes its Christmas dates as a news article each year.",
       "services": [
-        { "id": "standard", "name": "Standard delivery", "date": null, "source": "https://www.evri.com/news" },
-        { "id": "next-day", "name": "Next day delivery", "date": null, "source": "https://www.evri.com/news" }
+        { "id": "standard", "name": "Standard delivery", "date": null, "source": "https://www.evri.com/news", "lastYear": { "date": "2025-12-19", "source": "https://www.evri.com/news/last-posting-dates-for-christmas-2025", "note": "Drop off by 11am at a ParcelShop or Evri Locker." } },
+        { "id": "next-day", "name": "Next day delivery", "date": null, "source": "https://www.evri.com/news", "lastYear": { "date": "2025-12-20", "source": "https://www.evri.com/news/last-posting-dates-for-christmas-2025", "note": "Drop off by 11am at a ParcelShop or Evri Locker." } }
       ]
     },
     {
@@ -39,7 +40,7 @@
       "page": "https://inpost.co.uk/resources",
       "note": "Yodel is now InPost. InPost says Yodel by InPost moved fully under the InPost name on 17 July 2026.",
       "services": [
-        { "id": "standard", "name": "Locker, shop and home delivery", "date": null, "source": "https://inpost.co.uk/resources" }
+        { "id": "standard", "name": "Locker, shop and home delivery", "date": null, "source": "https://inpost.co.uk/resources", "lastYear": { "date": "2025-12-20", "source": "https://inpost.co.uk/blog/do-they-know-its-xs-mas-time" } }
       ]
     },
     {
