@@ -49,6 +49,17 @@ describe("saved calculation names and links", () => {
     expect(readExtras({ promo: "500", boost: "1" })).toEqual({ ...noExtras, boost: true });
   });
 
+  it("carries eBay's buyer region, International Shipping and currency options in the link", () => {
+    const e = { ...noExtras, destination: "us_ca" as const, eis: true, fx: true };
+    const q = extrasQuery("ebay_business", e);
+    expect(q).toBe("dest=us_ca&eis=1&fx=1");
+    expect(readExtras(new URLSearchParams(q))).toEqual(e);
+    expect(extrasQuery("ebay_business", { ...noExtras, eis: true })).toBe("");
+    expect(extrasQuery("vinted", e)).toBe("");
+    expect(readExtras({ dest: "mars" }).destination).toBe("uk");
+    expect(cleanInputs("ebay_business", { price: 10, destination: "europe", eis: true, fx: "yes" })).toMatchObject({ destination: "europe", eis: true, fx: false });
+  });
+
   it("round-trips FBA figures and refuses a link with no price", () => {
     const i = { ...fbaDefaults, price: 22, peak: true, category: "books" };
     expect(readFba(new URLSearchParams(fbaQuery(i)))).toEqual(i);
