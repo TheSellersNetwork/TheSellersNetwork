@@ -91,7 +91,7 @@ export default async function HomePage() {
     <main id="main" className="flex-1">
       {/* Dark band, whatever the theme. Words on the left, real content drifting behind the revolving card on the right. */}
       <section className="hero-dark border-b bg-background text-foreground">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16 lg:py-16">
+        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16 lg:py-16">
           <HeroCopy signedIn={!!viewer} />
           <HeroFeed slides={slides} feed={feed} />
         </div>
